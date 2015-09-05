@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="AspectRatioImageView">
+        <attr name="widthToHeightRatio" format="float|reference" />
+    </declare-styleable>
+</resources>

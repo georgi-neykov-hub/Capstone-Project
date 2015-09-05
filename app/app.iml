@@ -26,7 +26,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/build/retrolambda/debug" />
     <output-test url="file://$MODULE_DIR$/build/retrolambda/debugAndroidTest" />
     <exclude-output />
@@ -72,11 +72,11 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex-cache" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/jars" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/cardview-v7/23.0.0/jars" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/design/23.0.0/jars" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/23.0.0/jars" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.0/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.1/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/cardview-v7/23.0.1/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/design/23.0.1/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/23.0.1/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.1/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.google.android.gms/play-services-base/7.8.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.squareup.sqlbrite/sqlbrite/0.3.1/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/info.android15.nucleus/nucleus-support-v4/2.0.0-beta8/jars" />
@@ -103,21 +103,21 @@
     <orderEntry type="library" exported="" name="picasso-2.5.2" level="project" />
     <orderEntry type="library" exported="" name="nucleus-2.0.0-beta8" level="project" />
     <orderEntry type="library" exported="" name="okhttp-2.4.0" level="project" />
+    <orderEntry type="library" exported="" name="cardview-v7-23.0.1" level="project" />
     <orderEntry type="library" exported="" name="dagger-2.0.1" level="project" />
-    <orderEntry type="library" exported="" name="cardview-v7-23.0.0" level="project" />
     <orderEntry type="library" exported="" name="javax.inject-1" level="project" />
     <orderEntry type="library" exported="" name="rxandroid-1.0.1" level="project" />
     <orderEntry type="library" exported="" name="retrofit-1.9.0" level="project" />
-    <orderEntry type="library" exported="" name="design-23.0.0" level="project" />
-    <orderEntry type="library" exported="" name="appcompat-v7-23.0.0" level="project" />
-    <orderEntry type="library" exported="" name="recyclerview-v7-23.0.0" level="project" />
+    <orderEntry type="library" exported="" name="design-23.0.1" level="project" />
+    <orderEntry type="library" exported="" name="recyclerview-v7-23.0.1" level="project" />
     <orderEntry type="library" exported="" name="rxjava-1.0.14" level="project" />
     <orderEntry type="library" exported="" name="nucleus-support-v4-2.0.0-beta8" level="project" />
     <orderEntry type="library" exported="" name="jsr250-api-1.0" level="project" />
-    <orderEntry type="library" exported="" name="support-v4-23.0.0" level="project" />
     <orderEntry type="library" exported="" name="sqlbrite-0.3.1" level="project" />
+    <orderEntry type="library" exported="" name="support-v4-23.0.1" level="project" />
     <orderEntry type="library" exported="" name="okio-1.5.0" level="project" />
-    <orderEntry type="library" exported="" name="support-annotations-23.0.0" level="project" />
+    <orderEntry type="library" exported="" name="appcompat-v7-23.0.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-base-7.8.0" level="project" />
+    <orderEntry type="library" exported="" name="support-annotations-23.0.1" level="project" />
   </component>
 </module>

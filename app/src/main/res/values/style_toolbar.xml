@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme.Toolbar" parent="AppTheme">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
+        <item name="colorAccent">@android:color/white</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="android:actionModeBackground">?attr/colorPrimary</item>
+        <item name="actionModeBackground">?attr/colorPrimary</item>
+        <item name="drawerArrowStyle">@style/AppTheme.Toolbar.DrawerArrowStyle</item>
+        <item name="android:background">?attr/colorPrimary</item>
+    </style>
+</resources>
