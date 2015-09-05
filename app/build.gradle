@@ -54,7 +54,7 @@ dependencies {
 
     compile 'io.reactivex:rxjava:1.0.14'
     compile 'io.reactivex:rxandroid:1.0.1'
-    compile 'de.greenrobot:greendao:2.0.0'
+    compile 'com.squareup.sqlbrite:sqlbrite:0.3.1'
     compile 'info.android15.nucleus:nucleus:2.0.0-beta8'
     compile 'info.android15.nucleus:nucleus-support-v4:2.0.0-beta8'
 }
