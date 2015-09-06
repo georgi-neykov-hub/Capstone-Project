@@ -11,8 +11,11 @@ import android.view.View;
 
 import com.neykov.podcastportal.R;
 
+import nucleus.presenter.Presenter;
 
-public abstract class ToolbarFragment extends BaseFragment {
+public abstract class ToolbarViewFragment<PresenterType extends Presenter>
+        extends BaseViewFragment<PresenterType>{
+
     private ActionBarDrawerToggle mDrawerToggle;
     private Toolbar mToolbar;
     private DrawerLayoutProvider mDrawerProvider;

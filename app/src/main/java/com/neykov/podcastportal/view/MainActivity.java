@@ -12,7 +12,7 @@ import android.view.MenuItem;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.view.base.DrawerLayoutProvider;
-import com.neykov.podcastportal.view.discover.ExploreFrament;
+import com.neykov.podcastportal.view.discover.ExploreFragment;
 
 public class MainActivity extends AppCompatActivity implements DrawerLayoutProvider, NavigationView.OnNavigationItemSelectedListener {
 
@@ -82,8 +82,8 @@ public class MainActivity extends AppCompatActivity implements DrawerLayoutProvi
     private void openExploreScreen(){
         clearNavigationStack();
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.content, ExploreFrament.newInstance(), ExploreFrament.TAG)
-                .addToBackStack(ExploreFrament.TAG)
+                .replace(R.id.content, ExploreFragment.newInstance(), ExploreFragment.TAG)
+                .addToBackStack(ExploreFragment.TAG)
                 .commit();
     }
 

@@ -34,10 +34,10 @@ public class NetworkingModule {
     public static final int HTTP_READOUT_TIMEOUT_MS = 20*1000;
     public static final int HTTP_WRITE_TIMEOUT_MS = 20*1000;
 
-    private static final String GPODDER_DATE_FORMAT = "YYYY-MM-DDTHH:MM:SSZ";
+    private static final String GPODDER_DATE_FORMAT = "yyyy-MM-ddTHH:mm:ssZ";
 
     public static final String ITUNES_SEARCH_API_BASE_URL = "https://itunes.apple.com/";
-    public static final String GPODDER_API_BASE_URL = "https://itunes.apple.com/";
+    public static final String GPODDER_API_BASE_URL = "http://gpodder.net/";
 
     @Provides
     @Singleton
@@ -62,7 +62,7 @@ public class NetworkingModule {
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
                 .excludeFieldsWithoutExposeAnnotation()
-                .setDateFormat(GPODDER_DATE_FORMAT)
+                //.setDateFormat(GPODDER_DATE_FORMAT)
                 .create();
 
         return new RestAdapter.Builder()
