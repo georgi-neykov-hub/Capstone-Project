@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
+import com.neykov.podcastportal.model.entity.Tag;
 import com.neykov.podcastportal.view.base.BaseViewFragment;
 import com.neykov.podcastportal.view.discover.presenter.PopularTagsPresenter;
 
@@ -86,7 +87,7 @@ public class PopularTagsFragment extends BaseViewFragment<PopularTagsPresenter> 
     }
 
     @Override
-    public void onTagsLoaded(List<String> tags) {
+    public void onTagsLoaded(List<Tag> tags) {
         mTagsAdapter.addItems(tags);
     }
 

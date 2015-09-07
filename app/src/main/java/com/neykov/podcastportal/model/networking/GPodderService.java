@@ -2,6 +2,7 @@ package com.neykov.podcastportal.model.networking;
 
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.Podcast;
+import com.neykov.podcastportal.model.entity.Tag;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public interface GPodderService {
     Observable<List<Podcast>> getTopPodcasts(@Path("count") int count);
 
     @GET("/api/2/tags/{count}.json")
-    Observable<List<String>> getTopPodcastsTags(@Path("count") int count);
+    Observable<List<Tag>> getTopPodcastsTags(@Path("count") int count);
 
     @GET("/api/2/tag/{tag}/{count}.json")
     Observable<List<Podcast>> getPodcastsWithTag(@Path("tag") String tag, @Path("count") int count);
