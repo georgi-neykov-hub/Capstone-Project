@@ -1,5 +1,6 @@
 package com.neykov.podcastportal.view.base.adapter;
 
+import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -7,8 +8,7 @@ import android.support.v7.widget.RecyclerView;
 
 public abstract class BaseStateAdapter<ItemType, VH extends RecyclerView.ViewHolder> extends BaseAdapter<ItemType, VH> {
 
-    public @NonNull
-    Parcelable onSaveInstanceState(){
+    public @NonNull Parcelable onSaveInstanceState(){
         return BaseAdapterState.EMPTY_STATE;
     }
 
@@ -18,7 +18,8 @@ public abstract class BaseStateAdapter<ItemType, VH extends RecyclerView.ViewHol
         }
     }
 
-    public static abstract class BaseAdapterState<ItemType> implements Parcelable{
+    @SuppressLint("ParcelCreator")
+    public static class BaseAdapterState implements Parcelable{
         public static final BaseAdapterState EMPTY_STATE = new BaseAdapterState() {
         };
 
@@ -40,7 +41,7 @@ public abstract class BaseStateAdapter<ItemType, VH extends RecyclerView.ViewHol
             if (superState == null) {
                 throw new IllegalArgumentException("superState must not be null");
             }
-            mSuperState = superState != EMPTY_STATE ? superState : null;
+            mSuperState = superState;
         }
 
         /**
@@ -50,8 +51,7 @@ public abstract class BaseStateAdapter<ItemType, VH extends RecyclerView.ViewHol
          */
         protected BaseAdapterState(Parcel source) {
             Parcelable superState = source.readParcelable(getClass().getClassLoader());
-
-            mSuperState = superState != null ? superState : EMPTY_STATE;
+            mSuperState = superState;
         }
 
         final public Parcelable getSuperState() {

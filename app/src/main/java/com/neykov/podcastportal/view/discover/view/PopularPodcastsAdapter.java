@@ -1,5 +1,7 @@
 package com.neykov.podcastportal.view.discover.view;
 
+import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -7,27 +9,27 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.model.entity.Tag;
+import com.neykov.podcastportal.model.entity.Podcast;
 import com.neykov.podcastportal.view.base.adapter.BaseStateAdapter;
-
-import org.w3c.dom.Text;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class TagsAdapter extends BaseStateAdapter<Tag, TagsAdapter.TagViewHolder> {
+public class PopularPodcastsAdapter extends BaseStateAdapter<Podcast, PopularPodcastsAdapter.PodcastViewHolder> {
 
     @Override
-    public TagViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public PodcastViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item_tag, parent, false);
-        return new TagViewHolder(itemView);
+                .inflate(R.layout.list_item_podcast, parent, false);
+        return new PodcastViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(TagViewHolder holder, int position) {
+    public void onBindViewHolder(PodcastViewHolder holder, int position) {
         holder.onBind(getItem(position));
     }
 
@@ -48,14 +50,14 @@ public class TagsAdapter extends BaseStateAdapter<Tag, TagsAdapter.TagViewHolder
         setItems(typedState.tags);
     }
 
-    protected static class SavedState extends BaseAdapterState{
-        private List<Tag> tags;
+    protected static class SavedState extends BaseAdapterState {
 
-        public SavedState(Parcelable superState, List<Tag> tags) {
+        private List<Podcast> tags;
+
+        public SavedState(Parcelable superState, List<Podcast> tags) {
             super(superState);
             this.tags = tags;
         }
-
 
         @Override
         public int describeContents() {
@@ -70,7 +72,7 @@ public class TagsAdapter extends BaseStateAdapter<Tag, TagsAdapter.TagViewHolder
 
         protected SavedState(Parcel in) {
             super(in);
-            this.tags = in.createTypedArrayList(Tag.CREATOR);
+            this.tags = in.createTypedArrayList(Podcast.CREATOR);
         }
 
         public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
@@ -84,20 +86,34 @@ public class TagsAdapter extends BaseStateAdapter<Tag, TagsAdapter.TagViewHolder
         };
     }
 
-    protected static class TagViewHolder extends RecyclerView.ViewHolder{
+    protected static class PodcastViewHolder extends RecyclerView.ViewHolder{
 
-        private TextView mTagNameTextView;
-        private TextView mUsageCountTextView;
+        private ImageView mLogoImageView;
+        private TextView mTitleTextView;
+        private TextView mDescriptionTextView;
 
-        public TagViewHolder(View itemView) {
+        public PodcastViewHolder(View itemView) {
             super(itemView);
-            mTagNameTextView = (TextView) itemView.findViewById(R.id.tagName);
-            mUsageCountTextView = (TextView) itemView.findViewById(R.id.usageCount);
+            mLogoImageView = (ImageView) itemView.findViewById(R.id.logo);
+            mTitleTextView = (TextView) itemView.findViewById(R.id.title);
+            mDescriptionTextView = (TextView) itemView.findViewById(R.id.description);
         }
 
-        protected void onBind(Tag tag){
-            mTagNameTextView.setText(tag.getTitle());
-            mUsageCountTextView.setText(String.valueOf(tag.getUsage()));
+        protected void onBind(Podcast podcast){
+            mTitleTextView.setText(podcast.getTitle());
+            mDescriptionTextView.setText(podcast.getDescription());
+            loadLogoImage(podcast);
+        }
+
+        private void loadLogoImage(Podcast podcast) {
+            if(podcast.getLogoUrl() != null) {
+                Picasso.with(mLogoImageView.getContext())
+                        .load(podcast.getLogoUrl())
+                        .centerCrop()
+                        .fit()
+                        .noPlaceholder()
+                        .into(mLogoImageView);
+            }
         }
     }
 }

@@ -1,18 +1,13 @@
 package com.neykov.podcastportal.view.discover.presenter;
 
-import com.neykov.podcastportal.model.entity.Tag;
 import com.neykov.podcastportal.model.networking.GPodderService;
 import com.neykov.podcastportal.view.base.BasePresenter;
 import com.neykov.podcastportal.view.discover.view.PopularTagsView;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
 public class PopularTagsPresenter extends BasePresenter<PopularTagsView> {

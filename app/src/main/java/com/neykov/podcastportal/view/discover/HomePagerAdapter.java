@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.view.discover.view.PopularPodcastsFragment;
+import com.neykov.podcastportal.view.discover.view.PopularPodcastListFragment;
 import com.neykov.podcastportal.view.discover.view.PopularTagsFragment;
 
 public class HomePagerAdapter extends FragmentStatePagerAdapter {
@@ -26,7 +26,7 @@ public class HomePagerAdapter extends FragmentStatePagerAdapter {
     @Override
     public Fragment getItem(int position) {
         if(position == POSITION_POPULAR_PODCASTS){
-            return PopularPodcastsFragment.newInstance();
+            return PopularPodcastListFragment.newInstance();
         }else if(position == POSITION_POPULAR_TAGS){
             return PopularTagsFragment.newInstance();
         }else {

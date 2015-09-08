@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.Tag;
+import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.BaseViewFragment;
 import com.neykov.podcastportal.view.discover.presenter.PopularTagsPresenter;
 
@@ -56,6 +57,8 @@ public class PopularTagsFragment extends BaseViewFragment<PopularTagsPresenter> 
         mTagsRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mLoadingView = rootView.findViewById(R.id.loadingIndicator);
         mRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefresh);
+        int colorAccent = ViewUtils.getThemeAttribute(getContext().getTheme(), R.attr.colorAccent);
+        mRefreshLayout.setColorSchemeResources(colorAccent);
         mRefreshLayout.setOnRefreshListener(() -> getPresenter().getTopPodcastTags());
         return rootView;
     }

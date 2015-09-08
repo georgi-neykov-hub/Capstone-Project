@@ -4,6 +4,7 @@ import android.app.Application;
 import android.support.annotation.NonNull;
 
 import com.neykov.podcastportal.view.base.DependencyResolverProvider;
+import com.squareup.picasso.Picasso;
 
 public class PodcastPortal extends Application implements DependencyResolverProvider{
 
@@ -15,6 +16,7 @@ public class PodcastPortal extends Application implements DependencyResolverProv
         mDependencyResolver = DaggerDependencyResolver.builder()
                 .applicationModule(new ApplicationModule(this))
                 .build();
+        Picasso.setSingletonInstance(getDependencyResolver().getPicasso());
     }
 
     @NonNull
