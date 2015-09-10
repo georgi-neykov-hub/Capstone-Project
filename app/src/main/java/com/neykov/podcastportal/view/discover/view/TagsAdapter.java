@@ -3,7 +3,6 @@ package com.neykov.podcastportal.view.discover.view;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,13 +10,21 @@ import android.widget.TextView;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.Tag;
+import com.neykov.podcastportal.view.base.BaseSavedState;
+import com.neykov.podcastportal.view.base.adapter.BaseListenerViewHolder;
 import com.neykov.podcastportal.view.base.adapter.BaseStateAdapter;
+import com.neykov.podcastportal.view.base.adapter.OnItemClickListener;
 
-import org.w3c.dom.Text;
-
+import java.lang.ref.WeakReference;
 import java.util.List;
 
-public class TagsAdapter extends BaseStateAdapter<Tag, TagsAdapter.TagViewHolder> {
+public class TagsAdapter extends BaseStateAdapter<Tag, TagsAdapter.TagViewHolder> implements OnItemClickListener {
+
+    private WeakReference<OnItemClickListener> mClickListenerRef;
+
+    public void setOnItemClickListener(OnItemClickListener listener){
+        this.mClickListenerRef = new WeakReference<>(listener);
+    }
 
     @Override
     public TagViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -27,8 +34,15 @@ public class TagsAdapter extends BaseStateAdapter<Tag, TagsAdapter.TagViewHolder
     }
 
     @Override
+    public void onViewRecycled(TagViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.setListener(null);
+    }
+
+    @Override
     public void onBindViewHolder(TagViewHolder holder, int position) {
         holder.onBind(getItem(position));
+        holder.setListener(this);
     }
 
     @NonNull
@@ -48,14 +62,19 @@ public class TagsAdapter extends BaseStateAdapter<Tag, TagsAdapter.TagViewHolder
         setItems(typedState.tags);
     }
 
-    protected static class SavedState extends BaseAdapterState{
+    @Override
+    public void onItemClick(int position) {
+        OnItemClickListener listener = mClickListenerRef.get();
+        if(listener != null) listener.onItemClick(position);
+    }
+
+    protected static class SavedState extends BaseSavedState{
         private List<Tag> tags;
 
         public SavedState(Parcelable superState, List<Tag> tags) {
             super(superState);
             this.tags = tags;
         }
-
 
         @Override
         public int describeContents() {
@@ -77,14 +96,13 @@ public class TagsAdapter extends BaseStateAdapter<Tag, TagsAdapter.TagViewHolder
             public SavedState createFromParcel(Parcel source) {
                 return new SavedState(source);
             }
-
             public SavedState[] newArray(int size) {
                 return new SavedState[size];
             }
         };
     }
 
-    protected static class TagViewHolder extends RecyclerView.ViewHolder{
+    protected static class TagViewHolder extends BaseListenerViewHolder<OnItemClickListener>{
 
         private TextView mTagNameTextView;
         private TextView mUsageCountTextView;
@@ -93,11 +111,13 @@ public class TagsAdapter extends BaseStateAdapter<Tag, TagsAdapter.TagViewHolder
             super(itemView);
             mTagNameTextView = (TextView) itemView.findViewById(R.id.tagName);
             mUsageCountTextView = (TextView) itemView.findViewById(R.id.usageCount);
+            itemView.findViewById(R.id.clickView).setOnClickListener(v -> getListener().onItemClick(getAdapterPosition()));
         }
 
-        protected void onBind(Tag tag){
+        protected void onBind(Tag tag) {
             mTagNameTextView.setText(tag.getTitle());
-            mUsageCountTextView.setText(String.valueOf(tag.getUsage()));
+            String usage = mUsageCountTextView.getResources().getString(R.string.label_tag_usage_format, tag.getUsage());
+            mUsageCountTextView.setText(usage);
         }
     }
 }

@@ -1,24 +1,37 @@
 package com.neykov.podcastportal.view.discover.view;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.view.View;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.view.ViewUtils;
+import com.neykov.podcastportal.view.base.BaseListFragment;
+import com.neykov.podcastportal.view.base.BaseListViewFragment;
 import com.neykov.podcastportal.view.discover.presenter.PopularPodcastsPresenter;
 
-public class PopularPodcastListFragment extends BaseListFragment<PopularPodcastsPresenter>  {
+public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapter, PopularPodcastsPresenter> {
 
-    public static PopularPodcastListFragment newInstance() {
-        return new PopularPodcastListFragment();
+    public static PopularPodcastsFragment newInstance() {
+        return new PopularPodcastsFragment();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (getAdapter().getItemCount() == 0) {
+            getPresenter().loadItems(this);
+        }
     }
 
     @NonNull
     @Override
-    protected RecyclerView.Adapter<? extends RecyclerView.ViewHolder> getAdapter() {
+    protected PodcastsAdapter getAdapter() {
         return getPresenter().getAdapter();
     }
 
@@ -29,7 +42,7 @@ public class PopularPodcastListFragment extends BaseListFragment<PopularPodcasts
 
     @Override
     protected void onShowLoadError(int error) {
-        if(error == PopularPodcastsPresenter.ERROR_TYPE_NO_INTERNET){
+        if(error == ERROR_NETWORK){
             ViewUtils.getNoNetworkSnackbar(getContext(), getView()).show();
         }
     }

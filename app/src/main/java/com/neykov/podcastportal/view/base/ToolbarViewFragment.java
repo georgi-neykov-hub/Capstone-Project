@@ -3,7 +3,7 @@ package com.neykov.podcastportal.view.base;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -24,7 +24,7 @@ public abstract class ToolbarViewFragment<PresenterType extends Presenter>
     public void onAttach(Context context) {
         super.onAttach(context);
         Object host = getHost();
-        if(host instanceof DrawerLayoutProvider){
+        if (host instanceof DrawerLayoutProvider) {
             mDrawerProvider = (DrawerLayoutProvider) host;
         }
     }
@@ -38,9 +38,14 @@ public abstract class ToolbarViewFragment<PresenterType extends Presenter>
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mToolbar = callOnSetToolbar();
-        configureDrawerToggleIfNeeded(mToolbar);
-        callOnConfigureToolbar();
+        if (mDrawerProvider != null) {
+            mToolbar = callOnSetToolbar();
+        }
+
+        if (mToolbar != null) {
+            createDrawerToggle(mToolbar);
+            callOnConfigureToolbar();
+        }
     }
 
     @Override
@@ -52,7 +57,7 @@ public abstract class ToolbarViewFragment<PresenterType extends Presenter>
 
     @Override
     public void onResume() {
-        if(mDrawerProvider != null){
+        if (mDrawerProvider != null && mDrawerToggle != null) {
             mDrawerProvider.getDrawerLayout().setDrawerListener(mDrawerToggle);
             mDrawerToggle.syncState();
         }
@@ -62,42 +67,46 @@ public abstract class ToolbarViewFragment<PresenterType extends Presenter>
     @Override
     public void onPause() {
         super.onPause();
-        if(mDrawerProvider != null){
+        if (mDrawerProvider != null) {
             mDrawerProvider.getDrawerLayout().setDrawerListener(null);
         }
     }
 
-    @NonNull
-    protected abstract Toolbar onSetToolbar(View view);
+    @Nullable
+    protected Toolbar onSetToolbar(View view) {
+        return null;
+    }
 
-    protected abstract void onConfigureToolbar(Toolbar toolbar);
+    protected void onConfigureToolbar(Toolbar toolbar) {
+
+    }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if(mDrawerToggle != null){
+        if (mDrawerToggle != null) {
             mDrawerToggle.onConfigurationChanged(newConfig);
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(mDrawerToggle != null){
+        if (mDrawerToggle != null) {
             return mDrawerToggle.onOptionsItemSelected(item);
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private Toolbar callOnSetToolbar(){
+    private Toolbar callOnSetToolbar() {
         return onSetToolbar(getView());
     }
 
-    private void callOnConfigureToolbar(){
+    private void callOnConfigureToolbar() {
         onConfigureToolbar(mToolbar);
     }
 
-    private void configureDrawerToggleIfNeeded(Toolbar toolbar){
-        if(mDrawerProvider != null){
+    private void createDrawerToggle(Toolbar toolbar) {
+        if (mDrawerProvider != null) {
             //Set a drawer Toggle t
             mDrawerToggle = new ActionBarDrawerToggle(
                     getActivity(),

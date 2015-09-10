@@ -12,7 +12,7 @@ import android.view.MenuItem;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.view.base.DrawerLayoutProvider;
-import com.neykov.podcastportal.view.discover.ExploreFragment;
+import com.neykov.podcastportal.view.discover.view.ExploreFragment;
 
 public class MainActivity extends AppCompatActivity implements DrawerLayoutProvider, NavigationView.OnNavigationItemSelectedListener {
 

@@ -1,7 +1,5 @@
 package com.neykov.podcastportal.view.discover.view;
 
-import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -19,7 +17,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class PopularPodcastsAdapter extends BaseStateAdapter<Podcast, PopularPodcastsAdapter.PodcastViewHolder> {
+public class PodcastsAdapter extends BaseStateAdapter<Podcast, PodcastsAdapter.PodcastViewHolder> {
 
     @Override
     public PodcastViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -97,6 +95,7 @@ public class PopularPodcastsAdapter extends BaseStateAdapter<Podcast, PopularPod
             mLogoImageView = (ImageView) itemView.findViewById(R.id.logo);
             mTitleTextView = (TextView) itemView.findViewById(R.id.title);
             mDescriptionTextView = (TextView) itemView.findViewById(R.id.description);
+
         }
 
         protected void onBind(Podcast podcast){
@@ -109,11 +108,12 @@ public class PopularPodcastsAdapter extends BaseStateAdapter<Podcast, PopularPod
             if(podcast.getLogoUrl() != null) {
                 Picasso.with(mLogoImageView.getContext())
                         .load(podcast.getLogoUrl())
-                        .centerCrop()
                         .fit()
-                        .noPlaceholder()
+                        .centerCrop()
+                        .placeholder(R.color.photo_placeholder)
                         .into(mLogoImageView);
             }
         }
+
     }
 }

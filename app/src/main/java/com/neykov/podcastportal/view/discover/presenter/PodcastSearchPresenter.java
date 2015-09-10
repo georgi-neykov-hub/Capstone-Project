@@ -1,8 +1,9 @@
 package com.neykov.podcastportal.view.discover.presenter;
 
 import android.os.Bundle;
-import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
+import com.neykov.podcastportal.model.entity.Tag;
 import com.neykov.podcastportal.model.networking.GPodderService;
 import com.neykov.podcastportal.view.base.BasePresenter;
 import com.neykov.podcastportal.view.base.ItemListView;
@@ -11,64 +12,59 @@ import com.neykov.podcastportal.view.discover.view.PodcastsAdapter;
 import javax.inject.Inject;
 
 import retrofit.RetrofitError;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
-public class PopularPodcastsPresenter extends BasePresenter<ItemListView> {
+public class PodcastSearchPresenter extends BasePresenter<ItemListView>{
 
-    private static final String KEY_ADAPTER_STATE = "PopularPodcastsPresenter.KEY_ADAPTER_STATE";
+    private static final String KEY_SEARCH_QUERY = "PodcastSearchPresenter.KEY_SEARCH_QUERY";
 
-    private PodcastsAdapter mAdapter;
     private GPodderService mService;
+    private PodcastsAdapter mAdapter;
+
+    private String mQuery;
 
     @Inject
-    public PopularPodcastsPresenter(GPodderService mService) {
+    public PodcastSearchPresenter(GPodderService mService) {
         this.mService = mService;
-        mAdapter = new PodcastsAdapter();
     }
 
     @Override
     protected void onCreate(Bundle savedState) {
         super.onCreate(savedState);
-        if(savedState != null){
-            Parcelable adapterState = savedState.getParcelable(KEY_ADAPTER_STATE);
-            if(adapterState != null) mAdapter.onRestoreInstanceState(adapterState);
-        }
+        mQuery = savedState.getString(KEY_SEARCH_QUERY);
     }
 
     @Override
     protected void onSave(Bundle state) {
         super.onSave(state);
-        state.putParcelable(KEY_ADAPTER_STATE, mAdapter.onSaveInstanceState());
+        state.putString(KEY_SEARCH_QUERY, mQuery);
     }
 
     public PodcastsAdapter getAdapter(){
         return mAdapter;
     }
 
-    public void refreshData(){
+    public void setQuery(String query){
+        mQuery = query;
+    }
+
+    public void loadItems(ItemListView view, boolean showLoading) {
+        if (showLoading) view.showLoadingIndicator();
         mAdapter.clearItems();
-        fetchPopularPodcasts();
+        if (mQuery != null) {
+            executeSearchQuery(mQuery);
+        } else {
+            view.hideLoadingIndicator();
+        }
     }
 
-    public void loadItems(ItemListView view){
-        view.showLoadingIndicator();
-        fetchPopularPodcasts();
-    }
-
-    private void fetchPopularPodcasts(){
-        //noinspection ConstantConditions
-        mService.getTopPodcasts(100)
-                .flatMap(Observable::from)
-                .toSortedList((podcast, podcast2) -> -podcast.compareTo(podcast2), 100)
-                .subscribeOn(Schedulers.computation())
+    private void executeSearchQuery(@NonNull String query){
+        mService.searchPodcasts(query)
                 .observeOn(AndroidSchedulers.mainThread())
                 .compose(delayUntilViewAvailable())
                 .subscribe(baseListViewListDelivery -> {
                     baseListViewListDelivery.split((baseListView, podcasts) -> {
                         baseListView.hideLoadingIndicator();
-                        mAdapter.clearItems();
                         mAdapter.addItems(podcasts);
                     }, (baseListView1, throwable) -> {
                         baseListView1.hideLoadingIndicator();

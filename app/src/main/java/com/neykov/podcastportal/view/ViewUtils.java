@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
@@ -59,7 +60,7 @@ public class ViewUtils {
     public static Snackbar getNoNetworkSnackbar(Context context, View hostView){
         return Snackbar.make(hostView, R.string.label_no_network, Snackbar.LENGTH_LONG)
                 .setAction(R.string.action_settings, v -> {
-                    context.startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS)
+                    context.startActivity(new Intent(Settings.ACTION_SETTINGS)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 });
     }

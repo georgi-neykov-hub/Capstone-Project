@@ -8,14 +8,14 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <com.neykov.podcastportal.view.widget.AspectRatioImageView
             android:id="@+id/logo"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginBottom="@dimen/rhythm_space_single"
-            app:widthToHeightRatio="1.577"
+            app:widthToHeightRatio="1.0"
             tools:background="@color/photo_placeholder" />
 
         <TextView
@@ -43,6 +43,32 @@
             android:textSize="14sp"
             android:maxLines="2"
             tools:text="The Android Nerds show" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_below="@+id/description"
+            android:background="#CCC"/>
+
+        <LinearLayout
+            style="?buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/description"
+            android:gravity="end">
+
+            <Button
+                style="?borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Subscribe"/>
+            <Button
+                style="?borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Share"/>
+
+        </LinearLayout>
 
     </RelativeLayout>
 

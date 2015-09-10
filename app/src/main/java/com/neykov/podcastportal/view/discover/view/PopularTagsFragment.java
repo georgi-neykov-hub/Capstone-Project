@@ -1,85 +1,67 @@
 package com.neykov.podcastportal.view.discover.view;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.Tag;
 import com.neykov.podcastportal.view.ViewUtils;
-import com.neykov.podcastportal.view.base.BaseViewFragment;
+import com.neykov.podcastportal.view.base.BaseListViewFragment;
+import com.neykov.podcastportal.view.base.ItemListView;
+import com.neykov.podcastportal.view.base.adapter.OnItemClickListener;
 import com.neykov.podcastportal.view.discover.presenter.PopularTagsPresenter;
 
-import java.util.List;
+public class PopularTagsFragment extends BaseListViewFragment<TagsAdapter, PopularTagsPresenter> implements ItemListView, OnItemClickListener {
 
-public class PopularTagsFragment extends BaseViewFragment<PopularTagsPresenter> implements PopularTagsView {
-
-    private static final String KEY_ADAPTER_STATE = "TagsFragment.KEY_ADAPTER_STATE";
+    public interface OnTagSelectedListener{
+        void onTagSelected(Tag tag);
+    }
 
     public static PopularTagsFragment newInstance() {
         return new PopularTagsFragment();
     }
 
-    private RecyclerView mTagsRecyclerView;
-    private View mLoadingView;
-    private SwipeRefreshLayout mRefreshLayout;
-    private TagsAdapter mTagsAdapter;
+    private OnTagSelectedListener mListener;
 
     @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        mTagsAdapter = new TagsAdapter();
-        if (bundle != null) {
-            //noinspection ConstantConditions
-            mTagsAdapter.onRestoreInstanceState(bundle.getParcelable(KEY_ADAPTER_STATE));
-        }
-
-        if (mTagsAdapter.isEmpty()) {
-            getPresenter().getTopPodcastTags();
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if(getParentFragment() instanceof OnTagSelectedListener){
+            mListener = (OnTagSelectedListener) getParentFragment();
         }
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_top_tags, container, false);
-        mTagsRecyclerView = (RecyclerView) rootView.findViewById(R.id.tagsList);
-        mTagsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        mTagsRecyclerView.setAdapter(mTagsAdapter);
-        mTagsRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mLoadingView = rootView.findViewById(R.id.loadingIndicator);
-        mRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefresh);
-        int colorAccent = ViewUtils.getThemeAttribute(getContext().getTheme(), R.attr.colorAccent);
-        mRefreshLayout.setColorSchemeResources(colorAccent);
-        mRefreshLayout.setOnRefreshListener(() -> getPresenter().getTopPodcastTags());
-        return rootView;
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (getAdapter().getItemCount() == 0) {
+            getPresenter().loadItems(this);
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        getAdapter().setOnItemClickListener(this);
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        mTagsRecyclerView = null;
-        mLoadingView = null;
-        mRefreshLayout = null;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle bundle) {
-        super.onSaveInstanceState(bundle);
-        bundle.putParcelable(KEY_ADAPTER_STATE, mTagsAdapter.onSaveInstanceState());
+    public void onPause() {
+        super.onPause();
+        getAdapter().setOnItemClickListener(null);
     }
 
     @NonNull
@@ -89,27 +71,51 @@ public class PopularTagsFragment extends BaseViewFragment<PopularTagsPresenter> 
                 .createTopTagsPresenter();
     }
 
+    @NonNull
     @Override
-    public void onTagsLoaded(List<Tag> tags) {
-        mTagsAdapter.addItems(tags);
+    protected TagsAdapter getAdapter() {
+        return getPresenter().getAdapter();
     }
 
     @Override
-    public void onTagsLoadFailed() {
-        mRefreshLayout.setRefreshing(false);
-        //noinspection ConstantConditions
-        Snackbar.make(getView(), R.string.error_could_not_load_tags, Snackbar.LENGTH_LONG)
-                .setAction(R.string.label_retry, v -> getPresenter().getTopPodcastTags())
-                .show();
+    protected void onRefresh() {
+        getPresenter().refreshData();
     }
 
     @Override
-    public void showLoadingIndicator() {
-        mLoadingView.setVisibility(View.VISIBLE);
+    protected void onShowLoadError(int error) {
+        switch (error){
+            case ERROR_GENERAL:
+                //noinspection ConstantConditions
+                Snackbar.make(getView(), R.string.error_could_not_load_tags, Snackbar.LENGTH_LONG)
+                        .setAction(R.string.label_retry, v -> getPresenter().loadItems(this))
+                        .show();
+                break;
+            case ERROR_NETWORK:
+                ViewUtils.getNoNetworkSnackbar(getContext(), getView()).show();
+                break;
+        }
+
     }
 
     @Override
-    public void hideLoadingIndicator() {
-        mLoadingView.setVisibility(View.INVISIBLE);
+    protected void onConfigureRecycleView(@NonNull RecyclerView view) {
+        view.setItemAnimator(new DefaultItemAnimator());
+    }
+
+    @NonNull
+    @Override
+    protected RecyclerView.LayoutManager onCreateLayoutManager(@NonNull Context context) {
+        return new StaggeredGridLayoutManager(
+                context.getResources().getInteger(R.integer.grid_column_count) + 1,
+                StaggeredGridLayoutManager.VERTICAL );
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Tag tag = getAdapter().getItem(position);
+        if(mListener != null){
+            mListener.onTagSelected(tag);
+        }
     }
 }

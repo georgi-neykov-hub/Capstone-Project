@@ -1,10 +1,12 @@
-package com.neykov.podcastportal.view.discover.view;
+package com.neykov.podcastportal.view.base;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,13 +16,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.neykov.podcastportal.DependencyResolver;
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.view.ViewUtils;
-import com.neykov.podcastportal.view.base.BaseViewFragment;
 
-import nucleus.presenter.Presenter;
-
-public abstract class BaseListFragment<P extends Presenter> extends BaseViewFragment<P> implements BaseListView{
+public abstract class BaseListFragment<A extends RecyclerView.Adapter> extends Fragment implements ItemListView, DependencyResolverProvider {
 
     private static final String TAG = BaseListFragment.class.getSimpleName();
     private static final String KEY_LAYOUT_MANAGER_STATE = "BaseListFragment.KEY_LAYOUT_MANAGER_STATE";
@@ -33,6 +33,7 @@ public abstract class BaseListFragment<P extends Presenter> extends BaseViewFrag
     private FrameLayout mEmptyViewContainer;
     private View mEmptyView;
     private View mEmptyErrorView;
+    private ContentLoadingProgressBar mLoadingView;
 
     @Nullable
     @Override
@@ -64,12 +65,14 @@ public abstract class BaseListFragment<P extends Presenter> extends BaseViewFrag
 
     @Override
     public void showLoadingIndicator() {
+        mLoadingView.show();
         toggleEmptyView(false);
         toggleEmptyErrorView(false);
     }
 
     @Override
     public void hideLoadingIndicator() {
+        mLoadingView.hide();
         if(mRecyclerView.getAdapter().getItemCount() == 0){
             toggleEmptyView(true);
         }
@@ -85,7 +88,14 @@ public abstract class BaseListFragment<P extends Presenter> extends BaseViewFrag
         onShowLoadError(errorType);
     }
 
-    protected abstract @NonNull RecyclerView.Adapter<? extends RecyclerView.ViewHolder> getAdapter();
+    @NonNull
+    @Override
+    public DependencyResolver getDependencyResolver() {
+        return ((DependencyResolverProvider)getContext().getApplicationContext())
+                .getDependencyResolver();
+    }
+
+    protected abstract @NonNull A getAdapter();
 
     protected abstract void onRefresh();
 
@@ -105,10 +115,15 @@ public abstract class BaseListFragment<P extends Presenter> extends BaseViewFrag
 
     protected abstract @NonNull RecyclerView.LayoutManager onCreateLayoutManager(@NonNull Context context);
 
+    @Nullable protected SwipeRefreshLayout getSwipeRefreshLayout(){
+        return mSwipeRefreshLayout;
+    }
+
     private void initializeViewReferences(View rootView){
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.list);
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh);
         mEmptyViewContainer = (FrameLayout) rootView.findViewById(R.id.emptyViewContainer);
+        mLoadingView = (ContentLoadingProgressBar) rootView.findViewById(R.id.loadingIndicator);
         int colorAccent = ViewUtils.getThemeAttribute(getContext().getTheme(), R.attr.colorAccent);
         mSwipeRefreshLayout.setColorSchemeResources(colorAccent);
     }

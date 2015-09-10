@@ -8,7 +8,7 @@ import com.google.gson.annotations.Expose;
 import javax.annotation.Generated;
 
 @Generated("org.jsonschema2pojo")
-public class Tag implements Parcelable{
+public class Tag implements Parcelable, Comparable<Tag>{
 
     @Expose
     private String title;
@@ -60,4 +60,10 @@ public class Tag implements Parcelable{
             return new Tag[size];
         }
     };
+
+    @Override
+    public int compareTo(Tag another) {
+        return this.getUsage() > another.getUsage() ?
+                -1 : this.getUsage() < another.getUsage() ? +1 : 0;
+    }
 }

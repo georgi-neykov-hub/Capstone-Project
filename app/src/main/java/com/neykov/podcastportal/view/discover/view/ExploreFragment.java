@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover;
+package com.neykov.podcastportal.view.discover.view;
 
 
 import android.os.Bundle;
@@ -12,12 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
+import com.neykov.podcastportal.model.entity.Tag;
 import com.neykov.podcastportal.view.base.ToolbarFragment;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ExploreFragment extends ToolbarFragment {
+public class ExploreFragment extends ToolbarFragment implements PopularTagsFragment.OnTagSelectedListener {
 
     public static final String TAG = ExploreFragment.class.getSimpleName();
 
@@ -34,7 +35,7 @@ public class ExploreFragment extends ToolbarFragment {
         View rootView = inflater.inflate(R.layout.fragment_explore, container, false);
         mTabLayout = (TabLayout) rootView.findViewById(R.id.tabLayout);
         mTabViewPager = (ViewPager) rootView.findViewById(R.id.pager);
-        mTabViewPager.setAdapter(new HomePagerAdapter(getContext(), getChildFragmentManager()));
+        mTabViewPager.setAdapter(new ExplorePagerAdapter(getContext(), getChildFragmentManager()));
         mTabLayout.setupWithViewPager(mTabViewPager);
         mTabLayout.setTabMode(TabLayout.MODE_FIXED);
         return rootView;
@@ -56,5 +57,14 @@ public class ExploreFragment extends ToolbarFragment {
     @Override
     protected void onConfigureToolbar(Toolbar toolbar) {
 
+    }
+
+    @Override
+    public void onTagSelected(Tag tag) {
+
+        getFragmentManager().beginTransaction()
+                .replace(R.id.content, PodcastsForTagFragment.newInstance(tag), PodcastsForTagFragment.TAG)
+                .addToBackStack(PodcastsForTagFragment.TAG)
+                .commit();
     }
 }
