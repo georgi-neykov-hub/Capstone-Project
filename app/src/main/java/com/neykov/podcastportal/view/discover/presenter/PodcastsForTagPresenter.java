@@ -29,21 +29,6 @@ public class PodcastsForTagPresenter extends BasePresenter<ItemListView> {
         mAdapter = new PodcastsAdapter();
     }
 
-    @Override
-    protected void onCreate(Bundle savedState) {
-        super.onCreate(savedState);
-        if(savedState != null){
-            Parcelable adapterState = savedState.getParcelable(KEY_ADAPTER_STATE);
-            if(adapterState != null) mAdapter.onRestoreInstanceState(adapterState);
-        }
-    }
-
-    @Override
-    protected void onSave(Bundle state) {
-        super.onSave(state);
-        state.putParcelable(KEY_ADAPTER_STATE, mAdapter.onSaveInstanceState());
-    }
-
     public PodcastsAdapter getAdapter(){
         return mAdapter;
     }

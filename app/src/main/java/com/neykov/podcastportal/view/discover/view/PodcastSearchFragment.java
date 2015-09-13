@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.SearchView.OnCloseListener;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -25,7 +26,13 @@ import rx.Subscriber;
 import rx.subjects.PublishSubject;
 import rx.subjects.Subject;
 
-public class PodcastSearchFragment extends ToolbarFragment implements SearchView.OnQueryTextListener {
+public class PodcastSearchFragment extends ToolbarFragment implements SearchView.OnQueryTextListener, OnCloseListener {
+
+    public static final String TAG = PodcastSearchFragment.class.getSimpleName();
+
+    public static PodcastSearchFragment newInstance() {
+        return new PodcastSearchFragment();
+    }
 
     private SearchView mSearchView;
     private ContentFragment mContentFragment;
@@ -36,7 +43,10 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search_podcast, container, false);
         mSearchView = (SearchView) rootView.findViewById(R.id.search);
+        mSearchView.setIconifiedByDefault(false);
+        mSearchView.setOnCloseListener(this);
         mSearchView.setOnQueryTextListener(this);
+        mSearchView.setOnSearchClickListener(v -> onQueryTextSubmit(mSearchView.getQuery().toString()));
         return rootView;
     }
 
@@ -45,7 +55,7 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
         super.onViewCreated(view, savedInstanceState);
         mContentFragment = (ContentFragment) getChildFragmentManager().findFragmentById(R.id.podcastSearchContentFramgent);
         mQuerySubject.asObservable()
-                .throttleWithTimeout(1000, TimeUnit.MILLISECONDS)
+                .debounce(1000, TimeUnit.MILLISECONDS)
                 .subscribe(mQuerySubscriber);
     }
 
@@ -66,11 +76,15 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
     @Override
     protected void onConfigureToolbar(Toolbar toolbar) {
         super.onConfigureToolbar(toolbar);
+        setHomeAsUpEnabled(true);
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        return false;
+        if (mContentFragment != null) {
+            mContentFragment.setSearchQuery(query);
+        }
+        return true;
     }
 
     @Override
@@ -92,13 +106,19 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
 
         @Override
         public void onNext(String s) {
-            if(mContentFragment != null){
+            if (mContentFragment != null) {
                 mContentFragment.setSearchQuery(s);
             }
         }
     };
 
-    public static class ContentFragment extends BaseListViewFragment<PodcastsAdapter, PodcastSearchPresenter>{
+    @Override
+    public boolean onClose() {
+        getFragmentManager().popBackStack();
+        return true;
+    }
+
+    public static class ContentFragment extends BaseListViewFragment<PodcastsAdapter, PodcastSearchPresenter> {
 
         @NonNull
         @Override
@@ -119,7 +139,7 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
 
         @Override
         protected void onShowLoadError(int error) {
-            if(error == ERROR_NETWORK){
+            if (error == ERROR_NETWORK) {
                 ViewUtils.getNoNetworkSnackbar(getContext(), getView()).show();
             }
         }
@@ -138,7 +158,7 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
                     StaggeredGridLayoutManager.VERTICAL);
         }
 
-        protected void setSearchQuery(String query){
+        protected void setSearchQuery(String query) {
             getPresenter().setQuery(query);
             getPresenter().loadItems(this, true);
         }

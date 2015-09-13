@@ -139,7 +139,6 @@ public abstract class BaseListFragment<A extends RecyclerView.Adapter> extends F
             if(layoutManagerState != null) mLayoutManager.onRestoreInstanceState(layoutManagerState);
         }
         mRecyclerView.setLayoutManager(mLayoutManager);
-
         mRecyclerView.setAdapter(getAdapter());
         onConfigureRecycleView(mRecyclerView);
     }

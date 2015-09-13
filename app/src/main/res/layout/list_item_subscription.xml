@@ -18,6 +18,15 @@
             app:widthToHeightRatio="1.0"
             tools:background="@color/photo_placeholder" />
 
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_below="@+id/logo"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="@dimen/rhythm_space_double"
+            android:src="@drawable/ic_subscribed"
+            android:tint="?colorAccent"/>
+
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
@@ -51,7 +60,7 @@
             android:layout_below="@+id/description"
             android:layout_marginStart="@dimen/rhythm_space_double"
             android:layout_marginEnd="@dimen/rhythm_space_double"
-            android:layout_marginBottom="@dimen/rhythm_space_single"
+            android:layout_marginBottom="@dimen/rhythm_space_double"
             android:textAppearance="?attr/textAppearanceListItemSmall"
             android:textSize="14sp"
             android:lines="1"
@@ -59,9 +68,24 @@
             tools:text="http://somesite.org/podcast" />
 
         <TextView
+            android:id="@+id/lastUpdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/website"
+            android:layout_marginStart="@dimen/rhythm_space_double"
+            android:layout_marginEnd="@dimen/rhythm_space_double"
+            android:layout_marginBottom="@dimen/rhythm_space_double"
+            android:textAppearance="?attr/textAppearanceListItemSmall"
+            android:textSize="14sp"
+            android:lines="1"
+            tools:text="5 days ago" />
+
+        <TextView
             android:id="@+id/subscribers"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/lastUpdate"
             android:layout_alignParentEnd="true"
             android:layout_below="@+id/website"
             android:layout_marginStart="@dimen/rhythm_space_double"
@@ -92,7 +116,7 @@
                 style="?borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/label_subscribe"/>
+                android:text="@string/label_unsubscribe"/>
             <Button
                 android:id="@+id/action_share"
                 style="?borderlessButtonStyle"

@@ -1,27 +1,39 @@
 package com.neykov.podcastportal.model.persistence;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
-/**
- * Created by Georgi on 5.9.2015 г..
- */
+import com.neykov.podcastportal.BuildConfig;
+
 public final class DatabaseContract {
 
-    public static final class Podcast implements BaseColumns {
+    public static final String CONTENT_AUTHORITY = BuildConfig.APPLICATION_ID;
+
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+
+
+    public static final class Subscription implements BaseColumns {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("subscriptions").build();
+        public static final String TABLE_NAME = "Subscriptions";
+
         public static final String TITLE = "Title";
         public static final String DESCRIPTION = "Description";
-        public static final String FEED_URL = "Feed URL";
+        public static final String FEED_URL = "FeedURL";
         public static final String SUBSCRIBERS = "Subscribers";
-        public static final String DATE_UPDATED = "Date Update";
-        public static final String LOGO_URL = "Logo URL";
-        public static final String LOCAL_LOGO_URL = "Local Logo URL";
+        public static final String DATE_UPDATED = "DateUpdate";
+        public static final String LOGO_URL = "LogoURL";
+        public static final String LOCAL_LOGO_URL = "LocalLogoURL";
+        public static final String WEBSITE = "Website";
     }
 
     public static final class Episode implements BaseColumns {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("episodes").build();
+        public static final String TABLE_NAME = "Episodes";
+
         public static final String TITLE = "Title";
         public static final String DESCRIPTION = "Description";
-        public static final String CONTENT_URL = "Content URL";
-        public static final String PODCAST_URL = "Podcast URL";
+        public static final String CONTENT_URL = "ContentURL";
+        public static final String PODCAST_URL = "PodcastURL";
         public static final String PODCAST_TITLE = "Podcast Title";
         public static final String PODCAST_ID = "Podcast ID";
         public static final String WEBSITE = "Website";
@@ -30,6 +42,9 @@ public final class DatabaseContract {
     }
 
     public static final class Download implements BaseColumns {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("downloads").build();
+        public static final String TABLE_NAME = "Download";
+
         public static final String FILE_URL = "File URL";
         public static final String FILE_SIZE = "File Size";
         public static final String STATE = "File URL";

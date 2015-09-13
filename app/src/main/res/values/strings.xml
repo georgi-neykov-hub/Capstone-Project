@@ -11,4 +11,9 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="label_retry">Retry</string>
     <string name="label_no_network">You are offline</string>
+    <string name="label_search">Search</string>
+    <string name="label_subscribe">Subscribe</string>
+    <string name="label_unsubscribe">Unsubscribe</string>
+    <string name="label_subscribers_count_format">%1d Subscribers</string>
+    <string name="label_share">Share</string>
 </resources>

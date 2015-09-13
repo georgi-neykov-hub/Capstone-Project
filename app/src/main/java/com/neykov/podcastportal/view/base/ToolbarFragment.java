@@ -2,10 +2,12 @@ package com.neykov.podcastportal.view.base;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -13,6 +15,7 @@ import android.view.View;
 
 import com.neykov.podcastportal.DependencyResolver;
 import com.neykov.podcastportal.R;
+import com.neykov.podcastportal.view.ViewUtils;
 
 
 public class ToolbarFragment extends Fragment implements DependencyResolverProvider {
@@ -75,7 +78,7 @@ public class ToolbarFragment extends Fragment implements DependencyResolverProvi
     @NonNull
     @Override
     public DependencyResolver getDependencyResolver() {
-        return ((DependencyResolverProvider)getContext().getApplicationContext())
+        return ((DependencyResolverProvider) getContext().getApplicationContext())
                 .getDependencyResolver();
     }
 
@@ -104,11 +107,19 @@ public class ToolbarFragment extends Fragment implements DependencyResolverProvi
         return super.onOptionsItemSelected(item);
     }
 
-    public void setHomeAsUpEnabled(boolean enabled){
-        if(mDrawerToggle != null){
-            mDrawerToggle.setDrawerIndicatorEnabled(enabled);
-        } else {
-
+    public void setHomeAsUpEnabled(boolean enabled) {
+        if (mToolbar != null) {
+            int upIconResId = ViewUtils.getThemeAttribute(mToolbar.getContext().getTheme(), R.attr.homeAsUpIndicator);
+            Drawable upIcon = ContextCompat.getDrawable(mToolbar.getContext(), upIconResId);
+            mToolbar.setNavigationIcon(enabled ? upIcon : null);
+            if (mDrawerToggle != null) {
+                mDrawerToggle.setDrawerIndicatorEnabled(!enabled);
+                mDrawerToggle.syncState();
+                mToolbar.setNavigationOnClickListener(enabled ?
+                        mHomeAsUpClickListener : mDrawerToggle.getToolbarNavigationClickListener());
+            } else {
+                mToolbar.setNavigationOnClickListener(enabled ? mHomeAsUpClickListener : null);
+            }
         }
     }
 
@@ -132,4 +143,12 @@ public class ToolbarFragment extends Fragment implements DependencyResolverProvi
             mDrawerToggle.syncState();
         }
     }
+
+    private final View.OnClickListener mHomeAsUpClickListener = v -> {
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
+            getFragmentManager().popBackStack();
+        } else if (getActivity() != null) {
+            getActivity().finish();
+        }
+    };
 }

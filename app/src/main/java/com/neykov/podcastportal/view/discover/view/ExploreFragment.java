@@ -56,7 +56,11 @@ public class ExploreFragment extends ToolbarFragment implements PopularTagsFragm
 
     @Override
     protected void onConfigureToolbar(Toolbar toolbar) {
-
+        toolbar.inflateMenu(R.menu.menu_podcast_search);
+        toolbar.getMenu().findItem(R.id.action_search).setOnMenuItemClickListener(item -> {
+            openSearchFragment();
+            return true;
+        });
     }
 
     @Override
@@ -65,6 +69,13 @@ public class ExploreFragment extends ToolbarFragment implements PopularTagsFragm
         getFragmentManager().beginTransaction()
                 .replace(R.id.content, PodcastsForTagFragment.newInstance(tag), PodcastsForTagFragment.TAG)
                 .addToBackStack(PodcastsForTagFragment.TAG)
+                .commit();
+    }
+
+    private void openSearchFragment(){
+        getFragmentManager().beginTransaction()
+                .replace(R.id.content, PodcastSearchFragment.newInstance(), PodcastSearchFragment.TAG)
+                .addToBackStack(PodcastSearchFragment.TAG)
                 .commit();
     }
 }

@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import javax.annotation.Generated;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -11,27 +12,27 @@ import com.google.gson.annotations.SerializedName;
 public class Podcast implements Parcelable, Comparable<Podcast> {
 
     @Expose
-    private String website;
+    private String title;
     @Expose
     private String description;
     @Expose
-    private String title;
-    @Expose
     private String url;
-    @SerializedName("position_last_week")
     @Expose
-    private int positionLastWeek;
-    @SerializedName("subscribers_last_week")
-    @Expose
-    private int subscribersLastWeek;
+    private String website;
     @Expose
     private int subscribers;
-    @SerializedName("mygpo_link")
-    @Expose
-    private String mygpoLink;
     @SerializedName("logo_url")
     @Expose
     private String logoUrl;
+
+    protected Podcast(String title, String description, String url, String website, int subscribers, String logoUrl) {
+        this.title = title;
+        this.description = description;
+        this.url = url;
+        this.website = website;
+        this.subscribers = subscribers;
+        this.logoUrl = logoUrl;
+    }
 
     public String getWebsite() {
         return website;
@@ -49,20 +50,8 @@ public class Podcast implements Parcelable, Comparable<Podcast> {
         return url;
     }
 
-    public int getPositionLastWeek() {
-        return positionLastWeek;
-    }
-
-    public int getSubscribersLastWeek() {
-        return subscribersLastWeek;
-    }
-
     public int getSubscribers() {
         return subscribers;
-    }
-
-    public String getMygpoLink() {
-        return mygpoLink;
     }
 
     public String getLogoUrl() {
@@ -70,6 +59,58 @@ public class Podcast implements Parcelable, Comparable<Podcast> {
     }
 
 
+    public Podcast() {
+    }
+
+    @Override
+    public int compareTo(Podcast another) {
+        int thisSubscribers = this.getSubscribers();
+        int thatSubscribers = another.getSubscribers();
+        return thisSubscribers > thatSubscribers ? 1 : thisSubscribers == thatSubscribers ? 0 : -1;
+    }
+
+    public final class Builder {
+        private String title;
+        private String description;
+        private String url;
+        private String website;
+        private int subscribers;
+        private String logoUrl;
+
+        public Builder setTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder setDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder setUrl(String url) {
+            this.url = url;
+            return this;
+        }
+
+        public Builder setWebsite(String website) {
+            this.website = website;
+            return this;
+        }
+
+        public Builder setSubscribers(int subscribers) {
+            this.subscribers = subscribers;
+            return this;
+        }
+
+        public Builder setLogoUrl(String logoUrl) {
+            this.logoUrl = logoUrl;
+            return this;
+        }
+
+        public Podcast createPodcast() {
+            return new Podcast(title, description, url, website, subscribers, logoUrl);
+        }
+    }
 
     @Override
     public int describeContents() {
@@ -78,33 +119,24 @@ public class Podcast implements Parcelable, Comparable<Podcast> {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.website);
-        dest.writeString(this.description);
         dest.writeString(this.title);
+        dest.writeString(this.description);
         dest.writeString(this.url);
-        dest.writeInt(this.positionLastWeek);
-        dest.writeInt(this.subscribersLastWeek);
+        dest.writeString(this.website);
         dest.writeInt(this.subscribers);
-        dest.writeString(this.mygpoLink);
         dest.writeString(this.logoUrl);
     }
 
-    public Podcast() {
-    }
-
     protected Podcast(Parcel in) {
-        this.website = in.readString();
-        this.description = in.readString();
         this.title = in.readString();
+        this.description = in.readString();
         this.url = in.readString();
-        this.positionLastWeek = in.readInt();
-        this.subscribersLastWeek = in.readInt();
+        this.website = in.readString();
         this.subscribers = in.readInt();
-        this.mygpoLink = in.readString();
         this.logoUrl = in.readString();
     }
 
-    public static final Parcelable.Creator<Podcast> CREATOR = new Parcelable.Creator<Podcast>() {
+    public static final Creator<Podcast> CREATOR = new Creator<Podcast>() {
         public Podcast createFromParcel(Parcel source) {
             return new Podcast(source);
         }
@@ -113,11 +145,4 @@ public class Podcast implements Parcelable, Comparable<Podcast> {
             return new Podcast[size];
         }
     };
-
-    @Override
-    public int compareTo(Podcast another) {
-        int thisSubscribers = this.getSubscribers();
-        int thatSubscribers = another.getSubscribers();
-        return thisSubscribers > thatSubscribers ? 1 : thisSubscribers == thatSubscribers ? 0 : -1;
-    }
 }

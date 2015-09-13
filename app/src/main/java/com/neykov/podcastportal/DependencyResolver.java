@@ -1,6 +1,7 @@
 package com.neykov.podcastportal;
 
 import com.neykov.podcastportal.model.networking.NetworkingModule;
+import com.neykov.podcastportal.model.persistence.PersistanceModule;
 import com.neykov.podcastportal.view.discover.DiscoverComponent;
 import com.squareup.picasso.Picasso;
 
@@ -12,7 +13,8 @@ import dagger.Component;
 @Component(
         modules = {
                 ApplicationModule.class,
-                NetworkingModule.class
+                NetworkingModule.class,
+                PersistanceModule.class
         })
 public interface DependencyResolver {
     DiscoverComponent getDiscoverComponent();
