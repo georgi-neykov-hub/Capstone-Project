@@ -17,26 +17,19 @@
             android:background="?attr/colorPrimary"
             android:minHeight="?attr/actionBarSize"
             android:theme="@style/AppTheme.Toolbar"
+            app:title="@string/title_podcasts"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" >
-
-            <android.support.v7.widget.SearchView
-                android:id="@+id/search"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:iconifiedByDefault="false"
-                android:layout_gravity="fill"
-                android:imeOptions="actionSearch"
-                android:theme="@style/AppTheme.Toolbar"/>
 
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
 
     <fragment
-        android:id="@+id/podcastSearchContentFragment"
-        android:name="com.neykov.podcastportal.view.discover.view.PodcastSearchFragment$ContentFragment"
+        android:id="@+id/podcastsForTagContentFragment"
+        android:name="com.neykov.podcastportal.view.discover.view.PodcastsForTagFragment$ContentFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:layout="@layout/fragment_base_list" />
 
 </android.support.design.widget.CoordinatorLayout>

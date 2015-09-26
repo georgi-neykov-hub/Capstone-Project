@@ -14,7 +14,7 @@
             android:id="@+id/logo"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginBottom="@dimen/rhythm_space_single"
+            android:layout_marginBottom="@dimen/rhythm_space_double"
             app:widthToHeightRatio="1.0"
             tools:background="@color/photo_placeholder" />
 
@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/logo"
             android:layout_marginStart="@dimen/rhythm_space_double"
-            android:layout_marginEnd="@dimen/rhythm_space_double"
+            android:layout_marginEnd="@dimen/rhythm_control_normal"
             android:layout_marginBottom="@dimen/rhythm_space_single"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="24sp"
@@ -40,7 +40,7 @@
             android:layout_marginEnd="@dimen/rhythm_space_double"
             android:textAppearance="?attr/textAppearanceListItemSmall"
             android:textSize="14sp"
-            android:maxLines="3"
+            android:maxLines="6"
             android:ellipsize="end"
             tools:text="The Android Nerds show The Android Nerds show The Android Nerds showThe Android Nerds show" />
 

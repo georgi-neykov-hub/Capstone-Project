@@ -45,6 +45,11 @@ public abstract class BaseAdapter<ItemType, VH extends RecyclerView.ViewHolder> 
         }
     }
 
+    public void swapItem(int position, ItemType replacement){
+        mItems.set(position, replacement);
+        notifyItemChanged(position, null);
+    }
+
     protected final void setItems(List<ItemType> items){
         this.mItems = items;
         notifyDataSetChanged();

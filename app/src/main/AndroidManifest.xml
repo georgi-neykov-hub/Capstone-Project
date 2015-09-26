@@ -22,7 +22,7 @@
 
         <provider
             android:name=".model.persistence.PodcastContentProvider"
-            android:authorities="com.neykov.podcastportal.provider."
+            android:authorities="com.neykov.podcastportal"
             android:enabled="true"
             android:exported="false" >
         </provider>

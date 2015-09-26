@@ -114,6 +114,7 @@ public class ToolbarFragment extends Fragment implements DependencyResolverProvi
             mToolbar.setNavigationIcon(enabled ? upIcon : null);
             if (mDrawerToggle != null) {
                 mDrawerToggle.setDrawerIndicatorEnabled(!enabled);
+                mDrawerToggle.setHomeAsUpIndicator(enabled ? upIcon : null);
                 mDrawerToggle.syncState();
                 mToolbar.setNavigationOnClickListener(enabled ?
                         mHomeAsUpClickListener : mDrawerToggle.getToolbarNavigationClickListener());

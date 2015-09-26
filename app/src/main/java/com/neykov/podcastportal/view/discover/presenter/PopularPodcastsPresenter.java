@@ -1,71 +1,30 @@
 package com.neykov.podcastportal.view.discover.presenter;
 
-import android.os.Bundle;
-import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
+import com.neykov.podcastportal.model.entity.Podcast;
 import com.neykov.podcastportal.model.networking.GPodderService;
-import com.neykov.podcastportal.view.base.BasePresenter;
-import com.neykov.podcastportal.view.base.ItemListView;
-import com.neykov.podcastportal.view.discover.view.PodcastsAdapter;
+import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
-import retrofit.RetrofitError;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
-public class PopularPodcastsPresenter extends BasePresenter<ItemListView> {
+public class PopularPodcastsPresenter extends BaseDiscoverPodcastsPresenter {
 
-    private static final String KEY_ADAPTER_STATE = "PopularPodcastsPresenter.KEY_ADAPTER_STATE";
-
-    private PodcastsAdapter mAdapter;
     private GPodderService mService;
 
     @Inject
-    public PopularPodcastsPresenter(GPodderService mService) {
-        this.mService = mService;
-        mAdapter = new PodcastsAdapter();
+    public PopularPodcastsPresenter(GPodderService service, SubscriptionsManager manager) {
+        super(manager);
+        this.mService = service;
     }
 
-    public PodcastsAdapter getAdapter(){
-        return mAdapter;
-    }
-
-    public void refreshData(){
-        mAdapter.clearItems();
-        fetchPopularPodcasts();
-    }
-
-    public void loadItems(ItemListView view){
-        view.showLoadingIndicator();
-        fetchPopularPodcasts();
-    }
-
-    private void fetchPopularPodcasts(){
-        //noinspection ConstantConditions
-        mService.getTopPodcasts(100)
-                .flatMap(Observable::from)
-                .toSortedList((podcast, podcast2) -> -podcast.compareTo(podcast2), 100)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .compose(delayUntilViewAvailable())
-                .subscribe(baseListViewListDelivery -> {
-                    baseListViewListDelivery.split((baseListView, podcasts) -> {
-                        baseListView.hideLoadingIndicator();
-                        mAdapter.clearItems();
-                        mAdapter.addItems(podcasts);
-                    }, (baseListView1, throwable) -> {
-                        baseListView1.hideLoadingIndicator();
-                        if(throwable instanceof RetrofitError){
-                            RetrofitError typedError = (RetrofitError) throwable;
-                            if(typedError.getKind() == RetrofitError.Kind.NETWORK){
-                                baseListView1.showListLoadError(ItemListView.ERROR_NETWORK);
-                            }
-                        }else {
-                            baseListView1.showListLoadError(ItemListView.ERROR_GENERAL);
-                        }
-                    });
-                });
+    @NonNull
+    @Override
+    protected Observable<List<Podcast>> getRemotePodcastsObservable() {
+        return mService.getTopPodcasts(100);
     }
 }

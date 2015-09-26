@@ -5,6 +5,7 @@ import android.os.Parcel;
 import java.util.Date;
 
 public class Subscription extends Podcast {
+    private Long id;
     private String localLogoUrl;
     private Date dateUpdated;
 
@@ -12,10 +13,15 @@ public class Subscription extends Podcast {
         this(p.getTitle(), p.getDescription(), p.getUrl(), p.getWebsite(), p.getSubscribers(), p.getLogoUrl(), localLogoUrl, dateUpdated);
     }*/
 
-    public Subscription(String title, String description, String url, String website, int subscribers, String logoUrl, String localLogoUrl, Date dateUpdated) {
+    public Subscription(Long id, String title, String description, String url, String website, int subscribers, String logoUrl, String localLogoUrl, Date dateUpdated) {
         super(title, description, url, website, subscribers, logoUrl);
+        this.id = id;
         this.localLogoUrl = localLogoUrl;
         this.dateUpdated = dateUpdated;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getLocalLogoUrl() {
@@ -34,12 +40,14 @@ public class Subscription extends Podcast {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
+        dest.writeLong(this.id);
         dest.writeString(this.localLogoUrl);
         dest.writeLong(dateUpdated != null ? dateUpdated.getTime() : -1);
     }
 
     protected Subscription(Parcel in) {
         super(in);
+        this.id = in.readLong();
         this.localLogoUrl = in.readString();
         long tmpDateUpdated = in.readLong();
         this.dateUpdated = tmpDateUpdated == -1 ? null : new Date(tmpDateUpdated);
@@ -56,6 +64,7 @@ public class Subscription extends Podcast {
     };
 
     public static class Builder {
+        private Long id;
         private String title;
         private String description;
         private String url;
@@ -79,6 +88,7 @@ public class Subscription extends Podcast {
         }
 
         public Builder(Subscription subscription){
+            this.id = subscription.getId();
             this.title = subscription.getTitle();
             this.description = subscription.getDescription();
             this.url = subscription.getUrl();
@@ -129,8 +139,13 @@ public class Subscription extends Podcast {
             return this;
         }
 
+        public Builder setId(Long id) {
+            this.id = id;
+            return this;
+        }
+
         public Subscription build() {
-            return new Subscription(title, description, url, website, subscribers, logoUrl, localLogoUrl, dateUpdated);
+            return new Subscription(id, title, description, url, website, subscribers, logoUrl, localLogoUrl, dateUpdated);
         }
     }
 }

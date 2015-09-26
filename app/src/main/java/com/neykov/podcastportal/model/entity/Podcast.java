@@ -25,7 +25,7 @@ public class Podcast implements Parcelable, Comparable<Podcast> {
     @Expose
     private String logoUrl;
 
-    protected Podcast(String title, String description, String url, String website, int subscribers, String logoUrl) {
+    public Podcast(String title, String description, String url, String website, int subscribers, String logoUrl) {
         this.title = title;
         this.description = description;
         this.url = url;

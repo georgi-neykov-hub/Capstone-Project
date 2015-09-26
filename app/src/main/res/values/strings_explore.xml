@@ -2,6 +2,7 @@
 <resources>
     <string name="error_could_not_load_tags">Could not load the tags.</string>
     <string name="title_popular_tags">Popular Tags</string>
+    <string name="title_podcasts">Podcasts</string>
     <string name="title_popular_podcasts">Popular Podcasts</string>
     <string name="label_tag_usage_format">%d Podcasts</string>
 </resources>

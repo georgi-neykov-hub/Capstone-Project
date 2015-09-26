@@ -1,6 +1,8 @@
 package com.neykov.podcastportal.view.discover.view;
 
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +16,25 @@ import com.neykov.podcastportal.view.base.adapter.BaseAdapter;
 import com.neykov.podcastportal.view.base.adapter.BaseListenerViewHolder;
 import com.squareup.picasso.Picasso;
 
+import java.lang.ref.WeakReference;
+import java.util.List;
+
 public class PodcastsAdapter extends BaseAdapter<Podcast, PodcastsAdapter.PodcastViewHolder> {
+
+    public interface PodcastItemListener {
+        void onItemClick(int position);
+        void onItemSubscribeClick(int position);
+        void onItemShareClick(int position);
+    }
 
     private static final int TYPE_SUBSCRIPTION = 1;
     private static final int TYPE_PODCAST = 2;
+
+    private WeakReference<PodcastItemListener> mListenerRef = new WeakReference<>(null);
+
+    public void setListener(PodcastItemListener listener) {
+        mListenerRef = new WeakReference<>(listener);
+    }
 
     @Override
     public PodcastViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -35,6 +52,13 @@ public class PodcastsAdapter extends BaseAdapter<Podcast, PodcastsAdapter.Podcas
     @Override
     public void onBindViewHolder(PodcastViewHolder holder, int position) {
         holder.onBind(getItem(position));
+        holder.setListener(mProxyListener);
+    }
+
+    @Override
+    public void onViewRecycled(PodcastViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.setListener(null);
     }
 
     @Override
@@ -42,12 +66,33 @@ public class PodcastsAdapter extends BaseAdapter<Podcast, PodcastsAdapter.Podcas
         return (getItem(position) instanceof Subscription) ? TYPE_SUBSCRIPTION : TYPE_PODCAST;
     }
 
-    protected static class PodcastViewHolder extends BaseListenerViewHolder<PodcastViewHolder.Listener> {
-
-        public interface Listener {
-            void onSubscribeClick(int position);
-            void onShareClick(int position);
+    private final PodcastItemListener mProxyListener = new PodcastItemListener() {
+        @Override
+        public void onItemClick(int position) {
+            PodcastItemListener listener = mListenerRef.get();
+            if (listener != null) {
+                listener.onItemClick(position);
+            }
         }
+
+        @Override
+        public void onItemSubscribeClick(int position) {
+            PodcastItemListener listener = mListenerRef.get();
+            if (listener != null) {
+                listener.onItemSubscribeClick(position);
+            }
+        }
+
+        @Override
+        public void onItemShareClick(int position) {
+            PodcastItemListener listener = mListenerRef.get();
+            if (listener != null) {
+                listener.onItemShareClick(position);
+            }
+        }
+    };
+
+    protected static class PodcastViewHolder extends BaseListenerViewHolder<PodcastItemListener> {
 
         private ImageView mLogoImageView;
         private TextView mTitleTextView;
@@ -63,17 +108,17 @@ public class PodcastsAdapter extends BaseAdapter<Podcast, PodcastsAdapter.Podcas
             mSubscribersTextView = (TextView) itemView.findViewById(R.id.subscribers);
             mWebsiteTextView = (TextView) itemView.findViewById(R.id.website);
             itemView.findViewById(R.id.action_subscribe).setOnClickListener(v -> {
-                Listener listener = getListener();
+                PodcastItemListener listener = getListener();
                 int position = getAdapterPosition();
                 if (listener != null && position != RecyclerView.NO_POSITION) {
-                    listener.onSubscribeClick(position);
+                    listener.onItemSubscribeClick(position);
                 }
             });
             itemView.findViewById(R.id.action_share).setOnClickListener(v -> {
-                Listener listener = getListener();
+                PodcastItemListener listener = getListener();
                 int position = getAdapterPosition();
                 if (listener != null && position != RecyclerView.NO_POSITION) {
-                    listener.onShareClick(position);
+                    listener.onItemShareClick(position);
                 }
             });
         }
@@ -104,13 +149,21 @@ public class PodcastsAdapter extends BaseAdapter<Podcast, PodcastsAdapter.Podcas
 
     protected static class SubscriptionViewHolder extends PodcastViewHolder {
 
+        private TextView mLastUpdateTextView;
+
         public SubscriptionViewHolder(View itemView) {
             super(itemView);
+            mLastUpdateTextView = (TextView) itemView.findViewById(R.id.lastUpdate);
         }
 
         @Override
         protected void onBind(Podcast podcast) {
             super.onBind(podcast);
+            Subscription subscription = (Subscription) podcast;
+            long now = System.currentTimeMillis();
+            CharSequence lastUpdateText = DateUtils.getRelativeTimeSpanString(
+                    subscription.getDateUpdated().getTime(), now, DateUtils.SECOND_IN_MILLIS);
+            mLastUpdateTextView.setText(lastUpdateText);
         }
     }
 }

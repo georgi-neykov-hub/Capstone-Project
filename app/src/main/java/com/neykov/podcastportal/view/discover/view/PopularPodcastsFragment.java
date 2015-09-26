@@ -10,12 +10,13 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
 
 import com.neykov.podcastportal.R;
+import com.neykov.podcastportal.model.entity.Podcast;
+import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.view.ViewUtils;
-import com.neykov.podcastportal.view.base.BaseListFragment;
 import com.neykov.podcastportal.view.base.BaseListViewFragment;
 import com.neykov.podcastportal.view.discover.presenter.PopularPodcastsPresenter;
 
-public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapter, PopularPodcastsPresenter> {
+public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapter, PopularPodcastsPresenter> implements DiscoverPodcastsView {
 
     public static PopularPodcastsFragment newInstance() {
         return new PopularPodcastsFragment();
@@ -27,6 +28,18 @@ public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapte
         if (getAdapter().getItemCount() == 0) {
             getPresenter().loadItems(this);
         }
+    }
+
+    @Override
+    public void onPause() {
+        getAdapter().setListener(null);
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        getAdapter().setListener(mItemListener);
+        super.onResume();
     }
 
     @NonNull
@@ -67,5 +80,37 @@ public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapte
         return getDependencyResolver()
                 .getDiscoverComponent()
                 .createPopularPodcastsPresenter();
+    }
+
+    private final PodcastsAdapter.PodcastItemListener mItemListener = new PodcastsAdapter.PodcastItemListener() {
+        @Override
+        public void onItemClick(int position) {
+
+        }
+
+        @Override
+        public void onItemSubscribeClick(int position) {
+            Podcast podcast = getAdapter().getItem(position);
+            if (podcast instanceof Subscription) {
+                getPresenter().unsubscribeFromPodcast(position, (Subscription) podcast);
+            } else {
+                getPresenter().subscribeForPodcast(position, podcast);
+            }
+        }
+
+        @Override
+        public void onItemShareClick(int position) {
+
+        }
+    };
+
+    @Override
+    public void onPodcastSubcribed(Subscription podcast) {
+
+    }
+
+    @Override
+    public void onPodcastUnsubscribed(Podcast podcast) {
+
     }
 }

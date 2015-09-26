@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
+import com.neykov.podcastportal.model.entity.Podcast;
+import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.BaseListViewFragment;
 import com.neykov.podcastportal.view.base.ToolbarFragment;
@@ -53,9 +55,9 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mContentFragment = (ContentFragment) getChildFragmentManager().findFragmentById(R.id.podcastSearchContentFramgent);
-        mQuerySubject.asObservable()
-                .debounce(1000, TimeUnit.MILLISECONDS)
+        mContentFragment = (ContentFragment) getChildFragmentManager().findFragmentById(R.id.podcastSearchContentFragment);
+        mQuerySubject
+                .debounce(1300, TimeUnit.MILLISECONDS)
                 .subscribe(mQuerySubscriber);
     }
 
@@ -118,7 +120,7 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
         return true;
     }
 
-    public static class ContentFragment extends BaseListViewFragment<PodcastsAdapter, PodcastSearchPresenter> {
+    public static class ContentFragment extends BaseListViewFragment<PodcastsAdapter, PodcastSearchPresenter> implements DiscoverPodcastsView{
 
         @NonNull
         @Override
@@ -134,7 +136,7 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
 
         @Override
         protected void onRefresh() {
-            getPresenter().loadItems(this, true);
+            getPresenter().refreshData();
         }
 
         @Override
@@ -160,7 +162,17 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
 
         protected void setSearchQuery(String query) {
             getPresenter().setQuery(query);
-            getPresenter().loadItems(this, true);
+            getPresenter().refreshData();
+        }
+
+        @Override
+        public void onPodcastSubcribed(Subscription podcast) {
+
+        }
+
+        @Override
+        public void onPodcastUnsubscribed(Podcast podcast) {
+
         }
     }
 }
