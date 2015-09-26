@@ -12,6 +12,7 @@ public class SubscriptionConverter implements Converter<com.neykov.podcastportal
     public com.neykov.podcastportal.model.entity.Subscription convert(Cursor values) {
         long timeUpdatedUtc = values.getLong(values.getColumnIndex(DatabaseContract.Subscription.DATE_UPDATED));
         return new com.neykov.podcastportal.model.entity.Subscription(
+                values.getLong(values.getColumnIndex(DatabaseContract.Subscription._ID)),
                 values.getString(values.getColumnIndex(DatabaseContract.Subscription.TITLE)),
                 values.getString(values.getColumnIndex(DatabaseContract.Subscription.DESCRIPTION)),
                 values.getString(values.getColumnIndex(DatabaseContract.Subscription.FEED_URL)),

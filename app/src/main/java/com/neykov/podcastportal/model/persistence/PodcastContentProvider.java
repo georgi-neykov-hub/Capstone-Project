@@ -2,17 +2,49 @@ package com.neykov.podcastportal.model.persistence;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 public class PodcastContentProvider extends ContentProvider {
+
+    private DatabaseOpenHelper mDatabaseOpenHelper;
+    private UriMatcher mURIMatcher;
+
     public PodcastContentProvider() {
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        // Implement this to handle requests to delete one or more rows.
-        throw new UnsupportedOperationException("Not yet implemented");
+        int deletedRowsCount;
+        SQLiteDatabase db = mDatabaseOpenHelper.getWritableDatabase();
+        switch (getMatcher().match(uri)) {
+            case SUBSCRIPTIONS:
+                deletedRowsCount = db.delete(DatabaseContract.Subscription.TABLE_NAME, selection, selectionArgs);
+                break;
+            case SUBSCRIPTION_BY_ID:
+                String idString = uri.getLastPathSegment();
+                String whereStatement = DatabaseContract.Subscription._ID + " = " + idString;
+                if (!TextUtils.isEmpty(selection)) {
+                    whereStatement += " AND " + selection;
+                }
+                deletedRowsCount = db.delete(
+                        DatabaseContract.Subscription.TABLE_NAME, whereStatement, selectionArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported URI: " + uri);
+        }
+
+        if (deletedRowsCount > 0) {
+            // Notify all listeners about the changes.
+            //noinspection ConstantConditions
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return deletedRowsCount;
     }
 
     @Override
@@ -22,29 +54,101 @@ public class PodcastContentProvider extends ContentProvider {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        // TODO: Implement this to handle requests to insert a new row.
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
 
     @Override
     public boolean onCreate() {
-        // TODO: Implement this to initialize your content provider on startup.
-        return false;
+        mDatabaseOpenHelper = new DatabaseOpenHelper(getContext(), DatabaseContract.DATABASE_NAME, null, 1);
+        return true;
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection,
-                        String[] selectionArgs, String sortOrder) {
-        // TODO: Implement this to handle query requests from clients.
-        throw new UnsupportedOperationException("Not yet implemented");
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        String targetTable;
+        switch (getMatcher().match(uri)) {
+            case SUBSCRIPTIONS:
+                targetTable = DatabaseContract.Subscription.TABLE_NAME;
+                break;
+            case EPISODES:
+                targetTable = DatabaseContract.Episode.TABLE_NAME;
+                break;
+            case DOWNLOADS:
+                targetTable = DatabaseContract.Download.TABLE_NAME;
+                break;
+            default:
+                throw new UnsupportedOperationException("Cannot handle URI.");
+        }
+
+        return mDatabaseOpenHelper.getReadableDatabase().query(
+                targetTable,
+                projection,
+                selection,
+                selection == null ? null : selectionArgs,
+                null,
+                null,
+                sortOrder
+        );
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection,
+    public int update(@NonNull Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
         // TODO: Implement this to handle requests to update one or more rows.
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
+    @Override
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
+        switch (getMatcher().match(uri)) {
+            case SUBSCRIPTIONS:
+                return insertSubscription(mDatabaseOpenHelper.getWritableDatabase(), values);
+            case EPISODES:
+                return insertEpisode(mDatabaseOpenHelper.getWritableDatabase(), values);
+            case DOWNLOADS:
+                return insertDownload(mDatabaseOpenHelper.getWritableDatabase(), values);
+            default:
+                throw new IllegalArgumentException("Cannot insert, Unknown URI.");
+        }
+    }
+
+    private Uri insertSubscription(SQLiteDatabase db, ContentValues values) {
+        long row = db.insertOrThrow(DatabaseContract.Subscription.TABLE_NAME, null, values);
+        return DatabaseContract.Subscription.CONTENT_URI.buildUpon().appendPath(String.valueOf(row)).build();
+    }
+
+    private Uri insertEpisode(SQLiteDatabase db, ContentValues values) {
+        long row = db.insertOrThrow(DatabaseContract.Episode.TABLE_NAME, null, values);
+        return DatabaseContract.Episode.CONTENT_URI.buildUpon().appendPath(String.valueOf(row)).build();
+    }
+
+    private Uri insertDownload(SQLiteDatabase db, ContentValues values) {
+        long row = db.insertOrThrow(DatabaseContract.Download.TABLE_NAME, null, values);
+        return DatabaseContract.Episode.CONTENT_URI.buildUpon().appendPath(String.valueOf(row)).build();
+    }
+
+    private synchronized UriMatcher getMatcher() {
+        if (mURIMatcher == null) {
+            mURIMatcher = createMatcher();
+        }
+
+        return mURIMatcher;
+    }
+
+    private UriMatcher createMatcher() {
+        UriMatcher instance = new UriMatcher(UriMatcher.NO_MATCH);
+        instance.addURI(DatabaseContract.CONTENT_AUTHORITY, DatabaseContract.Subscription.CONTENT_URI.getPath(), SUBSCRIPTIONS);
+        instance.addURI(DatabaseContract.CONTENT_AUTHORITY, DatabaseContract.Episode.CONTENT_URI.getPath(), EPISODES);
+        instance.addURI(DatabaseContract.CONTENT_AUTHORITY, DatabaseContract.Download.CONTENT_URI.getPath(), DOWNLOADS);
+        instance.addURI(DatabaseContract.CONTENT_AUTHORITY, DatabaseContract.Subscription.CONTENT_URI.buildUpon().appendPath("#").build().getPath(), SUBSCRIPTION_BY_ID);
+        instance.addURI(DatabaseContract.CONTENT_AUTHORITY, DatabaseContract.Episode.CONTENT_URI.buildUpon().appendPath("#").build().getPath(), EPISODE_BY_ID);
+        instance.addURI(DatabaseContract.CONTENT_AUTHORITY, DatabaseContract.Download.CONTENT_URI.buildUpon().appendPath("#").build().getPath(), DOWNLOAD_BY_ID);
+        return instance;
+    }
+
+    // URI Matching constants.
+    private static final int SUBSCRIPTIONS = 0x1000;
+    private static final int EPISODES = 0x2000;
+    private static final int DOWNLOADS = 0x3000;
+    private static final int SUBSCRIPTION_BY_ID = 0x1001;
+    private static final int EPISODE_BY_ID = 0x2001;
+    private static final int DOWNLOAD_BY_ID = 0x3001;
 }

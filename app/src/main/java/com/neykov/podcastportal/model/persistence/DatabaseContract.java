@@ -8,6 +8,8 @@ import com.neykov.podcastportal.BuildConfig;
 public final class DatabaseContract {
 
     public static final String CONTENT_AUTHORITY = BuildConfig.APPLICATION_ID;
+    public static final String DATABASE_NAME = "PodcastPortal";
+
 
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
@@ -34,20 +36,20 @@ public final class DatabaseContract {
         public static final String DESCRIPTION = "Description";
         public static final String CONTENT_URL = "ContentURL";
         public static final String PODCAST_URL = "PodcastURL";
-        public static final String PODCAST_TITLE = "Podcast Title";
-        public static final String PODCAST_ID = "Podcast ID";
+        public static final String PODCAST_TITLE = "PodcastTitle";
+        public static final String PODCAST_ID = "PodcastID";
         public static final String WEBSITE = "Website";
-        public static final String RELEASE_DATE = "Release Date";
-        public static final String DOWNLOAD_ID = "Download ID";
+        public static final String RELEASE_DATE = "ReleaseDate";
+        public static final String DOWNLOAD_ID = "DownloadID";
     }
 
     public static final class Download implements BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("downloads").build();
         public static final String TABLE_NAME = "Download";
 
-        public static final String FILE_URL = "File URL";
-        public static final String FILE_SIZE = "File Size";
-        public static final String STATE = "File URL";
-        public static final String EPISODE_ID = "Episode ID";
+        public static final String FILE_URL = "FileURL";
+        public static final String FILE_SIZE = "FileSize";
+        public static final String STATE = "State";
+        public static final String EPISODE_ID = "EpisodeID";
     }
 }

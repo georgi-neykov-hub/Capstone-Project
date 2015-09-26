@@ -2,6 +2,7 @@ package com.neykov.podcastportal.model.networking;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -52,6 +53,7 @@ public class NetworkingModule {
         return new RestAdapter.Builder()
                 .setEndpoint(ITUNES_SEARCH_API_BASE_URL)
                 .setClient(new OkClient(okHttpClient))
+                .setLogLevel(RestAdapter.LogLevel.BASIC)
                 .setConverter(new GsonConverter(gson))
                 .build()
                 .create(ITunesSearchService.class);

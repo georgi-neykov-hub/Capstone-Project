@@ -2,6 +2,7 @@ package com.neykov.podcastportal.model.persistence;
 
 import android.content.Context;
 
+import com.neykov.podcastportal.BuildConfig;
 import com.squareup.sqlbrite.BriteContentResolver;
 import com.squareup.sqlbrite.SqlBrite;
 
@@ -19,7 +20,9 @@ public class PersistanceModule {
 
     @Provides @Singleton
     BriteContentResolver provideBriteContentResolver(SqlBrite brite, Context context){
-        return brite.wrapContentProvider(context.getContentResolver());
+        BriteContentResolver resolver = brite.wrapContentProvider(context.getContentResolver());
+        resolver.setLoggingEnabled(BuildConfig.DEBUG);
+        return resolver;
     }
 
 }
