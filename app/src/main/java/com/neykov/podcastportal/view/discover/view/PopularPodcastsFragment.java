@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -15,6 +16,7 @@ import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.BaseListViewFragment;
 import com.neykov.podcastportal.view.discover.presenter.PopularPodcastsPresenter;
+import com.neykov.podcastportal.view.subscriptions.view.PodcastDetailFragment;
 
 public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapter, PopularPodcastsPresenter> implements DiscoverPodcastsView {
 
@@ -85,7 +87,14 @@ public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapte
     private final PodcastsAdapter.PodcastItemListener mItemListener = new PodcastsAdapter.PodcastItemListener() {
         @Override
         public void onItemClick(int position) {
-
+            FragmentManager manager = getParentFragment() != null ?
+                    getParentFragment().getFragmentManager() : getActivity().getSupportFragmentManager();
+            Podcast target = getAdapter().getItem(position);
+            manager.beginTransaction()
+                    .replace(R.id.content, PodcastDetailFragment.newInstance(target), PodcastDetailFragment.TAG)
+                    .addToBackStack(PodcastDetailFragment.TAG)
+                    .commit();
+            manager.executePendingTransactions();
         }
 
         @Override

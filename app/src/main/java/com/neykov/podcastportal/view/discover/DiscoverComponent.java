@@ -6,9 +6,12 @@ import com.neykov.podcastportal.view.discover.presenter.PodcastsForTagPresenter;
 import com.neykov.podcastportal.view.discover.presenter.PopularPodcastsPresenter;
 import com.neykov.podcastportal.view.discover.presenter.PopularTagsPresenter;
 
+import javax.inject.Singleton;
+
 import dagger.Subcomponent;
 
 @Subcomponent
+@Singleton
 public interface DiscoverComponent {
     ExplorePresenter createDiscoverPresenter();
     PopularTagsPresenter createTopTagsPresenter();

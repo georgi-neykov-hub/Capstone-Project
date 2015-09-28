@@ -2,25 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_home"
-            android:title="@string/navigation_home" />
-
+            android:id="@+id/navigation_explore"
+            android:title="@string/navigation_explore" />
         <item
-            android:id="@+id/navigation_pinned_subreddits"
-            android:title="@string/navigation_pinned_subreddits" />
-
+            android:id="@+id/navigation_my_podcasts"
+            android:title="@string/navigation_my_podcasts" />
         <item
-            android:id="@+id/navigation_browse_subreddits"
-            android:title="@string/navigation_browse_subreddits" />
-
+            android:id="@+id/navigation_episodes"
+            android:title="@string/navigation_episodes" />
         <item
-            android:id="@+id/navigation_manage_subscriptions"
-            android:title="@string/navigation_manage_subscriptions" />
-
+            android:id="@+id/navigation_player"
+            android:title="@string/navigation_player" />
+        <item
+            android:id="@+id/navigation_playlist"
+            android:title="@string/navigation_playlist" />
         <item
             android:id="@+id/navigation_about"
             android:title="@string/navigation_about" />
-
-
     </group>
 </menu>

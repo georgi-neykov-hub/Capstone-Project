@@ -9,6 +9,5 @@
         <item name="android:actionModeBackground">?attr/colorPrimary</item>
         <item name="actionModeBackground">?attr/colorPrimary</item>
         <item name="drawerArrowStyle">@style/AppTheme.Toolbar.DrawerArrowStyle</item>
-        <item name="android:background">?attr/colorPrimary</item>
     </style>
 </resources>

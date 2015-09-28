@@ -2,14 +2,17 @@ package com.neykov.podcastportal.view.base;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.neykov.podcastportal.R;
+import com.neykov.podcastportal.view.ViewUtils;
 
 import nucleus.presenter.Presenter;
 
@@ -97,6 +100,23 @@ public abstract class ToolbarViewFragment<PresenterType extends Presenter>
         return super.onOptionsItemSelected(item);
     }
 
+    public void setHomeAsUpEnabled(boolean enabled) {
+        if (mToolbar != null) {
+            int upIconResId = ViewUtils.getThemeAttribute(mToolbar.getContext().getTheme(), R.attr.homeAsUpIndicator);
+            Drawable upIcon = ContextCompat.getDrawable(mToolbar.getContext(), upIconResId);
+            mToolbar.setNavigationIcon(enabled ? upIcon : null);
+            if (mDrawerToggle != null) {
+                mDrawerToggle.setDrawerIndicatorEnabled(!enabled);
+                mDrawerToggle.setHomeAsUpIndicator(enabled ? upIcon : null);
+                mDrawerToggle.syncState();
+                mToolbar.setNavigationOnClickListener(enabled ?
+                        mHomeAsUpClickListener : mDrawerToggle.getToolbarNavigationClickListener());
+            } else {
+                mToolbar.setNavigationOnClickListener(enabled ? mHomeAsUpClickListener : null);
+            }
+        }
+    }
+
     private Toolbar callOnSetToolbar() {
         return onSetToolbar(getView());
     }
@@ -117,4 +137,12 @@ public abstract class ToolbarViewFragment<PresenterType extends Presenter>
             mDrawerToggle.syncState();
         }
     }
+
+    private final View.OnClickListener mHomeAsUpClickListener = v -> {
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
+            getFragmentManager().popBackStack();
+        } else if (getActivity() != null) {
+            getActivity().finish();
+        }
+    };
 }

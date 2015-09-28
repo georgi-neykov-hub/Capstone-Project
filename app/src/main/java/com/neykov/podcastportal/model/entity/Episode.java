@@ -23,9 +23,6 @@ public class Episode {
     private String website;
     @Expose
     private String released;
-    @SerializedName("mygpo_link")
-    @Expose
-    private String mygpoLink;
 
     public String getTitle() {
         return title;
@@ -53,9 +50,5 @@ public class Episode {
 
     public String getReleased() {
         return released;
-    }
-
-    public String getMygpoLink() {
-        return mygpoLink;
     }
 }

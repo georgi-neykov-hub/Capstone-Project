@@ -107,6 +107,13 @@ public class PodcastsAdapter extends BaseAdapter<Podcast, PodcastsAdapter.Podcas
             mDescriptionTextView = (TextView) itemView.findViewById(R.id.description);
             mSubscribersTextView = (TextView) itemView.findViewById(R.id.subscribers);
             mWebsiteTextView = (TextView) itemView.findViewById(R.id.website);
+            mLogoImageView.setOnClickListener(v1 -> {
+                PodcastItemListener listener = getListener();
+                int position = getAdapterPosition();
+                if (listener != null && position != RecyclerView.NO_POSITION) {
+                    listener.onItemClick(position);
+                }
+            });
             itemView.findViewById(R.id.action_subscribe).setOnClickListener(v -> {
                 PodcastItemListener listener = getListener();
                 int position = getAdapterPosition();

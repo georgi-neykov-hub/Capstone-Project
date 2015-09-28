@@ -3,6 +3,7 @@ package com.neykov.podcastportal;
 import com.neykov.podcastportal.model.networking.NetworkingModule;
 import com.neykov.podcastportal.model.persistence.PersistanceModule;
 import com.neykov.podcastportal.view.discover.DiscoverComponent;
+import com.neykov.podcastportal.view.subscriptions.SubscriptionsComponent;
 import com.squareup.picasso.Picasso;
 
 import javax.inject.Singleton;
@@ -18,5 +19,6 @@ import dagger.Component;
         })
 public interface DependencyResolver {
     DiscoverComponent getDiscoverComponent();
+    SubscriptionsComponent getSubscriptionsComponent();
     Picasso getPicasso();
 }

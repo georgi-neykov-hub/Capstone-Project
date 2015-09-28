@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="navigation_home">Home</string>
-    <string name="navigation_pinned_subreddits">Pinned SubReddits</string>
-    <string name="navigation_browse_subreddits">Browse SubReddits</string>
-    <string name="navigation_manage_subscriptions">Manage Subscriptions</string>
+    <string name="navigation_explore">Explore</string>
+    <string name="navigation_my_podcasts">My Podcasts</string>
+    <string name="navigation_episodes">Episodes</string>
+    <string name="navigation_player">Player</string>
+    <string name="navigation_playlist">Playlist</string>
     <string name="navigation_about">About</string>
 </resources>

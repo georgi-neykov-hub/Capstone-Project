@@ -8,6 +8,9 @@
         <item name="android:actionModeBackground">?attr/colorPrimary</item>
         <item name="actionModeBackground">?attr/colorPrimary</item>
         <item name="drawerArrowStyle">@style/AppTheme.Toolbar.DrawerArrowStyle</item>
-        <item name="android:background">?attr/colorPrimary</item>
+    </style>
+
+    <style name="AppTheme.Toolbar.ExpandedTitleTextAppearance" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
+        <item name="android:textColor">@android:color/white</item>
     </style>
 </resources>

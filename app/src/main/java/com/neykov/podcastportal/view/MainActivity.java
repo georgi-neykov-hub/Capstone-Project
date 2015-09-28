@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements DrawerLayoutProvi
     public boolean onNavigationItemSelected(MenuItem menuItem) {
         mNavigationDrawer.closeDrawer(GravityCompat.START);
         switch (menuItem.getItemId()){
-            case R.id.navigation_home:
+            case R.id.navigation_explore:
                 clearNavigationStack();
                 break;
             case R.id.navigation_about:
