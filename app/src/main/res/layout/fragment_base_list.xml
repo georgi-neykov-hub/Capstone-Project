@@ -12,23 +12,22 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fadeScrollbars="true"
-            android:paddingEnd="@dimen/activity_horizontal_margin"
-            android:paddingStart="@dimen/activity_horizontal_margin"
-            android:scrollbars="vertical" />
+            android:scrollbars="none" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
-
-    <android.support.v4.widget.ContentLoadingProgressBar
-        android:id="@+id/loadingIndicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="true" />
 
     <FrameLayout
         android:id="@+id/emptyViewContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <android.support.v4.widget.ContentLoadingProgressBar
+        style="?android:attr/progressBarStyle"
+        android:id="@+id/loadingIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true" />
 
 </FrameLayout>
 

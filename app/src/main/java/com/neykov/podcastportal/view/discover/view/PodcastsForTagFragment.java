@@ -13,12 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.model.entity.Podcast;
+import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.model.entity.Tag;
 import com.neykov.podcastportal.view.ViewUtils;
-import com.neykov.podcastportal.view.base.BaseListViewFragment;
-import com.neykov.podcastportal.view.base.ToolbarFragment;
+import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
+import com.neykov.podcastportal.view.base.fragment.ToolbarFragment;
 import com.neykov.podcastportal.view.discover.presenter.PodcastsForTagPresenter;
 
 public class PodcastsForTagFragment extends ToolbarFragment {
@@ -101,8 +101,9 @@ public class PodcastsForTagFragment extends ToolbarFragment {
         }
 
         @Override
-        protected void onRefresh() {
+        protected boolean onRefresh() {
             getPresenter().refreshData();
+            return true;
         }
 
         @Override
@@ -140,7 +141,7 @@ public class PodcastsForTagFragment extends ToolbarFragment {
         }
 
         @Override
-        public void onPodcastUnsubscribed(Podcast podcast) {
+        public void onPodcastUnsubscribed(RemotePodcastData podcast) {
 
         }
 
@@ -152,7 +153,7 @@ public class PodcastsForTagFragment extends ToolbarFragment {
 
             @Override
             public void onItemSubscribeClick(int position) {
-                Podcast podcast = getAdapter().getItem(position);
+                RemotePodcastData podcast = getAdapter().getItem(position);
                 if (podcast instanceof Subscription) {
                     getPresenter().unsubscribeFromPodcast(position, (Subscription) podcast);
                 } else {

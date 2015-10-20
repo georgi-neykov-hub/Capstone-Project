@@ -13,10 +13,11 @@ import android.view.View;
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.Tag;
 import com.neykov.podcastportal.view.ViewUtils;
-import com.neykov.podcastportal.view.base.BaseListViewFragment;
-import com.neykov.podcastportal.view.base.ItemListView;
+import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
+import com.neykov.podcastportal.view.base.fragment.ItemListView;
 import com.neykov.podcastportal.view.base.adapter.OnItemClickListener;
 import com.neykov.podcastportal.view.discover.presenter.PopularTagsPresenter;
+import com.neykov.podcastportal.view.widget.GridSpaceItemDecoration;
 
 public class PopularTagsFragment extends BaseListViewFragment<TagsAdapter, PopularTagsPresenter> implements ItemListView, OnItemClickListener {
 
@@ -78,8 +79,9 @@ public class PopularTagsFragment extends BaseListViewFragment<TagsAdapter, Popul
     }
 
     @Override
-    protected void onRefresh() {
+    protected boolean onRefresh() {
         getPresenter().refreshData();
+        return true;
     }
 
     @Override
@@ -100,6 +102,14 @@ public class PopularTagsFragment extends BaseListViewFragment<TagsAdapter, Popul
 
     @Override
     protected void onConfigureRecycleView(@NonNull RecyclerView view) {
+        view.setItemAnimator(new DefaultItemAnimator());
+        int spanCount = getResources().getInteger(R.integer.grid_column_count) + 1;
+        int horizontalPadding = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
+        int verticalPadding = getResources().getDimensionPixelSize(R.dimen.activity_vertical_margin);
+        view.setPaddingRelative(horizontalPadding, 0, horizontalPadding, 0);
+        GridSpaceItemDecoration spaceDecoration = new GridSpaceItemDecoration(spanCount, GridSpaceItemDecoration.VERTICAL);
+        spaceDecoration.setVerticalEndSpacing(verticalPadding);
+        view.addItemDecoration(spaceDecoration);
         view.setItemAnimator(new DefaultItemAnimator());
     }
 

@@ -3,23 +3,16 @@ package com.neykov.podcastportal.view.discover.presenter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.neykov.podcastportal.model.entity.Podcast;
-import com.neykov.podcastportal.model.entity.Subscription;
+import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.networking.GPodderService;
 import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
-import com.neykov.podcastportal.view.base.BasePresenter;
-import com.neykov.podcastportal.view.base.ItemListView;
-import com.neykov.podcastportal.view.discover.view.PodcastsAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
-import retrofit.RetrofitError;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 
 public class PodcastSearchPresenter extends BaseDiscoverPodcastsPresenter{
 
@@ -50,7 +43,7 @@ public class PodcastSearchPresenter extends BaseDiscoverPodcastsPresenter{
 
     @NonNull
     @Override
-    protected Observable<List<Podcast>> getRemotePodcastsObservable() {
+    protected Observable<List<RemotePodcastData>> getRemotePodcastsObservable() {
         if(mQuery != null) {
             return mService.searchPodcasts(mQuery);
         } else {

@@ -1,24 +1,29 @@
 package com.neykov.podcastportal.view.discover.view;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.model.entity.Podcast;
+import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.view.ViewUtils;
-import com.neykov.podcastportal.view.base.BaseListViewFragment;
+import com.neykov.podcastportal.view.base.AlertDialogFragment;
+import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
 import com.neykov.podcastportal.view.discover.presenter.PopularPodcastsPresenter;
-import com.neykov.podcastportal.view.subscriptions.view.PodcastDetailFragment;
+import com.neykov.podcastportal.view.widget.GridSpaceItemDecoration;
 
-public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapter, PopularPodcastsPresenter> implements DiscoverPodcastsView {
+public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapter, PopularPodcastsPresenter> implements DiscoverPodcastsView, AlertDialogFragment.OnDialogFragmentClickListener {
+
+    public static final int UNSUBSCRIBE_DIALOG_ID = 1000;
+    public static final String TAG_UNSUBSCRIBE_DIALOG = "PopularPodcastsFragment.TAG_UNSUBSCRIBE_DIALOG";
 
     public static PopularPodcastsFragment newInstance() {
         return new PopularPodcastsFragment();
@@ -51,8 +56,9 @@ public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapte
     }
 
     @Override
-    protected void onRefresh() {
+    protected boolean onRefresh() {
         getPresenter().refreshData();
+        return true;
     }
 
     @Override
@@ -65,7 +71,14 @@ public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapte
     @Override
     protected void onConfigureRecycleView(@NonNull RecyclerView view) {
         view.setItemAnimator(new DefaultItemAnimator());
-        view.setVerticalScrollBarEnabled(true);
+        int spanCount = getResources().getInteger(R.integer.grid_column_count);
+        int horizontalPadding = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
+        int verticalPadding = getResources().getDimensionPixelSize(R.dimen.activity_vertical_margin);
+        view.setPaddingRelative(horizontalPadding, 0, horizontalPadding, 0);
+        GridSpaceItemDecoration spaceDecoration = new GridSpaceItemDecoration(spanCount, GridSpaceItemDecoration.VERTICAL);
+        spaceDecoration.setVerticalEndSpacing(verticalPadding);
+        view.addItemDecoration(spaceDecoration);
+        view.setItemAnimator(new DefaultItemAnimator());
     }
 
     @NonNull
@@ -87,19 +100,11 @@ public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapte
     private final PodcastsAdapter.PodcastItemListener mItemListener = new PodcastsAdapter.PodcastItemListener() {
         @Override
         public void onItemClick(int position) {
-            FragmentManager manager = getParentFragment() != null ?
-                    getParentFragment().getFragmentManager() : getActivity().getSupportFragmentManager();
-            Podcast target = getAdapter().getItem(position);
-            manager.beginTransaction()
-                    .replace(R.id.content, PodcastDetailFragment.newInstance(target), PodcastDetailFragment.TAG)
-                    .addToBackStack(PodcastDetailFragment.TAG)
-                    .commit();
-            manager.executePendingTransactions();
         }
 
         @Override
         public void onItemSubscribeClick(int position) {
-            Podcast podcast = getAdapter().getItem(position);
+            RemotePodcastData podcast = getAdapter().getItem(position);
             if (podcast instanceof Subscription) {
                 getPresenter().unsubscribeFromPodcast(position, (Subscription) podcast);
             } else {
@@ -119,7 +124,22 @@ public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapte
     }
 
     @Override
-    public void onPodcastUnsubscribed(Podcast podcast) {
+    public void onPodcastUnsubscribed(RemotePodcastData podcast) {
 
+    }
+
+    private void unsubscribePodcast(Subscription subscription){
+        new AlertDialogFragment.Builder(getContext())
+                .setMessage("Unsubscribing will delete any related downloaded episodes.")
+                .setPositiveButton(R.string.action_unsubscribe)
+                .setNegativeButton(android.R.string.cancel)
+                .setId(UNSUBSCRIBE_DIALOG_ID)
+                .show(getChildFragmentManager(), TAG_UNSUBSCRIBE_DIALOG);
+    }
+
+    @Override
+    public void onClick(DialogFragment dialog, @AlertDialogFragment.DialogButton int which, int dialogId) {
+        if(dialogId == UNSUBSCRIBE_DIALOG_ID && which == DialogInterface.BUTTON_POSITIVE){
+        }
     }
 }

@@ -3,12 +3,11 @@ package com.neykov.podcastportal.view.discover.presenter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.neykov.podcastportal.model.entity.Podcast;
+import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.entity.Subscription;
-import com.neykov.podcastportal.model.networking.GPodderService;
 import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
 import com.neykov.podcastportal.view.base.BasePresenter;
-import com.neykov.podcastportal.view.base.ItemListView;
+import com.neykov.podcastportal.view.base.fragment.ItemListView;
 import com.neykov.podcastportal.view.discover.view.PodcastsAdapter;
 import com.neykov.podcastportal.view.discover.view.DiscoverPodcastsView;
 
@@ -27,7 +26,7 @@ public abstract class BaseDiscoverPodcastsPresenter extends BasePresenter<Discov
 
     protected PodcastsAdapter mAdapter;
     protected SubscriptionsManager mSubscriptionsManager;
-    private ArrayList<Podcast> mRemoteItems;
+    private ArrayList<RemotePodcastData> mRemoteItems;
 
     public BaseDiscoverPodcastsPresenter(SubscriptionsManager manager) {
         this.mSubscriptionsManager = manager;
@@ -38,7 +37,7 @@ public abstract class BaseDiscoverPodcastsPresenter extends BasePresenter<Discov
     protected void onCreate(Bundle savedState) {
         super.onCreate(savedState);
         if (savedState != null) {
-            ArrayList<Podcast> savedItems = savedState.getParcelableArrayList(KEY_REMOTE_ITEMS);
+            ArrayList<RemotePodcastData> savedItems = savedState.getParcelableArrayList(KEY_REMOTE_ITEMS);
             if (savedItems != null) {
                 mRemoteItems.addAll(savedItems);
             }
@@ -78,12 +77,13 @@ public abstract class BaseDiscoverPodcastsPresenter extends BasePresenter<Discov
                             mAdapter.swapItem(position, podcast);
                             itemListView.onPodcastUnsubscribed(podcast);
                         }, (popularPodcastsView, throwable) -> {
+                            throwable.printStackTrace();
                             popularPodcastsView.hideLoadingIndicator();
                             popularPodcastsView.showListLoadError(DiscoverPodcastsView.ERROR_SUBSCRIBING);
                         }));
     }
 
-    public void subscribeForPodcast(int position, Podcast podcast) {
+    public void subscribeForPodcast(int position, RemotePodcastData podcast) {
         //noinspection ConstantConditions
         getView().showLoadingIndicator();
         mSubscriptionsManager.subscribeForPodcast(podcast)
@@ -95,19 +95,20 @@ public abstract class BaseDiscoverPodcastsPresenter extends BasePresenter<Discov
                             mAdapter.swapItem(position, subscription);
                             itemListView.onPodcastSubcribed(subscription);
                         }, (popularPodcastsView, throwable) -> {
+                            throwable.printStackTrace();
                             popularPodcastsView.hideLoadingIndicator();
                             popularPodcastsView.showListLoadError(DiscoverPodcastsView.ERROR_SUBSCRIBING);
                         }));
     }
 
-    protected abstract @NonNull Observable<List<Podcast>> getRemotePodcastsObservable();
+    protected abstract @NonNull Observable<List<RemotePodcastData>> getRemotePodcastsObservable();
 
-    protected void onRemoteDataLoaded(List<Podcast> remoteItems){
-        mRemoteItems = (ArrayList<Podcast>) remoteItems;
+    protected void onRemoteDataLoaded(List<RemotePodcastData> remoteItems){
+        mRemoteItems = (ArrayList<RemotePodcastData>) remoteItems;
     }
 
-    private Observable<Podcast> resolveRemotePodcastsObservable(){
-        Observable<List<Podcast>> observable;
+    private Observable<RemotePodcastData> resolveRemotePodcastsObservable(){
+        Observable<List<RemotePodcastData>> observable;
         if (mRemoteItems != null) {
             observable = Observable.defer(() -> Observable.just(mRemoteItems));
         } else {
@@ -120,16 +121,16 @@ public abstract class BaseDiscoverPodcastsPresenter extends BasePresenter<Discov
     }
 
     private void fetchPodcastItems() {
-        Observable<Map<String, Subscription>> subscriptionsMapObservable = mSubscriptionsManager.getSubscriptions()
+        Observable<Map<String, Subscription>> subscriptionsMapObservable = mSubscriptionsManager.getSubscriptionsStream()
                 .firstOrDefault(new ArrayList<>(0))
                 .subscribeOn(Schedulers.io())
                 .flatMap(Observable::from)
-                .toMap(Podcast::getUrl);
+                .toMap(RemotePodcastData::getUrl);
 
-        Observable<Podcast> remoteResultsObservable = resolveRemotePodcastsObservable();
+        Observable<RemotePodcastData> remoteResultsObservable = resolveRemotePodcastsObservable();
 
         remoteResultsObservable.withLatestFrom(subscriptionsMapObservable, (podcast, stringSubscriptionMap) -> {
-            Podcast matchedSubscription = stringSubscriptionMap.get(podcast.getUrl());
+            RemotePodcastData matchedSubscription = stringSubscriptionMap.get(podcast.getUrl());
             return matchedSubscription != null ? matchedSubscription : podcast;
         })
                 .toSortedList((podcast1, podcast2) -> - podcast1.compareTo(podcast2))

@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import com.neykov.podcastportal.model.networking.GPodderService;
 import com.neykov.podcastportal.view.base.BasePresenter;
-import com.neykov.podcastportal.view.base.ItemListView;
+import com.neykov.podcastportal.view.base.fragment.ItemListView;
 import com.neykov.podcastportal.view.discover.view.TagsAdapter;
 
 import javax.inject.Inject;

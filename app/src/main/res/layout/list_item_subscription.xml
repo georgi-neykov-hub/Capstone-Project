@@ -2,10 +2,12 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="?cardStyle"
     android:layout_width="match_parent"
-    app:cardBackgroundColor="@color/subcription_card_color"
     android:layout_height="wrap_content"
-    app:cardUseCompatPadding="true">
+    app:cardUseCompatPadding="true"
+
+    tools:layout_width="192dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -15,128 +17,59 @@
             android:id="@+id/logo"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginBottom="@dimen/rhythm_space_double"
             app:widthToHeightRatio="1.0"
             tools:background="@color/photo_placeholder" />
 
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_below="@+id/logo"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="@dimen/rhythm_space_double"
-            android:src="@drawable/ic_star"
-            android:tint="?colorAccent"/>
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/logo"
-            android:layout_marginStart="@dimen/rhythm_space_double"
-            android:layout_marginEnd="@dimen/rhythm_control_normal"
-            android:layout_marginBottom="@dimen/rhythm_space_single"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="24sp"
-            android:maxLines="2"
-            tools:text="The Android Nerds" />
-
-        <TextView
-            android:id="@+id/description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/title"
-            android:layout_marginStart="@dimen/rhythm_space_double"
-            android:layout_marginEnd="@dimen/rhythm_space_double"
-            android:textAppearance="?attr/textAppearanceListItemSmall"
-            android:textSize="14sp"
-            android:maxLines="6"
-            android:ellipsize="end"
-            tools:text="The Android Nerds show The Android Nerds show The Android Nerds showThe Android Nerds show" />
-
-        <TextView
-            android:id="@+id/website"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/description"
-            android:layout_marginStart="@dimen/rhythm_space_double"
-            android:layout_marginEnd="@dimen/rhythm_space_double"
-            android:layout_marginBottom="@dimen/rhythm_space_single"
-            android:textAppearance="?attr/textAppearanceListItemSmall"
-            android:textSize="14sp"
-            android:lines="1"
-            android:autoLink="web"
-            tools:text="http://somesite.org/podcast" />
-
-        <ImageView
-            android:id="@+id/syncIcon"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/website"
-            android:layout_alignBottom="@+id/lastUpdate"
-            android:layout_marginStart="@dimen/rhythm_space_double"
-            android:layout_marginEnd="@dimen/rhythm_space_single"
-            android:src="@drawable/ic_sync"
-            android:tint="?colorAccent"/>
-
-        <TextView
-            android:id="@+id/lastUpdate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/website"
-            android:layout_toEndOf="@+id/syncIcon"
-            android:layout_marginEnd="@dimen/rhythm_space_double"
-            android:layout_marginBottom="@dimen/rhythm_space_double"
-            android:textAppearance="?attr/textAppearanceListItemSmall"
-            android:textSize="14sp"
-            android:lines="1"
-            tools:text="5 days ago" />
-
-        <TextView
-            android:id="@+id/subscribers"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@+id/lastUpdate"
-            android:layout_alignParentEnd="true"
-            android:layout_below="@+id/website"
-            android:layout_marginStart="@dimen/rhythm_space_double"
-            android:layout_marginEnd="@dimen/rhythm_space_double"
-            android:layout_marginBottom="@dimen/rhythm_space_double"
-            android:textAppearance="?attr/textAppearanceListItemSmall"
-            android:textSize="14sp"
-            android:lines="1"
-            android:gravity="end"
-            tools:text="5 Subscribers" />
-
-        <View
-            android:id="@+id/separator"
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_below="@+id/subscribers"
-            android:background="#CCC"/>
-
         <LinearLayout
-            style="?buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/separator"
-            android:gravity="end">
+            android:layout_below="@+id/logo"
+            android:layout_marginStart="@dimen/rhythm_space_single"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/action_subscribe"
-                style="?borderlessButtonStyle"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/label_unsubscribe"/>
-            <Button
-                android:id="@+id/action_share"
-                style="?borderlessButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_share"/>
+                android:layout_weight="1"
+                android:singleLine="true"
+                tools:text="The Android Nerds" />
+
+            <FrameLayout
+                android:layout_width="@dimen/rhythm_control_half"
+                android:layout_height="@dimen/rhythm_control_normal">
+
+                <android.support.v7.widget.ActionMenuView
+                    android:id="@+id/menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="end"
+                    android:layout_gravity="end|center_vertical"
+                    android:theme="@style/AppTheme.ActionMenu" />
+
+            </FrameLayout>
 
         </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/toolbar_scrim_gradient_inverse">
+
+            <TextView
+                android:id="@+id/episodeCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:layout_margin="@dimen/rhythm_space_single"
+                android:gravity="end"
+                android:singleLine="true"
+                android:textAppearance="?attr/textAppearanceListItemSmall"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                tools:text="5 Subscribers" />
+        </FrameLayout>
 
     </RelativeLayout>
 

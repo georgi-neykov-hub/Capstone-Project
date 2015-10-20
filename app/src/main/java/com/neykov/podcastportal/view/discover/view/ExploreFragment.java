@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.Tag;
-import com.neykov.podcastportal.view.base.ToolbarFragment;
+import com.neykov.podcastportal.view.base.fragment.ToolbarFragment;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -67,14 +67,14 @@ public class ExploreFragment extends ToolbarFragment implements PopularTagsFragm
     public void onTagSelected(Tag tag) {
 
         getFragmentManager().beginTransaction()
-                .replace(R.id.content, PodcastsForTagFragment.newInstance(tag), PodcastsForTagFragment.TAG)
+                .replace(R.id.fragmentContainer, PodcastsForTagFragment.newInstance(tag), PodcastsForTagFragment.TAG)
                 .addToBackStack(PodcastsForTagFragment.TAG)
                 .commit();
     }
 
     private void openSearchFragment(){
         getFragmentManager().beginTransaction()
-                .replace(R.id.content, PodcastSearchFragment.newInstance(), PodcastSearchFragment.TAG)
+                .replace(R.id.fragmentContainer, PodcastSearchFragment.newInstance(), PodcastSearchFragment.TAG)
                 .addToBackStack(PodcastSearchFragment.TAG)
                 .commit();
     }

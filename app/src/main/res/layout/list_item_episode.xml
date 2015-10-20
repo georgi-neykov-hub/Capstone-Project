@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="?cardStyle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:cardUseCompatPadding="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.neykov.podcastportal.view.widget.AspectRatioImageView
+            android:id="@+id/thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="@dimen/rhythm_space_double"
+            app:widthToHeightRatio="1.577"
+            android:alpha="0.6"
+            tools:background="@color/photo_placeholder" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/thumbnail"
+            android:layout_marginStart="@dimen/rhythm_space_double"
+            android:layout_marginEnd="@dimen/rhythm_control_normal"
+            android:layout_marginBottom="@dimen/rhythm_space_single"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="24sp"
+            android:maxLines="2"
+            tools:text="The Android Nerds" />
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/title"
+            android:layout_marginStart="@dimen/rhythm_space_double"
+            android:layout_marginEnd="@dimen/rhythm_space_double"
+            android:layout_marginBottom="@dimen/rhythm_space_double"
+            android:textSize="14sp"
+            android:textColor="?android:textColorSecondary"
+            android:lines="6"
+            android:ellipsize="end"
+            tools:text="The Android Nerds show The Android Nerds show The Android Nerds showThe Android Nerds show" />
+
+        <View
+            android:id="@+id/separator"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_below="@+id/description"
+            android:background="?android:windowBackground"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/separator">
+
+            <android.support.v7.widget.ActionMenuView
+                android:id="@+id/menu"
+                android:layout_gravity="end|center_vertical"
+                android:gravity="end"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/rhythm_control_normal"
+                android:layout_marginStart="@dimen/rhythm_space_double"
+                android:theme="@style/AppTheme.ActionMenu"/>
+
+        </FrameLayout>
+
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>
+

@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.neykov.podcastportal.model.entity.Podcast;
+import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.networking.GPodderService;
 import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
 import com.neykov.podcastportal.view.discover.view.PodcastsAdapter;
@@ -58,7 +58,7 @@ public class PodcastsForTagPresenter extends BaseDiscoverPodcastsPresenter {
 
     @NonNull
     @Override
-    protected Observable<List<Podcast>> getRemotePodcastsObservable() {
+    protected Observable<List<RemotePodcastData>> getRemotePodcastsObservable() {
         if(getTargetTag() == null){
             throw new IllegalStateException("setTargetTag() not called.");
         }

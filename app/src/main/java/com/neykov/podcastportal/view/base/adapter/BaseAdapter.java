@@ -27,6 +27,16 @@ public abstract class BaseAdapter<ItemType, VH extends RecyclerView.ViewHolder> 
         return mItems.isEmpty();
     }
 
+    public void addItem(ItemType item){
+        if(item == null){
+            throw new IllegalArgumentException("Null item provided.");
+        }
+
+        int insertPosition = mItems.size();
+        mItems.add(item);
+        notifyItemInserted(insertPosition);
+    }
+
     public void addItems(Collection<ItemType> newItems){
         if(newItems == null){
             throw new IllegalArgumentException("Null collection provided.");
@@ -35,6 +45,16 @@ public abstract class BaseAdapter<ItemType, VH extends RecyclerView.ViewHolder> 
             mItems.addAll(newItems);
             notifyItemRangeInserted(addPosition, newItems.size());
         }
+    }
+
+    public void setData(List<ItemType> items){
+        if(items == null){
+            throw new IllegalArgumentException("Null collection provided.");
+        }
+
+        mItems.clear();
+        mItems.addAll(items);
+        notifyDataSetChanged();
     }
 
     public void clearItems() {
@@ -48,11 +68,6 @@ public abstract class BaseAdapter<ItemType, VH extends RecyclerView.ViewHolder> 
     public void swapItem(int position, ItemType replacement){
         mItems.set(position, replacement);
         notifyItemChanged(position, null);
-    }
-
-    protected final void setItems(List<ItemType> items){
-        this.mItems = items;
-        notifyDataSetChanged();
     }
 
     protected final List<ItemType> getItems(){

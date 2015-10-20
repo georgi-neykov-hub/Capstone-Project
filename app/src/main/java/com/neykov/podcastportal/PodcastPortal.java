@@ -3,6 +3,7 @@ package com.neykov.podcastportal;
 import android.app.Application;
 import android.support.annotation.NonNull;
 
+import com.neykov.podcastportal.model.ApplicationModule;
 import com.neykov.podcastportal.view.base.DependencyResolverProvider;
 import com.squareup.picasso.Picasso;
 

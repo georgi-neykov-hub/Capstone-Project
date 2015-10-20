@@ -59,7 +59,7 @@ public class TagsAdapter extends BaseStateAdapter<Tag, TagsAdapter.TagViewHolder
 
         SavedState typedState = (SavedState) state;
         super.onRestoreInstanceState(typedState.getSuperState());
-        setItems(typedState.tags);
+        setData(typedState.tags);
     }
 
     @Override

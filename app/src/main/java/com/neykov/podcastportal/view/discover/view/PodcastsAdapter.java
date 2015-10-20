@@ -1,6 +1,5 @@
 package com.neykov.podcastportal.view.discover.view;
 
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -10,16 +9,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.model.entity.Podcast;
+import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.view.base.adapter.BaseAdapter;
 import com.neykov.podcastportal.view.base.adapter.BaseListenerViewHolder;
 import com.squareup.picasso.Picasso;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
-public class PodcastsAdapter extends BaseAdapter<Podcast, PodcastsAdapter.PodcastViewHolder> {
+public class PodcastsAdapter extends BaseAdapter<RemotePodcastData, PodcastsAdapter.PodcastViewHolder> {
 
     public interface PodcastItemListener {
         void onItemClick(int position);
@@ -44,7 +42,7 @@ public class PodcastsAdapter extends BaseAdapter<Podcast, PodcastsAdapter.Podcas
             return new PodcastViewHolder(itemView);
         } else {
             View itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.list_item_subscription, parent, false);
+                    .inflate(R.layout.list_item_subscribed_podcast, parent, false);
             return new SubscriptionViewHolder(itemView);
         }
     }
@@ -130,7 +128,7 @@ public class PodcastsAdapter extends BaseAdapter<Podcast, PodcastsAdapter.Podcas
             });
         }
 
-        protected void onBind(Podcast podcast) {
+        protected void onBind(RemotePodcastData podcast) {
             mTitleTextView.setText(podcast.getTitle());
             mDescriptionTextView.setText(podcast.getDescription());
             mWebsiteTextView.setText(podcast.getWebsite());
@@ -142,7 +140,7 @@ public class PodcastsAdapter extends BaseAdapter<Podcast, PodcastsAdapter.Podcas
             loadLogoImage(podcast);
         }
 
-        private void loadLogoImage(Podcast podcast) {
+        private void loadLogoImage(RemotePodcastData podcast) {
             if (podcast.getLogoUrl() != null) {
                 Picasso.with(mLogoImageView.getContext())
                         .load(podcast.getLogoUrl())
@@ -164,12 +162,12 @@ public class PodcastsAdapter extends BaseAdapter<Podcast, PodcastsAdapter.Podcas
         }
 
         @Override
-        protected void onBind(Podcast podcast) {
+        protected void onBind(RemotePodcastData podcast) {
             super.onBind(podcast);
             Subscription subscription = (Subscription) podcast;
             long now = System.currentTimeMillis();
             CharSequence lastUpdateText = DateUtils.getRelativeTimeSpanString(
-                    subscription.getDateUpdated().getTime(), now, DateUtils.SECOND_IN_MILLIS);
+                    subscription.getDateUpdatedUtc().getTime(), now, DateUtils.SECOND_IN_MILLIS);
             mLastUpdateTextView.setText(lastUpdateText);
         }
     }

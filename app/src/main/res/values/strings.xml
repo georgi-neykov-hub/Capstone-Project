@@ -17,4 +17,6 @@
     <string name="label_subscribers_count_format">%1d Subscribers</string>
     <string name="label_share">Share</string>
     <string name="content_description_podcast_image">Podcast Image</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_unsubscribe">Unsubscribe</string>
 </resources>

@@ -15,11 +15,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.model.entity.Podcast;
+import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.view.ViewUtils;
-import com.neykov.podcastportal.view.base.BaseListViewFragment;
-import com.neykov.podcastportal.view.base.ToolbarFragment;
+import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
+import com.neykov.podcastportal.view.base.fragment.ToolbarFragment;
 import com.neykov.podcastportal.view.discover.presenter.PodcastSearchPresenter;
 
 import java.util.concurrent.TimeUnit;
@@ -135,8 +135,9 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
         }
 
         @Override
-        protected void onRefresh() {
+        protected boolean onRefresh() {
             getPresenter().refreshData();
+            return true;
         }
 
         @Override
@@ -171,7 +172,7 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
         }
 
         @Override
-        public void onPodcastUnsubscribed(Podcast podcast) {
+        public void onPodcastUnsubscribed(RemotePodcastData podcast) {
 
         }
     }

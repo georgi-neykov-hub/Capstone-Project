@@ -1,5 +1,6 @@
 package com.neykov.podcastportal;
 
+import com.neykov.podcastportal.model.ApplicationModule;
 import com.neykov.podcastportal.model.networking.NetworkingModule;
 import com.neykov.podcastportal.model.persistence.PersistanceModule;
 import com.neykov.podcastportal.view.discover.DiscoverComponent;
@@ -18,7 +19,7 @@ import dagger.Component;
                 PersistanceModule.class
         })
 public interface DependencyResolver {
-    DiscoverComponent getDiscoverComponent();
-    SubscriptionsComponent getSubscriptionsComponent();
-    Picasso getPicasso();
+    @Singleton DiscoverComponent getDiscoverComponent();
+    @Singleton SubscriptionsComponent getSubscriptionsComponent();
+    @Singleton Picasso getPicasso();
 }
