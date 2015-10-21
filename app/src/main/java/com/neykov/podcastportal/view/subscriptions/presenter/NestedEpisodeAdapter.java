@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.subscriptions.view;
+package com.neykov.podcastportal.view.subscriptions.presenter;
 
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.internal.view.SupportMenuInflater;
@@ -18,7 +18,9 @@ import com.neykov.podcastportal.view.base.adapter.BaseListenerViewHolder;
 import com.neykov.podcastportal.view.base.adapter.OnItemClickListener;
 import com.squareup.picasso.Picasso;
 
-public class EpisodeAdapter extends BaseAdapter<Episode, EpisodeAdapter.EpisodeViewHolder> {
+import java.util.List;
+
+public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdapter.EpisodeViewHolder> {
 
     public interface EpisodeItemListener extends OnItemClickListener{
         void onDownloadClick(int position);
@@ -28,10 +30,22 @@ public class EpisodeAdapter extends BaseAdapter<Episode, EpisodeAdapter.EpisodeV
 
     private String mDefaultThumbnailUrl;
 
+    public NestedEpisodeAdapter(List<Episode> data) {
+        super(data);
+    }
+
+    public NestedEpisodeAdapter() {
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return getItem(position).getId();
+    }
+
     @Override
     public EpisodeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View itemView = inflater.inflate(R.layout.list_item_episode, parent, false);
+        View itemView = inflater.inflate(R.layout.list_item_episode_lite, parent, false);
         return new EpisodeViewHolder(itemView);
     }
 
@@ -48,7 +62,6 @@ public class EpisodeAdapter extends BaseAdapter<Episode, EpisodeAdapter.EpisodeV
 
         private ImageView mThumbnailView;
         private TextView mTitleTextView;
-        private TextView mDescriptionTextView;
         private MenuItem mDownloadMenuItem;
         private MenuItem mPlaylistAddItem;
 
@@ -56,7 +69,6 @@ public class EpisodeAdapter extends BaseAdapter<Episode, EpisodeAdapter.EpisodeV
             super(itemView);
             mThumbnailView = (ImageView) itemView.findViewById(R.id.thumbnail);
             mTitleTextView = (TextView) itemView.findViewById(R.id.title);
-            mDescriptionTextView = (TextView) itemView.findViewById(R.id.description);
 
             ActionMenuView menuView = (ActionMenuView) itemView.findViewById(R.id.menu);
             Menu itemMenu = menuView.getMenu();
@@ -64,13 +76,12 @@ public class EpisodeAdapter extends BaseAdapter<Episode, EpisodeAdapter.EpisodeV
             mPlaylistAddItem = itemMenu.findItem(R.id.playlist_add);
             mDownloadMenuItem = itemMenu.findItem(R.id.download);
 
-            DrawableCompat.setTint(mPlaylistAddItem.getIcon(), mTitleTextView.getCurrentTextColor());
-            DrawableCompat.setTint(mDownloadMenuItem.getIcon(), mTitleTextView.getCurrentTextColor());
+            //DrawableCompat.setTint(mPlaylistAddItem.getIcon(), mTitleTextView.getCurrentTextColor());
+            //DrawableCompat.setTint(mDownloadMenuItem.getIcon(), mTitleTextView.getCurrentTextColor());
         }
 
         private void onBind(Episode episode, String fallbackThumbnailUrl){
             mTitleTextView.setText(episode.getTitle());
-            mDescriptionTextView.setText(episode.getDescription());
             Picasso.with(mThumbnailView.getContext())
                     .load(fallbackThumbnailUrl)
                     .fit()

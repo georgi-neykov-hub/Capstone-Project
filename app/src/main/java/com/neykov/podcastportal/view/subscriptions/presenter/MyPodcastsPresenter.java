@@ -1,13 +1,20 @@
 package com.neykov.podcastportal.view.subscriptions.presenter;
 
 import android.os.Bundle;
+import android.support.annotation.WorkerThread;
 
+import com.neykov.podcastportal.model.entity.Episode;
+import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
 import com.neykov.podcastportal.view.base.BasePresenter;
+import com.neykov.podcastportal.view.base.ErrorDisplayView;
 import com.neykov.podcastportal.view.subscriptions.view.MyPodcastsView;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -25,15 +32,23 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
 
         this.restartableLatestCache(RESTARTABLE_ID_SUBSCRIPTIONS,
                 () -> mManager.getSubscriptionsStream()
+                        .flatMap(Observable::from)
+                        .map(this::getAdapterItem)
+                        .toList()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread()),
-                (itemListView, subscriptions) -> {
+                (podcastsView, subscriptions) -> {
                     mAdapter.setData(subscriptions);
-                    itemListView.hideLoadingIndicator();
+                    podcastsView.hideLoadingIndicator();
                 },
-                (itemListView, throwable) -> {
-                    itemListView.hideLoadingIndicator();
+                (podcastsView, throwable) -> {
+                    podcastsView.hideLoadingIndicator();
+                    podcastsView.showError(ErrorDisplayView.ERROR_GENERAL);
                 });
+    }
+
+    public SubscriptionsAdapter getAdapter() {
+        return mAdapter;
     }
 
     @Override
@@ -59,8 +74,18 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
         super.onDropView();
     }
 
-    public SubscriptionsAdapter getAdapter() {
-        return mAdapter;
+    @WorkerThread
+    private SubscriptionAdapterItem getAdapterItem(Subscription subscription){
+        List<Episode> latestEpisodes = getLatestEpisodes(subscription);
+        return new SubscriptionAdapterItem(subscription, latestEpisodes);
+    }
+
+    @WorkerThread
+    private List<Episode> getLatestEpisodes(Subscription subscription){
+        return mManager.getLatestEpisodes(subscription, 10)
+                .first()
+                .toBlocking()
+                .single();
     }
 
 }

@@ -2,6 +2,7 @@ package com.neykov.podcastportal.view.subscriptions.presenter;
 
 import android.support.v7.internal.view.SupportMenuInflater;
 import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +15,12 @@ import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.view.base.adapter.BaseListenerViewHolder;
 import com.neykov.podcastportal.view.base.adapter.BaseStateAdapter;
 import com.neykov.podcastportal.view.base.adapter.OnItemClickListener;
+import com.neykov.podcastportal.view.widget.SpaceItemDecoration;
 import com.squareup.picasso.Picasso;
 
 import java.lang.ref.WeakReference;
 
-public class SubscriptionsAdapter extends BaseStateAdapter<Subscription, SubscriptionsAdapter.SubscriptionViewHolder> {
+public class SubscriptionsAdapter extends BaseStateAdapter<SubscriptionAdapterItem, SubscriptionsAdapter.SubscriptionViewHolder> {
 
     public interface ItemListener extends OnItemClickListener {
         void onUnsubscribeClick(int position);
@@ -38,7 +40,7 @@ public class SubscriptionsAdapter extends BaseStateAdapter<Subscription, Subscri
 
     @Override
     public long getItemId(int position) {
-        return getItem(position).getId();
+        return getItem(position).getSubscription().getId();
     }
 
     @Override
@@ -84,30 +86,29 @@ public class SubscriptionsAdapter extends BaseStateAdapter<Subscription, Subscri
     protected static class SubscriptionViewHolder extends BaseListenerViewHolder<ItemListener>{
 
         private TextView mTitleTextView;
-        private ImageView mLogoImageView;
+        private RecyclerView mEpisodesRecyclerView;
 
         protected SubscriptionViewHolder(View itemView) {
             super(itemView);
-            mLogoImageView = (ImageView) itemView.findViewById(R.id.logo);
             mTitleTextView = (TextView) itemView.findViewById(R.id.title);
-            mLogoImageView.setOnClickListener(mClickListener);
+            mEpisodesRecyclerView = (RecyclerView) itemView.findViewById(R.id.items);
+            RecyclerView.LayoutManager manager = new LinearLayoutManager(mEpisodesRecyclerView.getContext(), LinearLayoutManager.HORIZONTAL, false);
+            RecyclerView.ItemDecoration decoration = new SpaceItemDecoration(
+                    mEpisodesRecyclerView.getResources(),
+                    R.dimen.activity_horizontal_margin,
+                    R.dimen.rhythm_control_half,
+                    R.dimen.activity_horizontal_margin,
+                    SpaceItemDecoration.HORIZONTAL);
+            mEpisodesRecyclerView.addItemDecoration(decoration);
+            mEpisodesRecyclerView.setLayoutManager(manager);
             ActionMenuView menuView = ((ActionMenuView)itemView.findViewById(R.id.menu));
             new SupportMenuInflater(menuView.getContext()).inflate(R.menu.menu_subscription, menuView.getMenu());
             menuView.setOnMenuItemClickListener(mMenuItemListener);
         }
 
-        private void onBind(Subscription subscription){
-            mTitleTextView.setText(subscription.getTitle());
-            bindLogo(subscription);
-        }
-
-        private void bindLogo(Subscription subscription){
-            Picasso.with(mLogoImageView.getContext())
-                    .load(subscription.getLogoUrl())
-                    .fit()
-                    .centerCrop()
-                    .placeholder(R.color.photo_placeholder)
-                    .into(mLogoImageView);
+        private void onBind(SubscriptionAdapterItem item){
+            mTitleTextView.setText(item.getSubscription().getTitle());
+            mEpisodesRecyclerView.swapAdapter(item.getAdapter(), false);
         }
 
         private final View.OnClickListener mClickListener = view -> {

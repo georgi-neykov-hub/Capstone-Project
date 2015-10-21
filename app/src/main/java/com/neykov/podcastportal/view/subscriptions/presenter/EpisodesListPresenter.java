@@ -6,7 +6,6 @@ import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
 import com.neykov.podcastportal.view.base.BasePresenter;
 import com.neykov.podcastportal.view.base.fragment.ItemListView;
-import com.neykov.podcastportal.view.subscriptions.view.EpisodeAdapter;
 
 import javax.inject.Inject;
 
@@ -15,7 +14,7 @@ import rx.schedulers.Schedulers;
 
 public class EpisodesListPresenter extends BasePresenter<ItemListView> {
 
-    private EpisodeAdapter mAdapter;
+    private NestedEpisodeAdapter mAdapter;
     private SubscriptionsManager mManager;
     private rx.Subscription mStreamSubscription;
 
@@ -27,7 +26,7 @@ public class EpisodesListPresenter extends BasePresenter<ItemListView> {
     @Override
     protected void onCreate(Bundle savedState) {
         super.onCreate(savedState);
-        mAdapter = new EpisodeAdapter();
+        mAdapter = new NestedEpisodeAdapter();
     }
 
     @Override
@@ -69,7 +68,7 @@ public class EpisodesListPresenter extends BasePresenter<ItemListView> {
         mStreamSubscription = null;
     }
 
-    public EpisodeAdapter getAdapter() {
+    public NestedEpisodeAdapter getAdapter() {
         return mAdapter;
     }
 }

@@ -8,7 +8,8 @@ import java.util.Date;
 
 public class Episode implements EpisodeData {
 
-    public Episode(long podcastId, String title, String url, String mimeType, String description, Date released) {
+    public Episode(long id, long podcastId, String title, String url, String mimeType, String description, Date released) {
+        this.id = id;
         this.podcastId = podcastId;
         this.title = title;
         this.url = url;
@@ -37,6 +38,10 @@ public class Episode implements EpisodeData {
     @Expose
     @SerializedName("released")
     private Date released;
+
+    public long getId() {
+        return id;
+    }
 
     public long getPodcastId(){
         return podcastId;

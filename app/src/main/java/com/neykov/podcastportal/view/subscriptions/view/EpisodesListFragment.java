@@ -17,6 +17,7 @@ import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
 import com.neykov.podcastportal.view.base.fragment.ItemListView;
 import com.neykov.podcastportal.view.base.fragment.ToolbarFragment;
+import com.neykov.podcastportal.view.subscriptions.presenter.NestedEpisodeAdapter;
 import com.neykov.podcastportal.view.subscriptions.presenter.EpisodesListPresenter;
 import com.neykov.podcastportal.view.widget.GridSpaceItemDecoration;
 
@@ -78,7 +79,7 @@ public class EpisodesListFragment extends ToolbarFragment {
         toolbar.setSubtitle(mTargetPodcast.getTitle());
     }
 
-    public static class ContentFragment extends BaseListViewFragment<EpisodeAdapter, EpisodesListPresenter> implements ItemListView {
+    public static class ContentFragment extends BaseListViewFragment<NestedEpisodeAdapter, EpisodesListPresenter> implements ItemListView {
 
         public static final String TAG = ContentFragment.class.getName();
 
@@ -113,7 +114,7 @@ public class EpisodesListFragment extends ToolbarFragment {
 
         @NonNull
         @Override
-        protected EpisodeAdapter getAdapter() {
+        protected NestedEpisodeAdapter getAdapter() {
             return getPresenter().getAdapter();
         }
 

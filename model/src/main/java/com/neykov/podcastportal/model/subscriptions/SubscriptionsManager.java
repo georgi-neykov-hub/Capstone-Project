@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.OperationApplicationException;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.support.annotation.WorkerThread;
 
 import com.neykov.podcastportal.model.BaseManager;
 import com.neykov.podcastportal.model.entity.Episode;
@@ -37,6 +38,16 @@ public class SubscriptionsManager extends BaseManager {
         this.mSubscriptionDownloader = downloader;
         this.mSubscriptionConverter = new SubscriptionConverter();
         this.mEpisodesConverter = new EpisodesConverter();
+    }
+
+    public Observable<List<Episode>> getLatestEpisodes(Subscription subscription, int count) {
+        return getQueryResolver().createQuery(DatabaseContract.Episode.CONTENT_URI,
+                null,
+                DatabaseContract.Episode.PODCAST_ID + " = ? LIMIT ?",
+                new String[]{subscription.getId().toString(), String.valueOf(count)},
+                DatabaseContract.Episode.RELEASE_DATE,
+                false)
+                .mapToList(mEpisodesConverter::convert);
     }
 
     public Observable<List<Episode>> getEpisodesStream(Subscription subscription) {

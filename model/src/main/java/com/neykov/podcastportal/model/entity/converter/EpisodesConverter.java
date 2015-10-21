@@ -26,6 +26,7 @@ public class EpisodesConverter implements Converter<Episode>, TransactionConvert
     @Override
     public Episode convert(Cursor valueCursor) {
         return new Episode(
+                valueCursor.getLong(valueCursor.getColumnIndex(DatabaseContract.Episode._ID)),
                 valueCursor.getLong(valueCursor.getColumnIndex(DatabaseContract.Episode.PODCAST_ID)),
                 valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.TITLE)),
                 valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.CONTENT_URL)),

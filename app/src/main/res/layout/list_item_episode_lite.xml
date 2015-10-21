@@ -5,7 +5,7 @@
     style="?cardStyle"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    tools:layout_width="128dp"
+    tools:layout_width="192dp"
     app:cardUseCompatPadding="true">
 
     <RelativeLayout
@@ -16,7 +16,7 @@
             android:id="@+id/thumbnail"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginBottom="@dimen/rhythm_space_double"
+            android:layout_marginBottom="@dimen/rhythm_space_single"
             app:widthToHeightRatio="1.577"
             android:alpha="0.6"
             tools:background="@color/photo_placeholder" />
@@ -26,39 +26,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/thumbnail"
+            android:layout_toStartOf="@+id/menuContainer"
+            android:layout_alignBottom="@+id/menuContainer"
             android:layout_marginStart="@dimen/rhythm_space_double"
-            android:layout_marginEnd="@dimen/rhythm_control_normal"
-            android:layout_marginBottom="@dimen/rhythm_space_single"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="24sp"
+            android:paddingBottom="@dimen/rhythm_space_single"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:gravity="center_vertical|start"
+            android:ellipsize="end"
             android:maxLines="2"
             tools:text="The Android Nerds" />
 
-        <TextView
-            android:id="@+id/description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/title"
-            android:layout_marginStart="@dimen/rhythm_space_double"
-            android:layout_marginEnd="@dimen/rhythm_space_double"
-            android:layout_marginBottom="@dimen/rhythm_space_double"
-            android:textSize="14sp"
-            android:textColor="?android:textColorSecondary"
-            android:lines="6"
-            android:ellipsize="end"
-            tools:text="The Android Nerds show The Android Nerds show The Android Nerds showThe Android Nerds show" />
-
-        <View
-            android:id="@+id/separator"
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_below="@+id/description"
-            android:background="?android:windowBackground"/>
-
         <FrameLayout
-            android:layout_width="match_parent"
+            android:id="@+id/menuContainer"
+            android:layout_width="32dp"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/separator">
+            android:layout_below="@+id/thumbnail"
+            android:layout_alignEnd="@+id/thumbnail">
 
             <android.support.v7.widget.ActionMenuView
                 android:id="@+id/menu"

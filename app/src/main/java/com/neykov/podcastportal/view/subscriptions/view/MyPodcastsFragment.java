@@ -85,4 +85,9 @@ public class MyPodcastsFragment extends ToolbarViewFragment<MyPodcastsPresenter>
     public void hideLoadingIndicator() {
 
     }
+
+    @Override
+    public void showError(int errorType) {
+
+    }
 }

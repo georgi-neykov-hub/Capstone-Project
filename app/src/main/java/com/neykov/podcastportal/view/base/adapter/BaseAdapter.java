@@ -11,7 +11,11 @@ public abstract class BaseAdapter<ItemType, VH extends RecyclerView.ViewHolder> 
     private List<ItemType> mItems;
 
     public BaseAdapter() {
-        this.mItems = new ArrayList<>();
+        this(new ArrayList<>());
+    }
+
+    public BaseAdapter(List<ItemType> data) {
+        this.mItems = data;
     }
 
     @Override
@@ -47,7 +51,7 @@ public abstract class BaseAdapter<ItemType, VH extends RecyclerView.ViewHolder> 
         }
     }
 
-    public void setData(List<ItemType> items){
+    public void setData(Collection<ItemType> items){
         if(items == null){
             throw new IllegalArgumentException("Null collection provided.");
         }

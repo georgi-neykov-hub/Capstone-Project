@@ -184,7 +184,7 @@ public class SubscriptionDownloader {
     }
 
     private Episode createEpisodeFromRssItem(RssItem source, long parentId) {
-        return new Episode(parentId, source.getTitle(), null, null, source.getDescription(), source.getPubDate());
+        return new Episode(0, parentId, source.getTitle(), null, null, source.getDescription(), source.getPubDate());
     }
 
     private boolean episodeAlreadyStored(RssItem item, long parentId) {
