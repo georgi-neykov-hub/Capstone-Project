@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.presenter;
+package com.neykov.podcastportal.view.explore.presenter;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;

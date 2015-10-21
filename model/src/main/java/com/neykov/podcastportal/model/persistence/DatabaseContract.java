@@ -7,7 +7,7 @@ import com.neykov.podcastportal.model.BuildConfig;
 
 public final class DatabaseContract {
 
-    public static final String CONTENT_AUTHORITY = BuildConfig.APPLICATION_ID;
+    public static final String CONTENT_AUTHORITY = "com.neykov.podcastportal";
     public static final String DATABASE_NAME = "PodcastPortal";
 
 

@@ -15,6 +15,7 @@
         android:minHeight="40dp"
         android:orientation="vertical"
         android:layout_marginBottom="@dimen/rhythm_space_single"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:gravity="center_vertical|start">
 
         <TextView
@@ -65,7 +66,7 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/items"
         android:layout_width="match_parent"
-        android:layout_height="152dp"
+        android:layout_height="wrap_content"
         android:minHeight="152dp"
         android:layout_below="@+id/namesContainer"
         android:layout_marginBottom="@dimen/rhythm_space_single"/>

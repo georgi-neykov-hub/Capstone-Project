@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.view;
+package com.neykov.podcastportal.view.explore.view;
 
 
 import android.os.Bundle;
@@ -15,9 +15,6 @@ import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.Tag;
 import com.neykov.podcastportal.view.base.fragment.ToolbarFragment;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class ExploreFragment extends ToolbarFragment implements PopularTagsFragment.OnTagSelectedListener {
 
     public static final String TAG = ExploreFragment.class.getSimpleName();

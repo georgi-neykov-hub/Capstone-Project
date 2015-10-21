@@ -11,8 +11,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".view.MyPodcastsActivity"
-            android:label="@string/app_name" >
+            android:name=".view.subscriptions.MyPodcastsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,12 +19,17 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".view.explore.ExploreActivity"/>
+
         <provider
-            android:name=".model.persistence.PodcastContentProvider"
+            android:name="com.neykov.podcastportal.model.persistence.PodcastContentProvider"
             android:authorities="com.neykov.podcastportal"
             android:enabled="true"
+            android:multiprocess="false"
             android:exported="false" >
         </provider>
+
     </application>
 
 </manifest>

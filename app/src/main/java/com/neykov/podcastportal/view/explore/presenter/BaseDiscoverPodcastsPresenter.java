@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.presenter;
+package com.neykov.podcastportal.view.explore.presenter;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,8 +8,8 @@ import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
 import com.neykov.podcastportal.view.base.BasePresenter;
 import com.neykov.podcastportal.view.base.fragment.ItemListView;
-import com.neykov.podcastportal.view.discover.view.PodcastsAdapter;
-import com.neykov.podcastportal.view.discover.view.DiscoverPodcastsView;
+import com.neykov.podcastportal.view.explore.view.PodcastsAdapter;
+import com.neykov.podcastportal.view.explore.view.DiscoverPodcastsView;
 
 import java.util.ArrayList;
 import java.util.List;

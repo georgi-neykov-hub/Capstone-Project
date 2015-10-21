@@ -96,7 +96,7 @@ public class SubscriptionsAdapter extends BaseStateAdapter<SubscriptionAdapterIt
             RecyclerView.ItemDecoration decoration = new SpaceItemDecoration(
                     mEpisodesRecyclerView.getResources(),
                     R.dimen.activity_horizontal_margin,
-                    R.dimen.rhythm_control_half,
+                    R.dimen.rhythm_space_half,
                     R.dimen.activity_horizontal_margin,
                     SpaceItemDecoration.HORIZONTAL);
             mEpisodesRecyclerView.addItemDecoration(decoration);

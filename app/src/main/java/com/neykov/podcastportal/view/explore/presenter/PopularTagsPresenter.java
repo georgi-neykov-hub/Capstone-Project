@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.presenter;
+package com.neykov.podcastportal.view.explore.presenter;
 
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import com.neykov.podcastportal.model.networking.GPodderService;
 import com.neykov.podcastportal.view.base.BasePresenter;
 import com.neykov.podcastportal.view.base.fragment.ItemListView;
-import com.neykov.podcastportal.view.discover.view.TagsAdapter;
+import com.neykov.podcastportal.view.explore.view.TagsAdapter;
 
 import javax.inject.Inject;
 

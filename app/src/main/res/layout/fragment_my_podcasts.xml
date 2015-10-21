@@ -17,8 +17,7 @@
                 android:minHeight="?attr/actionBarSize"
                 app:title="@string/navigation_my_podcasts"
                 android:theme="@style/AppTheme.Toolbar"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:layout_scrollFlags="scroll|enterAlways"/>
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
 
     </android.support.design.widget.AppBarLayout>

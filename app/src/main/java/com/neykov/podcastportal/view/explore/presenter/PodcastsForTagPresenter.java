@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.presenter;
+package com.neykov.podcastportal.view.explore.presenter;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -7,7 +7,7 @@ import android.support.annotation.Nullable;
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.networking.GPodderService;
 import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
-import com.neykov.podcastportal.view.discover.view.PodcastsAdapter;
+import com.neykov.podcastportal.view.explore.view.PodcastsAdapter;
 
 import java.util.List;
 

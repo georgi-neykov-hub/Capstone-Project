@@ -74,6 +74,7 @@ public class MyPodcastsFragment extends ToolbarViewFragment<MyPodcastsPresenter>
         DividerItemDecoration spaceDecoration = new DividerItemDecoration(view.getContext(), dividerRes, DividerItemDecoration.VERTICAL_LIST);
         view.addItemDecoration(spaceDecoration);
         view.setItemAnimator(new DefaultItemAnimator());
+        view.setAdapter(getPresenter().getAdapter());
     }
 
     @Override

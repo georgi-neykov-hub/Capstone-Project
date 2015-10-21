@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.view;
+package com.neykov.podcastportal.view.explore.view;
 
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.entity.Subscription;

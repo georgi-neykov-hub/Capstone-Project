@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.view;
+package com.neykov.podcastportal.view.explore.view;
 
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;

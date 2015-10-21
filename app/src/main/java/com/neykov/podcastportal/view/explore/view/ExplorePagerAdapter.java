@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.view;
+package com.neykov.podcastportal.view.explore.view;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
@@ -6,8 +6,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.view.discover.view.PopularPodcastsFragment;
-import com.neykov.podcastportal.view.discover.view.PopularTagsFragment;
 
 public class ExplorePagerAdapter extends FragmentStatePagerAdapter {
 

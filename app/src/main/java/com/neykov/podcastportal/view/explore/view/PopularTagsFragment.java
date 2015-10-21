@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.view;
+package com.neykov.podcastportal.view.explore.view;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -16,7 +16,7 @@ import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
 import com.neykov.podcastportal.view.base.fragment.ItemListView;
 import com.neykov.podcastportal.view.base.adapter.OnItemClickListener;
-import com.neykov.podcastportal.view.discover.presenter.PopularTagsPresenter;
+import com.neykov.podcastportal.view.explore.presenter.PopularTagsPresenter;
 import com.neykov.podcastportal.view.widget.GridSpaceItemDecoration;
 
 public class PopularTagsFragment extends BaseListViewFragment<TagsAdapter, PopularTagsPresenter> implements ItemListView, OnItemClickListener {

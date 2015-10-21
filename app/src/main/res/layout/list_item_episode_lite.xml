@@ -5,7 +5,6 @@
     style="?cardStyle"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    tools:layout_width="192dp"
     app:cardUseCompatPadding="true">
 
     <RelativeLayout
@@ -14,43 +13,49 @@
 
         <com.neykov.podcastportal.view.widget.AspectRatioImageView
             android:id="@+id/thumbnail"
-            android:layout_width="match_parent"
+            android:layout_width="152dp"
             android:layout_height="0dp"
-            android:layout_marginBottom="@dimen/rhythm_space_single"
             app:widthToHeightRatio="1.577"
             android:alpha="0.6"
             tools:background="@color/photo_placeholder" />
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/thumbnail"
-            android:layout_toStartOf="@+id/menuContainer"
-            android:layout_alignBottom="@+id/menuContainer"
-            android:layout_marginStart="@dimen/rhythm_space_double"
-            android:paddingBottom="@dimen/rhythm_space_single"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:gravity="center_vertical|start"
-            android:ellipsize="end"
-            android:maxLines="2"
-            tools:text="The Android Nerds" />
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginEnd="30dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignTop="@+id/menuContainer"
+                android:layout_alignEnd="@+id/thumbnail"
+                android:layout_alignBottom="@+id/menuContainer"
+                android:layout_marginStart="@dimen/rhythm_space_single"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                android:gravity="center_vertical|start"
+                android:ellipsize="end"
+                android:lines="2"
+                tools:text="The Nerds Are back Show" />
+
+
 
         <FrameLayout
             android:id="@+id/menuContainer"
-            android:layout_width="32dp"
+            android:layout_width="20dp"
             android:layout_height="wrap_content"
+            android:minWidth="20dp"
+            android:minHeight="40dp"
             android:layout_below="@+id/thumbnail"
-            android:layout_alignEnd="@+id/thumbnail">
+            android:layout_alignEnd="@+id/thumbnail"
+            android:layout_marginTop="@dimen/rhythm_space_half"
+            android:layout_marginBottom="@dimen/rhythm_space_half">
 
             <android.support.v7.widget.ActionMenuView
                 android:id="@+id/menu"
-                android:layout_gravity="end|center_vertical"
-                android:gravity="end"
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/rhythm_control_normal"
-                android:layout_marginStart="@dimen/rhythm_space_double"
-                android:theme="@style/AppTheme.ActionMenu"/>
+                android:layout_height="match_parent"
+                android:layout_gravity="end|center_vertical"
+                android:theme="@style/AppTheme.ActionMenu"
+                />
 
         </FrameLayout>
 

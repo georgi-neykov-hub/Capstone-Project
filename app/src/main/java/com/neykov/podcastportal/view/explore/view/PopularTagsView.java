@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.view;
+package com.neykov.podcastportal.view.explore.view;
 
 import com.neykov.podcastportal.model.entity.Tag;
 import com.neykov.podcastportal.view.base.LoadingView;

@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.view;
+package com.neykov.podcastportal.view.explore.view;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,7 +17,7 @@ import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.AlertDialogFragment;
 import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
-import com.neykov.podcastportal.view.discover.presenter.PopularPodcastsPresenter;
+import com.neykov.podcastportal.view.explore.presenter.PopularPodcastsPresenter;
 import com.neykov.podcastportal.view.widget.GridSpaceItemDecoration;
 
 public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapter, PopularPodcastsPresenter> implements DiscoverPodcastsView, AlertDialogFragment.OnDialogFragmentClickListener {

@@ -34,7 +34,7 @@
 
     <fragment
         android:id="@+id/podcastSearchContentFragment"
-        android:name="com.neykov.podcastportal.view.discover.view.PodcastSearchFragment$ContentFragment"
+        android:name="com.neykov.podcastportal.view.explore.view.PodcastSearchFragment$ContentFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />

@@ -43,9 +43,9 @@ public class SubscriptionsManager extends BaseManager {
     public Observable<List<Episode>> getLatestEpisodes(Subscription subscription, int count) {
         return getQueryResolver().createQuery(DatabaseContract.Episode.CONTENT_URI,
                 null,
-                DatabaseContract.Episode.PODCAST_ID + " = ? LIMIT ?",
-                new String[]{subscription.getId().toString(), String.valueOf(count)},
-                DatabaseContract.Episode.RELEASE_DATE,
+                DatabaseContract.Episode.PODCAST_ID + " = ?",
+                new String[]{subscription.getId().toString()},
+                DatabaseContract.Episode.RELEASE_DATE + " LIMIT "+ String.valueOf(count),
                 false)
                 .mapToList(mEpisodesConverter::convert);
     }

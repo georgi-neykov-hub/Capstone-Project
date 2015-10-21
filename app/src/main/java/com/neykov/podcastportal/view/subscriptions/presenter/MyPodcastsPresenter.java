@@ -30,21 +30,21 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
         this.mManager = manager;
         this.mAdapter = new SubscriptionsAdapter();
 
-        this.restartableLatestCache(RESTARTABLE_ID_SUBSCRIPTIONS,
+        this.restartable(RESTARTABLE_ID_SUBSCRIPTIONS,
                 () -> mManager.getSubscriptionsStream()
-                        .flatMap(Observable::from)
-                        .map(this::getAdapterItem)
-                        .toList()
+                        .flatMap(subscriptions1 -> Observable.from(subscriptions1).map(this::getAdapterItem).toList())
                         .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread()),
-                (podcastsView, subscriptions) -> {
-                    mAdapter.setData(subscriptions);
-                    podcastsView.hideLoadingIndicator();
-                },
-                (podcastsView, throwable) -> {
-                    podcastsView.hideLoadingIndicator();
-                    podcastsView.showError(ErrorDisplayView.ERROR_GENERAL);
-                });
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnNext(mAdapter::setData)
+                        .compose(delayUntilViewAvailable())
+                        .subscribe(delivery -> delivery.split(
+                                (podcastsView, subscriptions) -> podcastsView.hideLoadingIndicator(),
+                                (podcastsView, throwable) -> {
+                                    podcastsView.hideLoadingIndicator();
+                                    podcastsView.showError(ErrorDisplayView.ERROR_GENERAL);
+                                })));
+
+        this.start(RESTARTABLE_ID_SUBSCRIPTIONS);
     }
 
     public SubscriptionsAdapter getAdapter() {
@@ -75,13 +75,13 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
     }
 
     @WorkerThread
-    private SubscriptionAdapterItem getAdapterItem(Subscription subscription){
+    private SubscriptionAdapterItem getAdapterItem(Subscription subscription) {
         List<Episode> latestEpisodes = getLatestEpisodes(subscription);
         return new SubscriptionAdapterItem(subscription, latestEpisodes);
     }
 
     @WorkerThread
-    private List<Episode> getLatestEpisodes(Subscription subscription){
+    private List<Episode> getLatestEpisodes(Subscription subscription) {
         return mManager.getLatestEpisodes(subscription, 10)
                 .first()
                 .toBlocking()

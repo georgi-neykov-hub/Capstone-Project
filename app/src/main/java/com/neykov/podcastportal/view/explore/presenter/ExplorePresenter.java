@@ -1,6 +1,6 @@
-package com.neykov.podcastportal.view.discover.presenter;
+package com.neykov.podcastportal.view.explore.presenter;
 
-import com.neykov.podcastportal.view.discover.view.ExploreView;
+import com.neykov.podcastportal.view.explore.view.ExploreView;
 
 import javax.inject.Inject;
 

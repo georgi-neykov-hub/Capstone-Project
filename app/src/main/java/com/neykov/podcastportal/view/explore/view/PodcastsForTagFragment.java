@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.view.discover.view;
+package com.neykov.podcastportal.view.explore.view;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -19,7 +19,7 @@ import com.neykov.podcastportal.model.entity.Tag;
 import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
 import com.neykov.podcastportal.view.base.fragment.ToolbarFragment;
-import com.neykov.podcastportal.view.discover.presenter.PodcastsForTagPresenter;
+import com.neykov.podcastportal.view.explore.presenter.PodcastsForTagPresenter;
 
 public class PodcastsForTagFragment extends ToolbarFragment {
 
