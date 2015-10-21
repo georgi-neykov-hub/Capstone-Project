@@ -1,11 +1,9 @@
 package com.neykov.podcastportal.view.subscriptions.view;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -14,42 +12,48 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.model.entity.Subscription;
-import com.neykov.podcastportal.view.base.SubscriptionListView;
-import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
-import com.neykov.podcastportal.view.base.fragment.ItemListView;
-import com.neykov.podcastportal.view.base.fragment.ToolbarFragment;
-import com.neykov.podcastportal.view.subscriptions.presenter.SubscriptionsAdapter;
-import com.neykov.podcastportal.view.subscriptions.presenter.SubscriptionsPresenter;
-import com.neykov.podcastportal.view.widget.GridSpaceItemDecoration;
+import com.neykov.podcastportal.view.ViewUtils;
+import com.neykov.podcastportal.view.base.fragment.ToolbarViewFragment;
+import com.neykov.podcastportal.view.subscriptions.presenter.MyPodcastsPresenter;
+import com.neykov.podcastportal.view.widget.DividerItemDecoration;
 
-public class MyPodcastsFragment extends ToolbarFragment {
+public class MyPodcastsFragment extends ToolbarViewFragment<MyPodcastsPresenter> implements MyPodcastsView{
 
     public static final String TAG = MyPodcastsFragment.class.getSimpleName();
+    private static final String KEY_LAYOUT_MANAGER_STATE = "MyPodcastsFragment.KEY_LAYOUT_MANAGER_STATE";
 
     public static MyPodcastsFragment newInstance() {
         return new MyPodcastsFragment();
     }
 
+    private RecyclerView.LayoutManager mLayoutManager;
+
+    @NonNull
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected MyPodcastsPresenter onCreatePresenter() {
+        return getDependencyResolver().getSubscriptionsComponent().createMyPodcastsPresenter();
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_my_podcasts, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_my_podcasts, container, false);
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.podcastsList);
+        configureRecycleView(recyclerView, savedInstanceState);
+        return rootView;
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        if(savedInstanceState == null){
-            getChildFragmentManager().beginTransaction()
-                    .replace(R.id.podcastsListContainer, new ContentFragment(), ContentFragment.class.getName())
-                    .commit();
-            getChildFragmentManager().executePendingTransactions();
+    public void onDestroyView() {
+        super.onDestroyView();
+        mLayoutManager = null;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        if(mLayoutManager != null) {
+            bundle.putParcelable(KEY_LAYOUT_MANAGER_STATE, mLayoutManager.onSaveInstanceState());
         }
     }
 
@@ -59,90 +63,26 @@ public class MyPodcastsFragment extends ToolbarFragment {
         return (Toolbar) view.findViewById(R.id.toolbar);
     }
 
-    public static class ContentFragment extends BaseListViewFragment<SubscriptionsAdapter, SubscriptionsPresenter> implements SubscriptionListView {
-
-        @NonNull
-        @Override
-        protected SubscriptionsPresenter onCreatePresenter() {
-            return getDependencyResolver().getSubscriptionsComponent().createSubscriptionsPresenter();
+    protected void configureRecycleView(@NonNull RecyclerView view, Bundle savedState) {
+        mLayoutManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false);
+        if(savedState != null && savedState.containsKey(KEY_LAYOUT_MANAGER_STATE)){
+            mLayoutManager.onRestoreInstanceState(savedState.getParcelable(KEY_LAYOUT_MANAGER_STATE));
         }
+        view.setLayoutManager(mLayoutManager);
 
-        @NonNull
-        @Override
-        protected SubscriptionsAdapter getAdapter() {
-            return getPresenter().getAdapter();
-        }
+        int dividerRes = ViewUtils.getThemeAttribute(view.getContext().getTheme(), R.attr.dividerHorizontal);
+        DividerItemDecoration spaceDecoration = new DividerItemDecoration(view.getContext(), dividerRes, DividerItemDecoration.VERTICAL_LIST);
+        view.addItemDecoration(spaceDecoration);
+        view.setItemAnimator(new DefaultItemAnimator());
+    }
 
-        @Override
-        public void onResume() {
-            getAdapter().setItemListener(mItemListener);
-            super.onResume();
-        }
+    @Override
+    public void showLoadingIndicator() {
 
-        @Override
-        public void onPause() {
-            getAdapter().setItemListener(null);
-            super.onPause();
-        }
+    }
 
-        @Override
-        protected void onShowLoadError(int error) {
+    @Override
+    public void hideLoadingIndicator() {
 
-        }
-
-        @Override
-        protected void onConfigureRecycleView(@NonNull RecyclerView view) {
-            int spanCount = getResources().getInteger(R.integer.grid_column_count);
-            int horizontalPadding = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
-            int verticalPadding = getResources().getDimensionPixelSize(R.dimen.activity_vertical_margin);
-            view.setPaddingRelative(horizontalPadding, 0, horizontalPadding, 0);
-            GridSpaceItemDecoration spaceDecoration = new GridSpaceItemDecoration(spanCount, GridSpaceItemDecoration.VERTICAL);
-            spaceDecoration.setVerticalEndSpacing(verticalPadding);
-            view.addItemDecoration(spaceDecoration);
-            view.setItemAnimator(new DefaultItemAnimator());
-        }
-
-        @NonNull
-        @Override
-        protected RecyclerView.LayoutManager onCreateLayoutManager(@NonNull Context context) {
-            int spanCount = context.getResources().getInteger(R.integer.grid_column_count);
-            return new GridLayoutManager(context,spanCount, LinearLayoutManager.VERTICAL, false);
-        }
-
-        private void openEpisodesListScreen(Subscription target){
-            getActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragmentContainer, EpisodesListFragment.newInstance(target), EpisodesListFragment.TAG)
-                    .addToBackStack(EpisodesListFragment.TAG)
-                    .commit();
-        }
-
-        private final SubscriptionsAdapter.ItemListener mItemListener = new SubscriptionsAdapter.ItemListener() {
-            @Override
-            public void onUnsubscribeClick(int position) {
-
-            }
-
-            @Override
-            public void onRefreshClick(int position) {
-
-            }
-
-            @Override
-            public void onItemClick(int position) {
-                Subscription target = getAdapter().getItem(position);
-                openEpisodesListScreen(target);
-            }
-        };
-
-        @Override
-        public void onUnsubscribe(Subscription subscription) {
-
-        }
-
-        @Override
-        public void onUnsubscribeError(Subscription subscription) {
-
-        }
     }
 }

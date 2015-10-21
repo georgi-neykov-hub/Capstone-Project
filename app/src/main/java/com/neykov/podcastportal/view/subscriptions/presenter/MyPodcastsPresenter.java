@@ -2,17 +2,16 @@ package com.neykov.podcastportal.view.subscriptions.presenter;
 
 import android.os.Bundle;
 
-import com.neykov.podcastportal.model.entity.Subscription;
 import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
 import com.neykov.podcastportal.view.base.BasePresenter;
-import com.neykov.podcastportal.view.base.SubscriptionListView;
+import com.neykov.podcastportal.view.subscriptions.view.MyPodcastsView;
 
 import javax.inject.Inject;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class SubscriptionsPresenter extends BasePresenter<SubscriptionListView> {
+public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
 
     public static final int RESTARTABLE_ID_SUBSCRIPTIONS = 1;
 
@@ -20,7 +19,7 @@ public class SubscriptionsPresenter extends BasePresenter<SubscriptionListView> 
     private SubscriptionsManager mManager;
 
     @Inject
-    public SubscriptionsPresenter(SubscriptionsManager manager) {
+    public MyPodcastsPresenter(SubscriptionsManager manager) {
         this.mManager = manager;
         this.mAdapter = new SubscriptionsAdapter();
 
@@ -49,7 +48,7 @@ public class SubscriptionsPresenter extends BasePresenter<SubscriptionListView> 
     }
 
     @Override
-    protected void onTakeView(SubscriptionListView itemListView) {
+    protected void onTakeView(MyPodcastsView itemListView) {
         super.onTakeView(itemListView);
         start(RESTARTABLE_ID_SUBSCRIPTIONS);
     }
@@ -64,15 +63,5 @@ public class SubscriptionsPresenter extends BasePresenter<SubscriptionListView> 
         return mAdapter;
     }
 
-    public void unsubscribePodcast(Subscription subscription) {
-        mManager.unsubscribeFromPodcast(subscription)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .compose(deliverLatestCache())
-                .single()
-                .subscribe(delivery -> delivery.split(
-                        (itemListView, remotePodcastData) -> itemListView.onUnsubscribe(subscription),
-                        (itemListView1, throwable) -> itemListView1.onUnsubscribeError(subscription)));
-    }
 }
 
