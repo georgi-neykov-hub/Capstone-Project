@@ -8,7 +8,7 @@ import java.util.Date;
 public interface EpisodeData {
     String getTitle();
 
-    String getUrl();
+    String getContentUrl();
 
     String getDescription();
 

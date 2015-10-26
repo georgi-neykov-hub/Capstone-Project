@@ -7,16 +7,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.model.entity.Subscription;
+import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.view.base.adapter.BaseListenerViewHolder;
 import com.neykov.podcastportal.view.base.adapter.BaseStateAdapter;
 import com.neykov.podcastportal.view.base.adapter.OnItemClickListener;
 import com.neykov.podcastportal.view.widget.SpaceItemDecoration;
-import com.squareup.picasso.Picasso;
 
 import java.lang.ref.WeakReference;
 
@@ -27,10 +25,15 @@ public class SubscriptionsAdapter extends BaseStateAdapter<SubscriptionAdapterIt
         void onRefreshClick(int position);
     }
 
-    private WeakReference<ItemListener> mListenerRef;
+    private WeakReference<ItemListener> mOuterSubscriptionListenerRef;
+    private WeakReference<SubscriptionAdapterItem.EpisodeItemListener> mOuterEpisodeListenerRef;
 
-    public void setItemListener(ItemListener listener){
-        mListenerRef = new WeakReference<>(listener);
+    public void setSubscriptionItemListener(ItemListener listener){
+        mOuterSubscriptionListenerRef = new WeakReference<>(listener);
+    }
+
+    public void setEpisodeItemListener(SubscriptionAdapterItem.EpisodeItemListener listener){
+        mOuterEpisodeListenerRef = new WeakReference<>(listener);
     }
 
     @Override
@@ -48,19 +51,21 @@ public class SubscriptionsAdapter extends BaseStateAdapter<SubscriptionAdapterIt
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View itemView = inflater.inflate(R.layout.list_item_subscription, parent, false);
         SubscriptionViewHolder holder = new SubscriptionViewHolder(itemView);
-        holder.setListener(mProxyListener);
+        holder.setListener(mProxySubscriptionItemListener);
         return holder;
     }
 
     @Override
     public void onBindViewHolder(SubscriptionViewHolder holder, int position) {
-        holder.onBind(getItem(position));
+        SubscriptionAdapterItem item = getItem(position);
+        holder.onBind(item);
+        item.setItemListener(mProxyEpisodeItemListener);
     }
 
-    private final ItemListener mProxyListener = new ItemListener() {
+    private final ItemListener mProxySubscriptionItemListener = new ItemListener() {
         @Override
         public void onUnsubscribeClick(int position) {
-            ItemListener listener = mListenerRef.get();
+            ItemListener listener = mOuterSubscriptionListenerRef.get();
             if(listener != null){
                 listener.onUnsubscribeClick(position);
             }
@@ -68,7 +73,7 @@ public class SubscriptionsAdapter extends BaseStateAdapter<SubscriptionAdapterIt
 
         @Override
         public void onRefreshClick(int position) {
-            ItemListener listener = mListenerRef.get();
+            ItemListener listener = mOuterSubscriptionListenerRef.get();
             if(listener != null){
                 listener.onRefreshClick(position);
             }
@@ -76,9 +81,51 @@ public class SubscriptionsAdapter extends BaseStateAdapter<SubscriptionAdapterIt
 
         @Override
         public void onItemClick(int position) {
-            ItemListener listener = mListenerRef.get();
+            ItemListener listener = mOuterSubscriptionListenerRef.get();
             if(listener != null){
                 listener.onItemClick(position);
+            }
+        }
+    };
+
+    private final SubscriptionAdapterItem.EpisodeItemListener mProxyEpisodeItemListener = new SubscriptionAdapterItem.EpisodeItemListener() {
+        @Override
+        public void onAddToPlaylistTop(Episode episode) {
+            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterEpisodeListenerRef.get();
+            if(listener != null){
+                listener.onAddToPlaylistTop(episode);
+            }
+        }
+
+        @Override
+        public void onAddToPlaylistEnd(Episode episode) {
+            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterEpisodeListenerRef.get();
+            if(listener != null){
+                listener.onAddToPlaylistEnd(episode);
+            }
+        }
+
+        @Override
+        public void onRemoveFromPlaylist(Episode episode) {
+            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterEpisodeListenerRef.get();
+            if(listener != null){
+                listener.onRemoveFromPlaylist(episode);
+            }
+        }
+
+        @Override
+        public void onDownload(Episode episode) {
+            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterEpisodeListenerRef.get();
+            if(listener != null){
+                listener.onDownload(episode);
+            }
+        }
+
+        @Override
+        public void onSelected(Episode episode) {
+            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterEpisodeListenerRef.get();
+            if(listener != null){
+                listener.onSelected(episode);
             }
         }
     };

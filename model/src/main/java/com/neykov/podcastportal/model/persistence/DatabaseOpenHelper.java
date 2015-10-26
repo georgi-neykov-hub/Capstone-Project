@@ -5,9 +5,9 @@ import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.neykov.podcastportal.model.persistence.DatabaseContract.Subscription;
+import com.neykov.podcastportal.model.persistence.DatabaseContract.Podcast;
 import com.neykov.podcastportal.model.persistence.DatabaseContract.Episode;
-import com.neykov.podcastportal.model.persistence.DatabaseContract.Download;
+import com.neykov.podcastportal.model.persistence.DatabaseContract.PlaylistEntry;
 
 public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
@@ -34,8 +34,9 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_SUBSCRIPTIONS_TABLE);
         // Create the episodes table.
         db.execSQL(SQL_CREATE_EPISODES_TABLE);
-        // Create the downloads table.
-        db.execSQL(SQL_CREATE_DOWNLOADS_TABLE);
+        // Create the playlist table.
+        db.execSQL(SQL_CREATE_PLAYLIST_TABLE);
+        db.execSQL(SQL_TRIGGERS);
     }
 
     @Override
@@ -43,40 +44,52 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
     }
 
-    private static final String SQL_CREATE_SUBSCRIPTIONS_TABLE = "CREATE TABLE " + Subscription.TABLE_NAME + " (" +
-            Subscription._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-            Subscription.TITLE + " TEXT," +
-            Subscription.DESCRIPTION + " TEXT," +
-            Subscription.FEED_URL + " TEXT," +
-            Subscription.SUBSCRIBERS + " INTEGER," +
-            Subscription.DATE_UPDATED + " INTEGER," +
-            Subscription.LOGO_URL + " TEXT," +
-            Subscription.LOCAL_LOGO_URL + " TEXT," +
-            Subscription.WEBSITE + " TEXT" +
+    private static final String SQL_CREATE_SUBSCRIPTIONS_TABLE = "CREATE TABLE " + Podcast.TABLE_NAME + " (" +
+            Podcast.PODCAST_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+            Podcast.TITLE + " TEXT," +
+            Podcast.DESCRIPTION + " TEXT," +
+            Podcast.FEED_URL + " TEXT," +
+            Podcast.SUBSCRIBERS + " INTEGER," +
+            Podcast.DATE_UPDATED + " INTEGER," +
+            Podcast.LOGO_URL + " TEXT," +
+            Podcast.LOCAL_LOGO_URL + " TEXT," +
+            Podcast.WEBSITE + " TEXT" +
             " );";
 
     private static final String SQL_CREATE_EPISODES_TABLE = "CREATE TABLE " + Episode.TABLE_NAME + " (" +
-            Episode._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-            Episode.TITLE + " TEXT," +
-            Episode.DESCRIPTION + " TEXT," +
-            Episode.CONTENT_URL + " TEXT," +
-            Episode.MIME_TYPE + " TEXT," +
-            Episode.CONTENT_LENGTH + " INTEGER," +
-            Episode.PODCAST_URL + " TEXT," +
-            Episode.PODCAST_ID + " INTEGER," +
+            Episode.EPISODE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+            Episode.TITLE + " TEXT NOT NULL," +
+            Episode.DESCRIPTION + " TEXT NOT NULL," +
+            Episode.CONTENT_URL + " TEXT NOT NULL," +
+            Episode.MIME_TYPE + " TEXT NOT NULL," +
+            Episode.LENGTH + " INTEGER," +
+            Episode.PODCAST_ID + " INTEGER NOT NULL," +
+            Episode.PLAYLIST_ENTRY_ID + " INTEGER DEFAULT NULL," +
+            Episode.WATCHED + " INTEGER NOT NULL," +
             Episode.WEBSITE + " TEXT," +
             Episode.RELEASE_DATE + " INTEGER," +
-            Episode.DOWNLOAD_ID + " INTEGER," +
-            " FOREIGN KEY (" + Episode.PODCAST_ID + ") REFERENCES " + Subscription.TABLE_NAME + "("+ Subscription._ID + ") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED" +
-            " FOREIGN KEY (" + Episode.DOWNLOAD_ID + ") REFERENCES " + Download.TABLE_NAME + "("+ Download._ID + ") ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED" +
+            Episode.DOWNLOAD_STATE + " INTEGER NOT NULL, " +
+            Episode.FILE_URL + " TEXT," +
+            Episode.FILE_SIZE + " INTEGER," +
+            "FOREIGN KEY (" + Episode.PODCAST_ID + ") REFERENCES " + Podcast.TABLE_NAME + "(" + Podcast.PODCAST_ID + ") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED," +
+            "FOREIGN KEY (" + Episode.PLAYLIST_ENTRY_ID + ") REFERENCES " + PlaylistEntry.TABLE_NAME + "(" + PlaylistEntry.PLAYLIST_ENTRY_ID + ") ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED" +
             " );";
 
-    private static final String SQL_CREATE_DOWNLOADS_TABLE = "CREATE TABLE " + Download.TABLE_NAME + " (" +
-            Download._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-            Download.STATE + " INTEGER NOT NULL," +
-            Download.FILE_URL + " TEXT," +
-            Download.FILE_SIZE + " INTEGER," +
-            Download.EPISODE_ID + " INTEGER," +
-             "FOREIGN KEY (" + Download.EPISODE_ID + ") REFERENCES " + Episode.TABLE_NAME + "("+ Episode._ID + ") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED" +
+    private static final String SQL_CREATE_PLAYLIST_TABLE = "CREATE TABLE " + PlaylistEntry.TABLE_NAME + " (" +
+            PlaylistEntry.PLAYLIST_ENTRY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+            PlaylistEntry.EPISODE_ID + " INTEGER NOT NULL," +
+            PlaylistEntry.NEXT_ITEM_ID + " INTEGER," +
+            PlaylistEntry.PREVIOUS_ITEM_ID + " INTEGER," +
+            "FOREIGN KEY (" + PlaylistEntry.EPISODE_ID + ") REFERENCES " + Episode.TABLE_NAME + "(" + Episode.EPISODE_ID + ") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, " +
+            "FOREIGN KEY (" + PlaylistEntry.PREVIOUS_ITEM_ID + ") REFERENCES " + PlaylistEntry.TABLE_NAME + "(" + PlaylistEntry.PLAYLIST_ENTRY_ID + ") ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED" +
             " );";
+
+    private static final String SQL_TRIGGERS =
+            "CREATE TRIGGER updatePlaylistLinksOnDelete AFTER DELETE ON " + PlaylistEntry.TABLE_NAME + " " +
+                    "BEGIN \n" +
+                    "UPDATE " + PlaylistEntry.TABLE_NAME + " SET " + PlaylistEntry.NEXT_ITEM_ID + " = old." + PlaylistEntry.NEXT_ITEM_ID +
+                    " WHERE " + PlaylistEntry.NEXT_ITEM_ID + " = old." + PlaylistEntry.PLAYLIST_ENTRY_ID + ";\n" +
+                    " UPDATE " + PlaylistEntry.TABLE_NAME + " SET " + PlaylistEntry.PREVIOUS_ITEM_ID + " = old." + PlaylistEntry.PREVIOUS_ITEM_ID +
+                    " WHERE " + PlaylistEntry.PREVIOUS_ITEM_ID + " = old." + PlaylistEntry.PREVIOUS_ITEM_ID + ";\n" +
+                    " END;";
 }

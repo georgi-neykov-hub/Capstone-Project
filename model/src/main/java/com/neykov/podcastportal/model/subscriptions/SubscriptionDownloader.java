@@ -10,12 +10,11 @@ import android.util.Log;
 
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
-import com.neykov.podcastportal.model.entity.Subscription;
+import com.neykov.podcastportal.model.entity.PodcastSubscription;
 import com.neykov.podcastportal.model.entity.converter.EpisodesConverter;
 import com.neykov.podcastportal.model.entity.converter.SubscriptionConverter;
 import com.neykov.podcastportal.model.persistence.DatabaseContract;
 import com.neykov.podcastportal.model.rss.RSSFeed;
-import com.neykov.podcastportal.model.rss.RssChannel;
 import com.neykov.podcastportal.model.rss.RssFeedParser;
 import com.neykov.podcastportal.model.rss.RssItem;
 import com.squareup.okhttp.OkHttpClient;
@@ -53,24 +52,24 @@ public class SubscriptionDownloader {
         this.mFeedParser = new RssFeedParser();
     }
 
-    public Observable<Subscription> fetchSubscriptionUpdates(Subscription subscription) {
-        if (subscription.getId() == null) {
+    public Observable<PodcastSubscription> fetchSubscriptionUpdates(PodcastSubscription podcastSubscription) {
+        if (podcastSubscription.getId() == null) {
             throw new IllegalArgumentException("This method should only be used for existing, persisted subscriptions.");
         }
 
-        return downloadFeedData(subscription.getUrl())
+        return downloadFeedData(podcastSubscription.getUrl())
                 .flatMap(updatedRssFeed -> {
                     Date timestampUtc = DateTime.now(DateTimeZone.UTC).minusMinutes(UPDATE_TIME_TOLERANCE_MINUTES).toDate();
-                    Subscription updatedSubscription = new Subscription.Builder(subscription)
+                    PodcastSubscription updatedPodcastSubscription = new PodcastSubscription.Builder(podcastSubscription)
                             .setTitle(updatedRssFeed.getChannel().getTitle())
                             .setDescription(updatedRssFeed.getChannel().getDescription())
                             .setDateUpdated(timestampUtc)
                             .build();
-                    return storeSubscriptionUpdates(updatedSubscription, updatedRssFeed);
+                    return storeSubscriptionUpdates(updatedPodcastSubscription, updatedRssFeed);
                 });
     }
 
-    public Observable<Subscription> fetchSubscriptionAndEpisodesData(RemotePodcastData source) {
+    public Observable<PodcastSubscription> fetchSubscriptionAndEpisodesData(RemotePodcastData source) {
         return downloadFeedData(source.getUrl())
                 .flatMap(rssFeed -> {
                     Date timestampUtc = rssFeed != null ?
@@ -79,22 +78,22 @@ public class SubscriptionDownloader {
                 });
     }
 
-    private Observable<Subscription> storeSubscriptionUpdates(Subscription updatedSubscription, RSSFeed updatedRssFeed) {
-        return Observable.<Subscription>create(subscriber -> {
+    private Observable<PodcastSubscription> storeSubscriptionUpdates(PodcastSubscription updatedPodcastSubscription, RSSFeed updatedRssFeed) {
+        return Observable.<PodcastSubscription>create(subscriber -> {
             try {
                 ContentProviderOperation subscriptionUpdateOp = ContentProviderOperation
-                        .newUpdate(DatabaseContract.Subscription.buildItemUri(updatedSubscription.getId()))
+                        .newUpdate(DatabaseContract.Podcast.buildItemUri(updatedPodcastSubscription.getId()))
                         .withExpectedCount(1)
-                        .withValues(mSubscriptionConverter.convert(updatedSubscription))
+                        .withValues(mSubscriptionConverter.convert(updatedPodcastSubscription))
                         .build();
                 ArrayList<ContentProviderOperation> ops = new ArrayList<>();
                 ops.add(subscriptionUpdateOp);
 
                 int newEpisodes = 0;
                 for (RssItem item : updatedRssFeed.getChannel().getItemList()) {
-                    if (item.getPubDate().after(updatedSubscription.getDateUpdatedUtc()) &&
-                            !episodeAlreadyStored(item, updatedSubscription.getId())) {
-                        ops.add(buildEpisodeUpdateInsertOperation(item, updatedSubscription.getId()));
+                    if (item.getPubDate().after(updatedPodcastSubscription.getDateUpdatedUtc()) &&
+                            !episodeAlreadyStored(item, updatedPodcastSubscription.getId())) {
+                        ops.add(buildEpisodeUpdateInsertOperation(item, updatedPodcastSubscription.getId()));
                         newEpisodes++;
                     }
                 }
@@ -102,7 +101,7 @@ public class SubscriptionDownloader {
                 Log.d(TAG, "Saving " + newEpisodes + " new episodes...");
                 mContext.getContentResolver().applyBatch(DatabaseContract.CONTENT_AUTHORITY, ops);
                 Log.d(TAG, "Success!");
-                subscriber.onNext(updatedSubscription);
+                subscriber.onNext(updatedPodcastSubscription);
                 subscriber.onCompleted();
             } catch (RemoteException | AssertionError | OperationApplicationException e) {
                 subscriber.onError(e);
@@ -110,15 +109,15 @@ public class SubscriptionDownloader {
         });
     }
 
-    private Observable<Subscription> storeNewSubscriptionData(RemotePodcastData source, @Nullable RSSFeed feed, Date timestampUtc) {
-        return Observable.<Subscription>create(subscriber -> {
+    private Observable<PodcastSubscription> storeNewSubscriptionData(RemotePodcastData source, @Nullable RSSFeed feed, Date timestampUtc) {
+        return Observable.<PodcastSubscription>create(subscriber -> {
             try {
-                Subscription subscription = new Subscription.Builder(source)
+                PodcastSubscription podcastSubscription = new PodcastSubscription.Builder(source)
                         .setDateUpdated(timestampUtc)
                         .build();
 
                 ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-                ops.add(buildSubscriptionInsertOperation(subscription));
+                ops.add(buildSubscriptionInsertOperation(podcastSubscription));
                 int newEpisodes = 0;
 
                 if (feed != null && !feed.getChannel().getItemList().isEmpty()) {
@@ -131,7 +130,7 @@ public class SubscriptionDownloader {
                 Log.d(TAG, "Saving subscription and " + newEpisodes + " new episodes...");
                 mContext.getContentResolver().applyBatch(DatabaseContract.CONTENT_AUTHORITY, ops);
                 Log.d(TAG, "Success!");
-                subscriber.onNext(subscription);
+                subscriber.onNext(podcastSubscription);
                 subscriber.onCompleted();
             } catch (RemoteException | OperationApplicationException e) {
                 subscriber.onError(e);
@@ -159,9 +158,9 @@ public class SubscriptionDownloader {
         });
     }
 
-    private ContentProviderOperation buildSubscriptionInsertOperation(Subscription subscription) {
-        return ContentProviderOperation.newInsert(DatabaseContract.Subscription.CONTENT_URI)
-                .withValues(mSubscriptionConverter.convert(subscription))
+    private ContentProviderOperation buildSubscriptionInsertOperation(PodcastSubscription podcastSubscription) {
+        return ContentProviderOperation.newInsert(DatabaseContract.Podcast.CONTENT_URI)
+                .withValues(mSubscriptionConverter.convert(podcastSubscription))
                 .build();
     }
 
@@ -184,7 +183,19 @@ public class SubscriptionDownloader {
     }
 
     private Episode createEpisodeFromRssItem(RssItem source, long parentId) {
-        return new Episode(0, parentId, source.getTitle(), null, null, source.getDescription(), source.getPubDate());
+        return new Episode(0,
+                parentId,
+                source.getTitle(),
+                source.getDescription(),
+                source.getContent().getContentUrl(),
+                source.getContent().getMimeType(),
+                null,
+                source.getContent().getContentLength(),
+                Episode.REMOTE,
+                null,
+                false,
+                null,
+                source.getPubDate());
     }
 
     private boolean episodeAlreadyStored(RssItem item, long parentId) {

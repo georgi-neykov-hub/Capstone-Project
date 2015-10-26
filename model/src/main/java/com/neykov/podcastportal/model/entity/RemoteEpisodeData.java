@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.model;
+package com.neykov.podcastportal.model.entity;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -30,7 +30,7 @@ public class RemoteEpisodeData implements EpisodeData {
     }
 
     @Override
-    public String getUrl() {
+    public String getContentUrl() {
         return url;
     }
 

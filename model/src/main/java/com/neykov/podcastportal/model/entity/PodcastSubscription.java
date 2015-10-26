@@ -4,16 +4,12 @@ import android.os.Parcel;
 
 import java.util.Date;
 
-public class Subscription extends RemotePodcastData {
+public class PodcastSubscription extends RemotePodcastData {
     private Long id;
     private String localLogoUrl;
     private Date dateUpdated;
 
-    /*public Subscription(Podcast p, String localLogoUrl, Date dateUpdated) {
-        this(p.getTitle(), p.getDescription(), p.getUrl(), p.getWebsite(), p.getSubscribers(), p.getLogoUrl(), localLogoUrl, dateUpdated);
-    }*/
-
-    public Subscription(Long id, String title, String description, String url, String website, int subscribers, String logoUrl, String localLogoUrl, Date dateUpdated) {
+    public PodcastSubscription(Long id, String title, String description, String url, String website, int subscribers, String logoUrl, String localLogoUrl, Date dateUpdated) {
         super(title, description, url, website, subscribers, logoUrl);
         this.id = id;
         this.localLogoUrl = localLogoUrl;
@@ -45,7 +41,7 @@ public class Subscription extends RemotePodcastData {
         dest.writeLong(dateUpdated != null ? dateUpdated.getTime() : -1);
     }
 
-    protected Subscription(Parcel in) {
+    protected PodcastSubscription(Parcel in) {
         super(in);
         this.id = in.readLong();
         this.localLogoUrl = in.readString();
@@ -53,13 +49,13 @@ public class Subscription extends RemotePodcastData {
         this.dateUpdated = tmpDateUpdated == -1 ? null : new Date(tmpDateUpdated);
     }
 
-    public static final Creator<Subscription> CREATOR = new Creator<Subscription>() {
-        public Subscription createFromParcel(Parcel source) {
-            return new Subscription(source);
+    public static final Creator<PodcastSubscription> CREATOR = new Creator<PodcastSubscription>() {
+        public PodcastSubscription createFromParcel(Parcel source) {
+            return new PodcastSubscription(source);
         }
 
-        public Subscription[] newArray(int size) {
-            return new Subscription[size];
+        public PodcastSubscription[] newArray(int size) {
+            return new PodcastSubscription[size];
         }
     };
 
@@ -87,16 +83,16 @@ public class Subscription extends RemotePodcastData {
             this.logoUrl = p.getLogoUrl();
         }
 
-        public Builder(Subscription subscription){
-            this.id = subscription.getId();
-            this.title = subscription.getTitle();
-            this.description = subscription.getDescription();
-            this.url = subscription.getUrl();
-            this.website = subscription.getWebsite();
-            this.subscribers = subscription.getSubscribers();
-            this.logoUrl = subscription.getLogoUrl();
-            this.localLogoUrl = subscription.getLocalLogoUrl();
-            this.dateUpdated = subscription.getDateUpdatedUtc();
+        public Builder(PodcastSubscription podcastSubscription){
+            this.id = podcastSubscription.getId();
+            this.title = podcastSubscription.getTitle();
+            this.description = podcastSubscription.getDescription();
+            this.url = podcastSubscription.getUrl();
+            this.website = podcastSubscription.getWebsite();
+            this.subscribers = podcastSubscription.getSubscribers();
+            this.logoUrl = podcastSubscription.getLogoUrl();
+            this.localLogoUrl = podcastSubscription.getLocalLogoUrl();
+            this.dateUpdated = podcastSubscription.getDateUpdatedUtc();
         }
 
         public Builder setTitle(String title) {
@@ -144,8 +140,8 @@ public class Subscription extends RemotePodcastData {
             return this;
         }
 
-        public Subscription build() {
-            return new Subscription(id, title, description, url, website, subscribers, logoUrl, localLogoUrl, dateUpdated);
+        public PodcastSubscription build() {
+            return new PodcastSubscription(id, title, description, url, website, subscribers, logoUrl, localLogoUrl, dateUpdated);
         }
     }
 }

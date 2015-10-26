@@ -1,6 +1,6 @@
 package com.neykov.podcastportal.model.networking;
 
-import com.neykov.podcastportal.model.RemoteEpisodeData;
+import com.neykov.podcastportal.model.entity.RemoteEpisodeData;
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.entity.Tag;
 

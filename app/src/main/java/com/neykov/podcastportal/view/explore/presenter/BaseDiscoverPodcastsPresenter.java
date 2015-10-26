@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
-import com.neykov.podcastportal.model.entity.Subscription;
+import com.neykov.podcastportal.model.entity.PodcastSubscription;
 import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
 import com.neykov.podcastportal.view.base.BasePresenter;
 import com.neykov.podcastportal.view.base.fragment.ItemListView;
@@ -65,10 +65,10 @@ public abstract class BaseDiscoverPodcastsPresenter extends BasePresenter<Discov
         fetchPodcastItems();
     }
 
-    public void unsubscribeFromPodcast(int position, Subscription subscription) {
+    public void unsubscribeFromPodcast(int position, PodcastSubscription podcastSubscription) {
         //noinspection ConstantConditions
         getView().showLoadingIndicator();
-        mSubscriptionsManager.unsubscribeFromPodcast(subscription)
+        mSubscriptionsManager.unsubscribeFromPodcast(podcastSubscription)
                 .compose(delayUntilViewAvailable())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(itemListViewSubscriptionDelivery -> itemListViewSubscriptionDelivery.split(
@@ -121,7 +121,7 @@ public abstract class BaseDiscoverPodcastsPresenter extends BasePresenter<Discov
     }
 
     private void fetchPodcastItems() {
-        Observable<Map<String, Subscription>> subscriptionsMapObservable = mSubscriptionsManager.getSubscriptionsStream()
+        Observable<Map<String, PodcastSubscription>> subscriptionsMapObservable = mSubscriptionsManager.getSubscriptionsStream(false)
                 .firstOrDefault(new ArrayList<>(0))
                 .subscribeOn(Schedulers.io())
                 .flatMap(Observable::from)

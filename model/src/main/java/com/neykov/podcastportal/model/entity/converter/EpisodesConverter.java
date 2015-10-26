@@ -14,24 +14,40 @@ public class EpisodesConverter implements Converter<Episode>, TransactionConvert
     @Override
     public ContentValues convert(Episode entity) {
         ContentValues values = new ContentValues();
+        values.put(DatabaseContract.Episode.EPISODE_ID, entity.getId() == 0? null: entity.getId());
         values.put(DatabaseContract.Episode.PODCAST_ID, entity.getPodcastId());
         values.put(DatabaseContract.Episode.TITLE, entity.getTitle());
-        values.put(DatabaseContract.Episode.CONTENT_URL, entity.getUrl());
-        values.put(DatabaseContract.Episode.MIME_TYPE, entity.getMimeType());
         values.put(DatabaseContract.Episode.DESCRIPTION, entity.getDescription());
+        values.put(DatabaseContract.Episode.CONTENT_URL, entity.getContentUrl());
+        values.put(DatabaseContract.Episode.MIME_TYPE, entity.getMimeType());
+        values.put(DatabaseContract.Episode.FILE_URL, entity.getFileUrl());
+        values.put(DatabaseContract.Episode.FILE_SIZE, entity.getFileSize());
+        values.put(DatabaseContract.Episode.DOWNLOAD_STATE, entity.getDownloadState());
+        values.put(DatabaseContract.Episode.LENGTH, entity.getFileSize());
+        values.put(DatabaseContract.Episode.WATCHED, entity.isWatched() ? 1 : 0);
+        values.put(DatabaseContract.Episode.PLAYLIST_ENTRY_ID, entity.getPlaylistEntryId());
         values.put(DatabaseContract.Episode.RELEASE_DATE, entity.getReleased().getTime());
         return values;
     }
 
     @Override
     public Episode convert(Cursor valueCursor) {
+        int playlistIdIndex = valueCursor.getColumnIndex(DatabaseContract.Episode.PLAYLIST_ENTRY_ID);
+        Long playlistEntryId = valueCursor.isNull(playlistIdIndex) ? null : valueCursor.getLong(playlistIdIndex);
+
         return new Episode(
-                valueCursor.getLong(valueCursor.getColumnIndex(DatabaseContract.Episode._ID)),
+                valueCursor.getLong(valueCursor.getColumnIndex(DatabaseContract.Episode.EPISODE_ID)),
                 valueCursor.getLong(valueCursor.getColumnIndex(DatabaseContract.Episode.PODCAST_ID)),
                 valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.TITLE)),
+                valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.DESCRIPTION)),
                 valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.CONTENT_URL)),
                 valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.MIME_TYPE)),
-                valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.DESCRIPTION)),
+                valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.FILE_URL)),
+                valueCursor.getLong(valueCursor.getColumnIndex(DatabaseContract.Episode.FILE_SIZE)),
+                valueCursor.getInt(valueCursor.getColumnIndex(DatabaseContract.Episode.DOWNLOAD_STATE)),
+                valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.LENGTH)),
+                valueCursor.getInt(valueCursor.getColumnIndex(DatabaseContract.Episode.WATCHED))> 0,
+                playlistEntryId,
                 new Date(valueCursor.getLong(valueCursor.getColumnIndex(DatabaseContract.Episode.RELEASE_DATE))));
     }
 
@@ -43,11 +59,15 @@ public class EpisodesConverter implements Converter<Episode>, TransactionConvert
 
     @Override
     public ContentProviderOperation convertToDeleteOperation(Episode value) {
-        return null;
+        return ContentProviderOperation.newDelete(DatabaseContract.Episode.buildItemUri(value.getId()))
+                .withExpectedCount(1)
+                .build();
     }
 
     @Override
     public ContentProviderOperation convertToUpdateOperation(Episode value) {
-        return null;
+        return ContentProviderOperation.newUpdate(DatabaseContract.Episode.buildItemUri(value.getId()))
+                .withExpectedCount(1)
+                .build();
     }
 }

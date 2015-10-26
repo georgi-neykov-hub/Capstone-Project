@@ -2,12 +2,16 @@ package com.neykov.podcastportal.model;
 
 import android.content.Context;
 
+import com.squareup.sqlbrite.BriteContentResolver;
+
 public abstract class BaseManager {
 
     private Context mApplicationContext;
+    private BriteContentResolver mBriteResolver;
 
-    protected BaseManager(Context mApplicationContext) {
+    protected BaseManager(Context mApplicationContext, BriteContentResolver resolver) {
         this.mApplicationContext = mApplicationContext;
+        this.mBriteResolver = resolver;
     }
 
     /**
@@ -15,5 +19,9 @@ public abstract class BaseManager {
      */
     protected Context getApplicationContext() {
         return mApplicationContext;
+    }
+
+    protected BriteContentResolver getBriteResolver(){
+        return mBriteResolver;
     }
 }

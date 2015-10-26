@@ -16,6 +16,7 @@ import android.view.View;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.view.explore.ExploreActivity;
+import com.neykov.podcastportal.view.player.PlayerActivity;
 import com.neykov.podcastportal.view.subscriptions.MyPodcastsActivity;
 
 public abstract class NavigationDrawerActivity extends BaseActivity implements DrawerLayoutProvider, NavigationView.OnNavigationItemSelectedListener {
@@ -72,6 +73,8 @@ public abstract class NavigationDrawerActivity extends BaseActivity implements D
             case R.id.navigation_my_podcasts:
                 openSection(MyPodcastsActivity.class);
                 break;
+            case R.id.navigation_player:
+                openSection(PlayerActivity.class);
             case R.id.navigation_about:
         }
         return false;

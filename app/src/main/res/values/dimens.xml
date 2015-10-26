@@ -12,4 +12,5 @@
     <dimen name="rhythm_control_normal">48dp</dimen>
     <dimen name="rhythm_control_half">24dp</dimen>
     <dimen name="rhythm_space_half">4dp</dimen>
+    <dimen name="list_item_text_offset">72dp</dimen>
 </resources>

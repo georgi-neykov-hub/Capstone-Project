@@ -27,8 +27,12 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (!mFragmentStack.pop())
+        if (!mFragmentStack.pop()) {
             super.onBackPressed();
+        }
+        if(isFinishing()){
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        }
     }
 
     public final DependencyResolver getDependencyResolver() {

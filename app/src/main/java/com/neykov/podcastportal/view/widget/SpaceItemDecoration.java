@@ -28,9 +28,9 @@ public class SpaceItemDecoration extends RecyclerView.ItemDecoration {
                                @DimenRes int dimenResId,
                                @DimenRes int endDimenResId,
                                @Direction int direction) {
-        this(resources.getDimensionPixelSize(startDimenResId),
-                resources.getDimensionPixelSize(dimenResId),
-                resources.getDimensionPixelSize(endDimenResId),
+        this(startDimenResId != 0 ? resources.getDimensionPixelSize(startDimenResId) : 0,
+                dimenResId != 0 ? resources.getDimensionPixelSize(dimenResId) : 0,
+                endDimenResId != 0 ? resources.getDimensionPixelSize(endDimenResId) : 0,
                 direction);
     }
 

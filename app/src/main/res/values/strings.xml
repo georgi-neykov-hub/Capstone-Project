@@ -13,6 +13,10 @@
     <string name="label_no_network">You are offline</string>
     <string name="label_search">Search</string>
     <string name="label_subscribe">Subscribe</string>
+    <string name="label_add_playlist_end">Add to Playlist End</string>
+    <string name="label_add_playlist_top">Add to Playlist Top</string>
+    <string name="label_remove_playlist">Remove from Playlist</string>
+    <string name="label_download">Download</string>
     <string name="label_unsubscribe">Unsubscribe</string>
     <string name="label_subscribers_count_format">%1d Subscribers</string>
     <string name="label_share">Share</string>

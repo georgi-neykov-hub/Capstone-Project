@@ -1,8 +1,8 @@
 package com.neykov.podcastportal.view.subscriptions.presenter;
 
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.internal.view.SupportMenuInflater;
 import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,23 +18,25 @@ import com.neykov.podcastportal.view.base.adapter.BaseListenerViewHolder;
 import com.neykov.podcastportal.view.base.adapter.OnItemClickListener;
 import com.squareup.picasso.Picasso;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdapter.EpisodeViewHolder> {
 
     public interface EpisodeItemListener extends OnItemClickListener{
         void onDownloadClick(int position);
-        void onPlaylistClick(int position);
-
+        void onAddPlaylistTopClick(int position);
+        void onAddPlaylistEndClick(int position);
+        void onRemoveFromPlaylistClick(int position);
     }
 
     private String mDefaultThumbnailUrl;
+    private int mLastScrollPositionX;
 
-    public NestedEpisodeAdapter(List<Episode> data) {
-        super(data);
-    }
+    private WeakReference<EpisodeItemListener> mListenerRef;
 
-    public NestedEpisodeAdapter() {
+    public void setListener(EpisodeItemListener listener){
+        mListenerRef = new WeakReference<>(listener);
     }
 
     @Override
@@ -43,10 +45,24 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
     }
 
     @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        recyclerView.scrollTo(mLastScrollPositionX, 0);
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        mLastScrollPositionX = recyclerView.getScrollX();
+        super.onDetachedFromRecyclerView(recyclerView);
+    }
+
+    @Override
     public EpisodeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View itemView = inflater.inflate(R.layout.list_item_episode_lite, parent, false);
-        return new EpisodeViewHolder(itemView);
+        EpisodeViewHolder holder = new EpisodeViewHolder(itemView);
+        holder.setListener(mProxyListener);
+        return holder;
     }
 
     @Override
@@ -58,12 +74,56 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
         mDefaultThumbnailUrl = url;
     }
 
-    protected static class EpisodeViewHolder extends BaseListenerViewHolder<OnItemClickListener>{
+    private EpisodeItemListener mProxyListener = new EpisodeItemListener() {
+        @Override
+        public void onDownloadClick(int position) {
+            EpisodeItemListener listener = mListenerRef.get();
+            if(listener != null){
+                listener.onDownloadClick(position);
+            }
+        }
+
+        @Override
+        public void onAddPlaylistTopClick(int position) {
+            EpisodeItemListener listener = mListenerRef.get();
+            if(listener != null){
+                listener.onAddPlaylistTopClick(position);
+            }
+        }
+
+        @Override
+        public void onAddPlaylistEndClick(int position) {
+            EpisodeItemListener listener = mListenerRef.get();
+            if(listener != null){
+                listener.onAddPlaylistEndClick(position);
+            }
+        }
+
+        @Override
+        public void onRemoveFromPlaylistClick(int position) {
+            EpisodeItemListener listener = mListenerRef.get();
+            if(listener != null){
+                listener.onRemoveFromPlaylistClick(position);
+            }
+        }
+
+        @Override
+        public void onItemClick(int position) {
+            EpisodeItemListener listener = mListenerRef.get();
+            if(listener != null){
+                listener.onItemClick(position);
+            }
+        }
+    };
+
+    protected static class EpisodeViewHolder extends BaseListenerViewHolder<EpisodeItemListener>{
 
         private ImageView mThumbnailView;
         private TextView mTitleTextView;
         private MenuItem mDownloadMenuItem;
-        private MenuItem mPlaylistAddItem;
+        private MenuItem mPlaylistAddTopItem;
+        private MenuItem mPlaylistAddEndItem;
+        private MenuItem mPlaylistRemoveItem;
 
         protected EpisodeViewHolder(View itemView) {
             super(itemView);
@@ -71,13 +131,13 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
             mTitleTextView = (TextView) itemView.findViewById(R.id.title);
 
             ActionMenuView menuView = (ActionMenuView) itemView.findViewById(R.id.menu);
+            menuView.setOnMenuItemClickListener(mMenuItemCLickListener);
             Menu itemMenu = menuView.getMenu();
-            new SupportMenuInflater(menuView.getContext()).inflate(R.menu.menu_podcast_listitem, itemMenu);
-            mPlaylistAddItem = itemMenu.findItem(R.id.playlist_add);
+            new SupportMenuInflater(menuView.getContext()).inflate(R.menu.menu_podcast_listitem_lite, itemMenu);
+            mPlaylistAddTopItem = itemMenu.findItem(R.id.playlist_add_top);
+            mPlaylistAddEndItem = itemMenu.findItem(R.id.playlist_add_end);
+            mPlaylistRemoveItem = itemMenu.findItem(R.id.playlist_remove);
             mDownloadMenuItem = itemMenu.findItem(R.id.download);
-
-            //DrawableCompat.setTint(mPlaylistAddItem.getIcon(), mTitleTextView.getCurrentTextColor());
-            //DrawableCompat.setTint(mDownloadMenuItem.getIcon(), mTitleTextView.getCurrentTextColor());
         }
 
         private void onBind(Episode episode, String fallbackThumbnailUrl){
@@ -88,6 +148,34 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
                     .centerCrop()
                     .placeholder(R.color.photo_placeholder)
                     .into(mThumbnailView);
+            mDownloadMenuItem.setVisible(episode.getDownloadState() != Episode.DOWNLOADED);
+            mDownloadMenuItem.setEnabled(episode.getDownloadState() == Episode.REMOTE);
+
+            mPlaylistRemoveItem.setVisible(episode.getPlaylistEntryId() != null);
+            mPlaylistAddEndItem.setVisible(!mPlaylistRemoveItem.isVisible());
+            mPlaylistAddTopItem.setVisible(!mPlaylistRemoveItem.isVisible());
         }
+
+        private final ActionMenuView.OnMenuItemClickListener mMenuItemCLickListener = item -> {
+            int position = this.getAdapterPosition();
+            if(position != RecyclerView.NO_POSITION && getListener() != null){
+                switch (item.getItemId()){
+                    case R.id.playlist_add_top:
+                        getListener().onAddPlaylistTopClick(position);
+                        break;
+                    case R.id.playlist_add_end:
+                        getListener().onAddPlaylistEndClick(position);
+                        break;
+                    case R.id.playlist_remove:
+                        getListener().onRemoveFromPlaylistClick(position);
+                        break;
+                    case R.id.download:
+                        getListener().onDownloadClick(position);
+                        break;
+                }
+            }
+
+            return true;
+        };
     }
 }

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="?listPreferredItemHeight"
+    android:background="@android:color/white">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@+id/length"
+        android:layout_toEndOf="@+id/thumbnailContainer"
+        android:layout_marginTop="12dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:scrollHorizontally="true"
+        tools:text="Some long cheesy title that may not fit the screen"/>
+
+    <TextView
+        android:id="@+id/podcastName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/thumbnailContainer"
+        android:layout_toStartOf="@+id/length"
+        android:layout_below="@+id/title"
+        android:layout_marginTop="@dimen/rhythm_space_half"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        android:singleLine="true"
+        tools:text="The Podcast Title"/>
+
+    <FrameLayout
+        android:id="@+id/thumbnailContainer"
+        android:layout_width="@dimen/rhythm_control_normal"
+        android:layout_height="@dimen/rhythm_control_normal"
+        android:layout_marginTop="@dimen/rhythm_space_single"
+        android:layout_marginBottom="@dimen/rhythm_space_single"
+        android:layout_marginStart="@dimen/rhythm_space_double"
+        android:layout_marginEnd="@dimen/rhythm_space_single"
+        android:src="@color/photo_placeholder">
+
+        <ImageView
+            android:id="@+id/thumbnail"
+            android:layout_width="@dimen/rhythm_control_normal"
+            android:layout_height="@dimen/rhythm_control_normal"
+            android:src="@color/photo_placeholder"/>
+
+        <ImageView
+            android:id="@+id/watchedIcon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/rhythm_space_single"
+            android:src="@drawable/ic_action_done"
+            android:tint="@android:color/white"/>
+        1
+    </FrameLayout>
+
+
+
+    <TextView
+        android:id="@+id/length"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/dragHandle"
+        android:layout_marginStart="@dimen/rhythm_space_half"
+        android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+        android:gravity="center"
+        android:singleLine="true"
+        tools:text="188:88"/>
+    
+    <ImageView
+        android:id="@+id/dragHandle"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_action_reorder"
+        android:tint="?android:textColorPrimary"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="16dp"/>
+</RelativeLayout>

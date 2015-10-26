@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
-import com.neykov.podcastportal.model.entity.Subscription;
+import com.neykov.podcastportal.model.entity.PodcastSubscription;
 import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
 import com.neykov.podcastportal.view.base.fragment.ToolbarFragment;
@@ -167,7 +167,7 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
         }
 
         @Override
-        public void onPodcastSubcribed(Subscription podcast) {
+        public void onPodcastSubcribed(PodcastSubscription podcast) {
 
         }
 

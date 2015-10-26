@@ -13,7 +13,7 @@ import android.view.View;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
-import com.neykov.podcastportal.model.entity.Subscription;
+import com.neykov.podcastportal.model.entity.PodcastSubscription;
 import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.AlertDialogFragment;
 import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
@@ -105,8 +105,8 @@ public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapte
         @Override
         public void onItemSubscribeClick(int position) {
             RemotePodcastData podcast = getAdapter().getItem(position);
-            if (podcast instanceof Subscription) {
-                getPresenter().unsubscribeFromPodcast(position, (Subscription) podcast);
+            if (podcast instanceof PodcastSubscription) {
+                getPresenter().unsubscribeFromPodcast(position, (PodcastSubscription) podcast);
             } else {
                 getPresenter().subscribeForPodcast(position, podcast);
             }
@@ -119,7 +119,7 @@ public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapte
     };
 
     @Override
-    public void onPodcastSubcribed(Subscription podcast) {
+    public void onPodcastSubcribed(PodcastSubscription podcast) {
 
     }
 
@@ -128,7 +128,7 @@ public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapte
 
     }
 
-    private void unsubscribePodcast(Subscription subscription){
+    private void unsubscribePodcast(PodcastSubscription podcastSubscription){
         new AlertDialogFragment.Builder(getContext())
                 .setMessage("Unsubscribing will delete any related downloaded episodes.")
                 .setPositiveButton(R.string.action_unsubscribe)

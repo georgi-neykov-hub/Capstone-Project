@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.model.entity.Subscription;
+import com.neykov.podcastportal.model.entity.PodcastSubscription;
 import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
 import com.neykov.podcastportal.view.base.fragment.ItemListView;
 import com.neykov.podcastportal.view.base.fragment.ToolbarFragment;
@@ -26,7 +26,7 @@ public class EpisodesListFragment extends ToolbarFragment {
     public static final String TAG = EpisodesListFragment.class.getName();
     private static final String ARG_TARGET_PODCAST = "EpisodesListFragment.ARG_TARGET_PODCAST";
 
-    public static EpisodesListFragment newInstance(Subscription podcast) {
+    public static EpisodesListFragment newInstance(PodcastSubscription podcast) {
         if (podcast == null) {
             throw new IllegalArgumentException("Podcast argument cannot be null.");
         }
@@ -42,7 +42,7 @@ public class EpisodesListFragment extends ToolbarFragment {
         return new EpisodesListFragment();
     }
 
-    private Subscription mTargetPodcast;
+    private PodcastSubscription mTargetPodcast;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,7 +83,7 @@ public class EpisodesListFragment extends ToolbarFragment {
 
         public static final String TAG = ContentFragment.class.getName();
 
-        protected static ContentFragment newInstance(Subscription podcast) {
+        protected static ContentFragment newInstance(PodcastSubscription podcast) {
             if (podcast == null) {
                 throw new IllegalArgumentException("Podcast argument cannot be null.");
             }
@@ -95,7 +95,7 @@ public class EpisodesListFragment extends ToolbarFragment {
             return fragment;
         }
 
-        private Subscription mTargetPodcast;
+        private PodcastSubscription mTargetPodcast;
 
         @Override
         public void onCreate(Bundle bundle) {

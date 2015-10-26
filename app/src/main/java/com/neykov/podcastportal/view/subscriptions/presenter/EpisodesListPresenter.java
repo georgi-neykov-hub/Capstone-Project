@@ -2,7 +2,7 @@ package com.neykov.podcastportal.view.subscriptions.presenter;
 
 import android.os.Bundle;
 
-import com.neykov.podcastportal.model.entity.Subscription;
+import com.neykov.podcastportal.model.entity.PodcastSubscription;
 import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
 import com.neykov.podcastportal.view.base.BasePresenter;
 import com.neykov.podcastportal.view.base.fragment.ItemListView;
@@ -37,7 +37,7 @@ public class EpisodesListPresenter extends BasePresenter<ItemListView> {
         mAdapter = null;
     }
 
-    public void refreshEpisodes(Subscription target){
+    public void refreshEpisodes(PodcastSubscription target){
         rx.Subscription subscription = mManager.updateSubscription(target)
                 .observeOn(AndroidSchedulers.mainThread())
                 .compose(delayUntilViewAvailable())
@@ -47,7 +47,7 @@ public class EpisodesListPresenter extends BasePresenter<ItemListView> {
         this.add(subscription);
     }
 
-    public void subscribeForEpisodeStream(Subscription target){
+    public void subscribeForEpisodeStream(PodcastSubscription target){
         mStreamSubscription = mManager.getEpisodesStream(target)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

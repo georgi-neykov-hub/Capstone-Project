@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
-import com.neykov.podcastportal.model.entity.Subscription;
+import com.neykov.podcastportal.model.entity.PodcastSubscription;
 import com.neykov.podcastportal.view.base.adapter.BaseAdapter;
 import com.neykov.podcastportal.view.base.adapter.BaseListenerViewHolder;
 import com.squareup.picasso.Picasso;
@@ -61,7 +61,7 @@ public class PodcastsAdapter extends BaseAdapter<RemotePodcastData, PodcastsAdap
 
     @Override
     public int getItemViewType(int position) {
-        return (getItem(position) instanceof Subscription) ? TYPE_SUBSCRIPTION : TYPE_PODCAST;
+        return (getItem(position) instanceof PodcastSubscription) ? TYPE_SUBSCRIPTION : TYPE_PODCAST;
     }
 
     private final PodcastItemListener mProxyListener = new PodcastItemListener() {
@@ -164,10 +164,10 @@ public class PodcastsAdapter extends BaseAdapter<RemotePodcastData, PodcastsAdap
         @Override
         protected void onBind(RemotePodcastData podcast) {
             super.onBind(podcast);
-            Subscription subscription = (Subscription) podcast;
+            PodcastSubscription podcastSubscription = (PodcastSubscription) podcast;
             long now = System.currentTimeMillis();
             CharSequence lastUpdateText = DateUtils.getRelativeTimeSpanString(
-                    subscription.getDateUpdatedUtc().getTime(), now, DateUtils.SECOND_IN_MILLIS);
+                    podcastSubscription.getDateUpdatedUtc().getTime(), now, DateUtils.SECOND_IN_MILLIS);
             mLastUpdateTextView.setText(lastUpdateText);
         }
     }

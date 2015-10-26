@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
-import com.neykov.podcastportal.model.entity.Subscription;
+import com.neykov.podcastportal.model.entity.PodcastSubscription;
 import com.neykov.podcastportal.model.entity.Tag;
 import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
@@ -136,7 +136,7 @@ public class PodcastsForTagFragment extends ToolbarFragment {
         }
 
         @Override
-        public void onPodcastSubcribed(Subscription podcast) {
+        public void onPodcastSubcribed(PodcastSubscription podcast) {
 
         }
 
@@ -154,8 +154,8 @@ public class PodcastsForTagFragment extends ToolbarFragment {
             @Override
             public void onItemSubscribeClick(int position) {
                 RemotePodcastData podcast = getAdapter().getItem(position);
-                if (podcast instanceof Subscription) {
-                    getPresenter().unsubscribeFromPodcast(position, (Subscription) podcast);
+                if (podcast instanceof PodcastSubscription) {
+                    getPresenter().unsubscribeFromPodcast(position, (PodcastSubscription) podcast);
                 } else {
                     getPresenter().subscribeForPodcast(position, podcast);
                 }
