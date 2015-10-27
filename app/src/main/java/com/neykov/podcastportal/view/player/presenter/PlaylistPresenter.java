@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.neykov.podcastportal.model.entity.PlaylistEntry;
 import com.neykov.podcastportal.model.playlist.PlaylistManager;
 import com.neykov.podcastportal.view.base.BasePresenter;
+import com.neykov.podcastportal.view.player.view.PlaylistItemTouchCallback;
 import com.neykov.podcastportal.view.player.view.PlaylistView;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import javax.inject.Inject;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class PlaylistPresenter extends BasePresenter<PlaylistView> {
+public class PlaylistPresenter extends BasePresenter<PlaylistView> implements PlaylistItemTouchCallback.PlaylistItemMoveHandler {
 
     public static final int PLAYLIST_STREAM_RESTARTABLE_ID = 1;
     private PlaylistManager mPlaylistManager;
@@ -24,6 +25,18 @@ public class PlaylistPresenter extends BasePresenter<PlaylistView> {
     public PlaylistPresenter(PlaylistManager manager) {
         this.mPlaylistManager = manager;
         mAdapter = new PlaylistEntryAdapter();
+    }
+
+    @Override
+    public void onItemMove(int fromPosition, int toPosition) {
+        PlaylistEntry target = getAdapter().getItem(fromPosition);
+        PlaylistEntry anchor = getAdapter().getItem(toPosition);
+    }
+
+    @Override
+    public void onItemDismiss(int position) {
+        PlaylistEntry entry = getAdapter().getItem(position);
+        this.add(mPlaylistManager.remove(entry).subscribe());
     }
 
     @Override
@@ -52,6 +65,6 @@ public class PlaylistPresenter extends BasePresenter<PlaylistView> {
 
 
     public void remove(PlaylistEntry entry){
-        this.add(mPlaylistManager.remove(entry).subscribe());
+
     }
 }

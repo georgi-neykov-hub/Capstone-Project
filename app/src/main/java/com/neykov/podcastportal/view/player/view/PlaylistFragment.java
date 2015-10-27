@@ -17,7 +17,14 @@ import com.neykov.podcastportal.view.widget.SpaceItemDecoration;
 
 public class PlaylistFragment extends BaseListViewFragment<PlaylistEntryAdapter, PlaylistPresenter> implements PlaylistView {
 
-    private RecyclerView mItemsRecyclerView;
+    private PlaylistItemTouchCallback mItemTouchCallback;
+
+    @Override
+    public void onDestroyView() {
+        mItemTouchCallback.setItemMoveHandler(null);
+        mItemTouchCallback = null;
+        super.onDestroyView();
+    }
 
     @NonNull
     @Override
@@ -38,6 +45,10 @@ public class PlaylistFragment extends BaseListViewFragment<PlaylistEntryAdapter,
 
     @Override
     protected void onConfigureRecycleView(@NonNull RecyclerView view) {
+        mItemTouchCallback = new PlaylistItemTouchCallback();
+        mItemTouchCallback.setItemMoveHandler(getPresenter());
+        ItemTouchHelper swipeDrageHelper = new ItemTouchHelper(mItemTouchCallback);
+        view.addItemDecoration(swipeDrageHelper);
     }
 
     @NonNull
@@ -46,39 +57,4 @@ public class PlaylistFragment extends BaseListViewFragment<PlaylistEntryAdapter,
         return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
     }
 
-    private final ItemTouchHelper.Callback mCallback = new ItemTouchHelper.Callback() {
-        @Override
-        public boolean isLongPressDragEnabled() {
-            return true;
-        }
-
-        @Override
-        public boolean isItemViewSwipeEnabled() {
-            return true;
-        }
-
-        @Override
-        public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-            int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-            int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
-            return makeMovementFlags(dragFlags, swipeFlags);
-        }
-
-        @Override
-        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-            int position = viewHolder.getAdapterPosition();
-            if(position != RecyclerView.NO_POSITION) {
-                getPresenter().remove(getAdapter().getItem(position));
-            }
-            return true;
-        }
-
-        @Override
-        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-            int position = viewHolder.getAdapterPosition();
-            if(position != RecyclerView.NO_POSITION) {
-                getPresenter().remove(getAdapter().getItem(position));
-            }
-        }
-    };
 }

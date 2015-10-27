@@ -3,18 +3,18 @@ package com.neykov.podcastportal.view.player.view;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
-/**
- * Created by Georgi on 24.10.2015 г..
- */
 public class PlaylistItemTouchCallback extends ItemTouchHelper.Callback {
 
-    public interface PlaylistItemTouchHandler {
+    public interface PlaylistItemMoveHandler {
         void onItemMove(int fromPosition, int toPosition);
         void onItemDismiss(int position);
-        void onDragSwipeComplete(int position);
     }
 
-    private PlaylistItemTouchHandler mListener;
+    private PlaylistItemMoveHandler mItemMoveHandler;
+
+    public void setItemMoveHandler(PlaylistItemMoveHandler handler) {
+        this.mItemMoveHandler = handler;
+    }
 
     @Override
     public boolean isLongPressDragEnabled() {
@@ -35,21 +35,26 @@ public class PlaylistItemTouchCallback extends ItemTouchHelper.Callback {
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-        if (viewHolder.getItemViewType() != target.getItemViewType()) {
-            return false;
+        if (viewHolder.getItemViewType() == target.getItemViewType()) {
+            int holderPosition = viewHolder.getAdapterPosition();
+            int targetPosition = target.getAdapterPosition();
+            if(holderPosition != RecyclerView.NO_POSITION &&
+                    targetPosition != RecyclerView.NO_POSITION &&
+                    mItemMoveHandler != null){
+                mItemMoveHandler.onItemMove(holderPosition, targetPosition);
+                return true;
+            }
         }
 
-        mListener.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
         return false;
     }
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        mListener.onItemDismiss(viewHolder.getAdapterPosition());
-    }
-
-    @Override
-    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-        super.clearView(recyclerView, viewHolder);
+        int holderPosition = viewHolder.getAdapterPosition();
+        if(holderPosition != RecyclerView.NO_POSITION &&
+                mItemMoveHandler != null){
+            mItemMoveHandler.onItemDismiss(holderPosition);
+        }
     }
 }
