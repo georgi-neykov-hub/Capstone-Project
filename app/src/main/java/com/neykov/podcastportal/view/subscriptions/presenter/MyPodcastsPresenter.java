@@ -1,7 +1,6 @@
 package com.neykov.podcastportal.view.subscriptions.presenter;
 
 import android.os.Bundle;
-import android.support.annotation.WorkerThread;
 
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.PodcastSubscription;
@@ -25,7 +24,7 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
 
     public static final int RESTARTABLE_ID_SUBSCRIPTIONS = 1;
 
-    private SubscriptionsAdapter mAdapter;
+    private MyPodcastsAdapter mAdapter;
     private SubscriptionsManager mManager;
     private PlaylistManager mPlaylistManager;
     private SubscriptionList mRowsSubscriptions;
@@ -34,7 +33,7 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
     public MyPodcastsPresenter(SubscriptionsManager manager, PlaylistManager playlistManager) {
         this.mManager = manager;
         this.mPlaylistManager = playlistManager;
-        this.mAdapter = new SubscriptionsAdapter();
+        this.mAdapter = new MyPodcastsAdapter();
         this.mRowsSubscriptions = new SubscriptionList();
         mAdapter.setSubscriptionItemListener(mSubscriptionItemListener);
         mAdapter.setEpisodeItemListener(mEpisodeItemListener);
@@ -58,7 +57,7 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
         this.start(RESTARTABLE_ID_SUBSCRIPTIONS);
     }
 
-    public SubscriptionsAdapter getAdapter() {
+    public MyPodcastsAdapter getAdapter() {
         return mAdapter;
     }
 
@@ -72,6 +71,7 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mRowsSubscriptions.clear();
         mAdapter.clearItems();
     }
 
@@ -93,7 +93,7 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
     }
 
 
-    private final SubscriptionsAdapter.ItemListener mSubscriptionItemListener = new SubscriptionsAdapter.ItemListener() {
+    private final MyPodcastsAdapter.ItemListener mSubscriptionItemListener = new MyPodcastsAdapter.ItemListener() {
         @Override
         public void onUnsubscribeClick(int position) {
            unsubscribe(getAdapter().getItem(position).getSubscription());

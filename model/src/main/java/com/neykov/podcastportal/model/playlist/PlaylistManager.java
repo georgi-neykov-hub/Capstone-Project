@@ -146,6 +146,10 @@ public class PlaylistManager extends BaseManager {
         return getItemBefore(null).toSingle();
     }
 
+    public Single<Void> remove(PlaylistEntry entry) {
+        return remove(entry.getEpisode());
+    }
+
     public Single<Void> remove(Episode episode) {
         return Single.create(singleSubscriber -> {
             ArrayList<ContentProviderOperation> ops = new ArrayList<>(1);

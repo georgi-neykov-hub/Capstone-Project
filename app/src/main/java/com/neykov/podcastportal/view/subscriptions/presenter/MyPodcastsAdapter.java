@@ -18,7 +18,7 @@ import com.neykov.podcastportal.view.widget.SpaceItemDecoration;
 
 import java.lang.ref.WeakReference;
 
-public class SubscriptionsAdapter extends BaseStateAdapter<SubscriptionAdapterItem, SubscriptionsAdapter.SubscriptionViewHolder> {
+public class MyPodcastsAdapter extends BaseStateAdapter<SubscriptionAdapterItem, MyPodcastsAdapter.SubscriptionViewHolder> {
 
     public interface ItemListener extends OnItemClickListener {
         void onUnsubscribeClick(int position);

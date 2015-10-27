@@ -40,4 +40,18 @@ public class PlaylistPresenter extends BasePresenter<PlaylistView> {
     public PlaylistEntryAdapter getAdapter(){
         return mAdapter;
     }
+
+    public void moveAfter(PlaylistEntry entry, PlaylistEntry anchor){
+        this.add(mPlaylistManager.moveAfter(entry, anchor).subscribe());
+    }
+
+
+    public void moveBefore(PlaylistEntry entry, PlaylistEntry anchor){
+        this.add(mPlaylistManager.moveBefore(entry, anchor).subscribe());
+    }
+
+
+    public void remove(PlaylistEntry entry){
+        this.add(mPlaylistManager.remove(entry).subscribe());
+    }
 }
