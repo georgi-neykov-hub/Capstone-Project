@@ -1,5 +1,6 @@
 package com.neykov.podcastportal.view.subscriptions.presenter;
 
+import android.os.Parcelable;
 import android.support.v7.internal.view.SupportMenuInflater;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.RecyclerView;
@@ -31,7 +32,7 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
     }
 
     private String mDefaultThumbnailUrl;
-    private int mLastScrollPositionX;
+    private Parcelable mLayoutState;
 
     private WeakReference<EpisodeItemListener> mListenerRef;
 
@@ -47,12 +48,14 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-        recyclerView.scrollTo(mLastScrollPositionX, 0);
+        if(mLayoutState != null){
+            recyclerView.getLayoutManager().onRestoreInstanceState(mLayoutState);
+        }
     }
 
     @Override
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
-        mLastScrollPositionX = recyclerView.getScrollX();
+        mLayoutState = recyclerView.getLayoutManager().onSaveInstanceState();
         super.onDetachedFromRecyclerView(recyclerView);
     }
 
