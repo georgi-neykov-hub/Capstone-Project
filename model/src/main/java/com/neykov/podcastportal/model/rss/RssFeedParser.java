@@ -79,7 +79,10 @@ public class RssFeedParser {
             String name = parser.getName();
             switch (name) {
                 case ITEM:
-                    itemList.add(readEntry(parser));
+                    RssItem item = readEntry(parser);
+                    if(item.getContent() != null){
+                        itemList.add(item);
+                    }
                     break;
                 case TITLE:
                     title = readTitle(parser);
