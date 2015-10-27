@@ -156,15 +156,11 @@ public class PlaylistManager extends BaseManager {
             ops.add(ContentProviderOperation.newDelete(DatabaseContract.PlaylistEntry.buildItemUri(episode.getPlaylistEntryId()))
                     .withExpectedCount(1)
                     .build());
-            ops.add(ContentProviderOperation.newUpdate(DatabaseContract.Episode.buildItemUri(episode.getId()))
-            .withValue(DatabaseContract.Episode.PODCAST_ID, episode.getPodcastId())
-            .withValue(DatabaseContract.Episode.PLAYLIST_ENTRY_ID, null)
-            .withExpectedCount(1)
-            .build());
-
             try {
                 getApplicationContext().getContentResolver()
                         .applyBatch(DatabaseContract.CONTENT_AUTHORITY, ops);
+                getApplicationContext().getContentResolver().notifyChange(DatabaseContract.Episode.buildItemUri(episode.getId()), null);
+                getApplicationContext().getContentResolver().notifyChange(DatabaseContract.Episode.buildSubscriptionEpisodesUri(episode.getPodcastId()), null);
                 singleSubscriber.onSuccess(null);
             } catch (RemoteException | OperationApplicationException e) {
                 singleSubscriber.onError(e);

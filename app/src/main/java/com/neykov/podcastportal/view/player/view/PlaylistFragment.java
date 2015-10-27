@@ -48,7 +48,7 @@ public class PlaylistFragment extends BaseListViewFragment<PlaylistEntryAdapter,
         mItemTouchCallback = new PlaylistItemTouchCallback();
         mItemTouchCallback.setItemMoveHandler(getPresenter());
         ItemTouchHelper swipeDrageHelper = new ItemTouchHelper(mItemTouchCallback);
-        view.addItemDecoration(swipeDrageHelper);
+        swipeDrageHelper.attachToRecyclerView(view);
     }
 
     @NonNull
