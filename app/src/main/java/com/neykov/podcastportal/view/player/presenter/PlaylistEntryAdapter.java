@@ -65,7 +65,7 @@ public class PlaylistEntryAdapter extends BaseAdapter<PlaylistEntry, PlaylistEnt
 
         protected String getDurationLabel(Episode episode){
             if(episode.getDuration() != null){
-                return DateUtils.formatElapsedTime(episode.getDuration());
+                return DateUtils.formatElapsedTime(episode.getDuration()/1000);
             }else {
                 return NULL_DURATION_LABEL;
             }

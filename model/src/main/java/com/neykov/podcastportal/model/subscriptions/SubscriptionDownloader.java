@@ -41,6 +41,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -94,47 +96,55 @@ public class SubscriptionDownloader {
     }
 
     private Observable<PodcastSubscription> storeSubscriptionUpdates(final PodcastSubscription podcast, final RSSFeed updatedRssFeed) {
+        List<RssItem> rssItems = updatedRssFeed.getChannel().getItemList();
+        if (rssItems.isEmpty()) {
+            return Observable.just(podcast);
+        }
+
         return Observable.<PodcastSubscription>create(subscriber -> {
-            try {
-                Date timestampUtc = DateTime.now(DateTimeZone.UTC).minusMinutes(UPDATE_TIME_TOLERANCE_MINUTES).toDate();
-                PodcastSubscription updatedPodcastSubscription = new PodcastSubscription.Builder(podcast)
-                        .setTitle(updatedRssFeed.getChannel().getTitle())
-                        .setDescription(updatedRssFeed.getChannel().getDescription())
-                        .setDateUpdated(timestampUtc)
-                        .build();
+                    int newEpisodes = 0;
+                    Date latestPubDate = new Date(0);
+                    try {
+                        for (RssItem item : updatedRssFeed.getChannel().getItemList()) {
+                            if (item.getPubDate().after(podcast.getDateUpdatedUtc()) &&
+                                    !episodeAlreadyStored(item, podcast.getId())) {
+                                if (item.getPubDate().after(latestPubDate)) {
+                                    latestPubDate = item.getPubDate();
+                                }
+                                String defaultThumbnail = podcast.getLocalLogoUrl() != null ?
+                                        podcast.getLocalLogoUrl() : podcast.getLogoUrl();
+                                Episode newEpisode = createEpisodeFromRssItem(item, podcast.getId(), defaultThumbnail);
+                                mContext.getContentResolver().insert(DatabaseContract.Episode.CONTENT_URI, mEpisodesConverter.convert(newEpisode));
+                                newEpisodes++;
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.w(TAG, "Error while storing new episode.", e);
+                    }
 
-                ContentProviderOperation subscriptionUpdateOp = ContentProviderOperation
-                        .newUpdate(DatabaseContract.Podcast.buildItemUri(updatedPodcastSubscription.getId()))
-                        .withExpectedCount(1)
-                        .withValues(mSubscriptionConverter.convert(updatedPodcastSubscription))
-                        .build();
-                ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-                ops.add(subscriptionUpdateOp);
+                    if (newEpisodes == 0) {
+                        subscriber.onNext(podcast);
+                        subscriber.onCompleted();
+                        return;
+                    }
 
-                int newEpisodes = 0;
-                for (RssItem item : updatedRssFeed.getChannel().getItemList()) {
-                    if (item.getPubDate().after(podcast.getDateUpdatedUtc()) &&
-                            !episodeAlreadyStored(item, podcast.getId())) {
-                        String defaultThumbnail = updatedPodcastSubscription.getLocalLogoUrl() != null ?
-                                updatedPodcastSubscription.getLocalLogoUrl() : updatedPodcastSubscription.getLogoUrl();
-                        Episode newEpisode = createEpisodeFromRssItem(item, updatedPodcastSubscription.getId(), defaultThumbnail);
-                        ops.add(ContentProviderOperation
-                                .newInsert(DatabaseContract.Episode.CONTENT_URI)
-                                .withValues(mEpisodesConverter.convert(newEpisode))
-                                .build());
-                        newEpisodes++;
+                    try {
+                        Date timestampUtc = new DateTime(latestPubDate.getTime(), DateTimeZone.UTC).minusMinutes(UPDATE_TIME_TOLERANCE_MINUTES).toDate();
+                        PodcastSubscription updatedPodcastSubscription = new PodcastSubscription.Builder(podcast)
+                                .setTitle(updatedRssFeed.getChannel().getTitle())
+                                .setDescription(updatedRssFeed.getChannel().getDescription())
+                                .setDateUpdated(timestampUtc)
+                                .build();
+                        Log.d(TAG, "Saving " + newEpisodes + " new episodes...");
+                        mContext.getContentResolver().update(DatabaseContract.Podcast.buildItemUri(podcast.getId()), null, null, null);
+                        Log.d(TAG, "Success!");
+                        subscriber.onNext(updatedPodcastSubscription);
+                        subscriber.onCompleted();
+                    } catch (Exception e) {
+                        subscriber.onError(e);
                     }
                 }
-
-                Log.d(TAG, "Saving " + newEpisodes + " new episodes...");
-                mContext.getContentResolver().applyBatch(DatabaseContract.CONTENT_AUTHORITY, ops);
-                Log.d(TAG, "Success!");
-                subscriber.onNext(updatedPodcastSubscription);
-                subscriber.onCompleted();
-            } catch (RemoteException | AssertionError | OperationApplicationException e) {
-                subscriber.onError(e);
-            }
-        });
+        );
     }
 
     public Observable<PodcastSubscription> downloadSubscriptionThumbnail(PodcastSubscription subscription) {
@@ -357,7 +367,7 @@ public class SubscriptionDownloader {
         FileOutputStream out = null;
         try {
             String filename = String.format("%s.%s", UUID.randomUUID(), compressFormat.toString().toLowerCase());
-            File dataFile = new File(context.getFilesDir(), "thumbnails/" + filename);
+            File dataFile = new File(context.getDir("thumbnails", Context.MODE_PRIVATE) + filename);
             out = new FileOutputStream(dataFile);
             boolean bitmapCompressed = thumbnail.compress(compressFormat, 100, out);
             return bitmapCompressed ? dataFile : null;

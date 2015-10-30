@@ -86,28 +86,24 @@ public class SubscriptionsManager extends BaseManager {
 
         return Observable.<RemotePodcastData>create(subscriber -> {
             try {
-                Uri targetUri = DatabaseContract.Podcast.CONTENT_URI
-                        .buildUpon()
-                        .appendPath(podcastSubscription.getId().toString())
-                        .build();
-                ArrayList<ContentProviderOperation> opList = new ArrayList<>();
-                opList.add(ContentProviderOperation.newDelete(targetUri)
-                        .withExpectedCount(1)
-                        .build());
-
-                getApplicationContext().getContentResolver().applyBatch(DatabaseContract.CONTENT_AUTHORITY, opList);
-                RemotePodcastData podcast = new RemotePodcastData(
-                        podcastSubscription.getTitle(),
-                        podcastSubscription.getDescription(),
-                        podcastSubscription.getUrl(),
-                        podcastSubscription.getWebsite(),
-                        podcastSubscription.getSubscribers(),
-                        podcastSubscription.getLogoUrl());
-                subscriber.onNext(podcast);
-                subscriber.onCompleted();
-            } catch (RemoteException | OperationApplicationException e) {
+                getApplicationContext().getContentResolver()
+                        .delete(
+                                DatabaseContract.Podcast.CONTENT_URI,
+                                DatabaseContract.Podcast.PODCAST_ID + "=?",
+                                new String[]{podcastSubscription.getId().toString()});
+            } catch (Exception e) {
                 subscriber.onError(e);
             }
+
+            RemotePodcastData podcast = new RemotePodcastData(
+                    podcastSubscription.getTitle(),
+                    podcastSubscription.getDescription(),
+                    podcastSubscription.getUrl(),
+                    podcastSubscription.getWebsite(),
+                    podcastSubscription.getSubscribers(),
+                    podcastSubscription.getLogoUrl());
+            subscriber.onNext(podcast);
+            subscriber.onCompleted();
         }).subscribeOn(Schedulers.io());
     }
 
