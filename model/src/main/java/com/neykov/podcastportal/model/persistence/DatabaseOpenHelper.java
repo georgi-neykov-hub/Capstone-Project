@@ -59,10 +59,11 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_EPISODES_TABLE = "CREATE TABLE " + Episode.TABLE_NAME + " (" +
             Episode.EPISODE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             Episode.TITLE + " TEXT NOT NULL," +
-            Episode.DESCRIPTION + " TEXT NOT NULL," +
-            Episode.CONTENT_URL + " TEXT NOT NULL," +
+            Episode.DESCRIPTION + " TEXT NOT NULL, " +
+            Episode.CONTENT_URL + " TEXT NOT NULL, " +
+            Episode.THUMBNAIL + " TEXT NOT NULL," +
             Episode.MIME_TYPE + " TEXT NOT NULL," +
-            Episode.LENGTH + " INTEGER," +
+            Episode.DURATION + " INTEGER," +
             Episode.PODCAST_ID + " INTEGER NOT NULL," +
             Episode.PLAYLIST_ENTRY_ID + " INTEGER DEFAULT NULL," +
             Episode.WATCHED + " INTEGER NOT NULL," +

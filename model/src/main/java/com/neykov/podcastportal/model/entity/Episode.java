@@ -18,7 +18,7 @@ public class Episode implements EpisodeData {
     public final static int DOWNLOADING = 1;
     public final static int DOWNLOADED = 2;
 
-    public Episode(long id, long podcastId, String title, String description, String contentUrl, String mimeType, String fileUrl, Long fileSize, int downloadState, String mediaLength, boolean watched, Long playlistEntryId, Date released) {
+    public Episode(long id, long podcastId, String title, String description, String contentUrl, String mimeType, String fileUrl, Long fileSize, int downloadState, Long duration, String thumbnail, boolean watched, Long playlistEntryId, Date released) {
         this.id = id;
         this.podcastId = podcastId;
         this.title = title;
@@ -28,10 +28,11 @@ public class Episode implements EpisodeData {
         this.fileUrl = fileUrl;
         this.fileSize = fileSize;
         this.downloadState = downloadState;
-        this.mediaLength = mediaLength;
+        this.duration = duration;
         this.watched = watched;
         this.playlistEntryId = playlistEntryId;
         this.released = released;
+        this.thumbnail = thumbnail;
     }
 
     private long id;
@@ -42,10 +43,10 @@ public class Episode implements EpisodeData {
     private String mimeType;
     private String fileUrl;
     private Long fileSize;
-    private
+    private String thumbnail;
     @DownloadState
-    int downloadState;
-    private String mediaLength;
+    private int downloadState;
+    private Long duration;
     private boolean watched;
     private Long playlistEntryId;
     private Date released;
@@ -86,8 +87,8 @@ public class Episode implements EpisodeData {
         return released;
     }
 
-    public String getMediaLength() {
-        return mediaLength;
+    public Long getDuration() {
+        return duration;
     }
 
     public String getFileUrl() {
@@ -96,6 +97,10 @@ public class Episode implements EpisodeData {
 
     public Long getFileSize() {
         return fileSize;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
     }
 
     public

@@ -42,11 +42,12 @@ public final class DatabaseContract {
         public static final String TITLE = "PodcastTitle";
         public static final String DESCRIPTION = "Description";
         public static final String CONTENT_URL = "ContentURL";
+        public static final String THUMBNAIL = "ThumbnailURL";
         public static final String MIME_TYPE = "MimeType";
         public static final String FILE_URL = "FileURL";
         public static final String FILE_SIZE = "FileSize";
         public static final String DOWNLOAD_STATE = "DownloadState";
-        public static final String LENGTH = "ContentLength";
+        public static final String DURATION = "Duration";
         public static final String WATCHED = "Watched";
         public static final String WEBSITE = "Website";
         public static final String PLAYLIST_ENTRY_ID = PlaylistEntry.PLAYLIST_ENTRY_ID;

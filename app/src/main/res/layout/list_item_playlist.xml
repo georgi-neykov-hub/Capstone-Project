@@ -27,6 +27,7 @@
         android:layout_below="@+id/title"
         android:layout_marginTop="@dimen/rhythm_space_half"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        android:textColor="@color/text_secondary"
         android:singleLine="true"
         tools:text="The Podcast Title"/>
 
@@ -36,7 +37,7 @@
         android:layout_height="@dimen/rhythm_control_normal"
         android:layout_marginTop="@dimen/rhythm_space_single"
         android:layout_marginBottom="@dimen/rhythm_space_single"
-        android:layout_marginStart="@dimen/rhythm_space_double"
+        android:layout_marginStart="@dimen/rhythm_space_single"
         android:layout_marginEnd="@dimen/rhythm_space_single"
         android:src="@color/photo_placeholder">
 
@@ -53,7 +54,6 @@
             android:padding="@dimen/rhythm_space_single"
             android:src="@drawable/ic_action_done"
             android:tint="@android:color/white"/>
-        1
     </FrameLayout>
 
 
@@ -69,6 +69,7 @@
         android:layout_toStartOf="@+id/dragHandle"
         android:layout_marginStart="@dimen/rhythm_space_half"
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+        android:textColor="@color/text_secondary"
         android:gravity="center"
         android:singleLine="true"
         tools:text="188:88"/>
@@ -78,7 +79,7 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:src="@drawable/ic_action_reorder"
-        android:tint="?android:textColorPrimary"
+        android:tint="?android:textColorSecondary"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="12dp"

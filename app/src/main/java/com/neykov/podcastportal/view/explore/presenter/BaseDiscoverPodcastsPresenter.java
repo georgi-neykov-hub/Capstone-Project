@@ -86,7 +86,7 @@ public abstract class BaseDiscoverPodcastsPresenter extends BasePresenter<Discov
     public void subscribeForPodcast(int position, RemotePodcastData podcast) {
         //noinspection ConstantConditions
         getView().showLoadingIndicator();
-        mSubscriptionsManager.subscribeForPodcast(podcast)
+        mSubscriptionsManager.subscribeForPodcast(podcast, false)
                 .compose(delayUntilViewAvailable())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(itemListViewSubscriptionDelivery -> itemListViewSubscriptionDelivery.split(

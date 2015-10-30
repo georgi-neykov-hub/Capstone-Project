@@ -1,12 +1,20 @@
 package com.neykov.podcastportal.model.subscriptions;
 
 import android.content.ContentProviderOperation;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.media.MediaMetadata;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
+import android.webkit.MimeTypeMap;
 
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
@@ -14,22 +22,33 @@ import com.neykov.podcastportal.model.entity.PodcastSubscription;
 import com.neykov.podcastportal.model.entity.converter.EpisodesConverter;
 import com.neykov.podcastportal.model.entity.converter.SubscriptionConverter;
 import com.neykov.podcastportal.model.persistence.DatabaseContract;
+import com.neykov.podcastportal.model.rss.Content;
 import com.neykov.podcastportal.model.rss.RSSFeed;
+import com.neykov.podcastportal.model.rss.RssChannel;
 import com.neykov.podcastportal.model.rss.RssFeedParser;
 import com.neykov.podcastportal.model.rss.RssItem;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+import com.squareup.picasso.Picasso;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import okio.BufferedSink;
+import okio.Okio;
+import retrofit.mime.MimeUtil;
 import rx.Observable;
 
 @Singleton
@@ -58,29 +77,32 @@ public class SubscriptionDownloader {
         }
 
         return downloadFeedData(podcastSubscription.getUrl())
-                .flatMap(updatedRssFeed -> {
-                    Date timestampUtc = DateTime.now(DateTimeZone.UTC).minusMinutes(UPDATE_TIME_TOLERANCE_MINUTES).toDate();
-                    PodcastSubscription updatedPodcastSubscription = new PodcastSubscription.Builder(podcastSubscription)
-                            .setTitle(updatedRssFeed.getChannel().getTitle())
-                            .setDescription(updatedRssFeed.getChannel().getDescription())
-                            .setDateUpdated(timestampUtc)
-                            .build();
-                    return storeSubscriptionUpdates(updatedPodcastSubscription, updatedRssFeed);
-                });
+                .flatMap(updatedRssFeed -> storeSubscriptionUpdates(podcastSubscription, updatedRssFeed));
     }
 
     public Observable<PodcastSubscription> fetchSubscriptionAndEpisodesData(RemotePodcastData source) {
         return downloadFeedData(source.getUrl())
-                .flatMap(rssFeed -> {
-                    Date timestampUtc = rssFeed != null ?
+                .map(rssFeed1 -> {
+                    File imageFile = downloadPodcastThumbnail(mContext, source.getLogoUrl());
+                    return new Pair<>(rssFeed1, imageFile);
+                })
+                .flatMap(rssFeedImageFilePair -> {
+                    Date timestampUtc = rssFeedImageFilePair.first != null ?
                             DateTime.now(DateTimeZone.UTC).minusMinutes(UPDATE_TIME_TOLERANCE_MINUTES).toDate() : new Date(0);
-                    return storeNewSubscriptionData(source, rssFeed, timestampUtc);
+                    return storeNewSubscriptionData(source, rssFeedImageFilePair.first, rssFeedImageFilePair.second, timestampUtc);
                 });
     }
 
-    private Observable<PodcastSubscription> storeSubscriptionUpdates(PodcastSubscription updatedPodcastSubscription, RSSFeed updatedRssFeed) {
+    private Observable<PodcastSubscription> storeSubscriptionUpdates(final PodcastSubscription podcast, final RSSFeed updatedRssFeed) {
         return Observable.<PodcastSubscription>create(subscriber -> {
             try {
+                Date timestampUtc = DateTime.now(DateTimeZone.UTC).minusMinutes(UPDATE_TIME_TOLERANCE_MINUTES).toDate();
+                PodcastSubscription updatedPodcastSubscription = new PodcastSubscription.Builder(podcast)
+                        .setTitle(updatedRssFeed.getChannel().getTitle())
+                        .setDescription(updatedRssFeed.getChannel().getDescription())
+                        .setDateUpdated(timestampUtc)
+                        .build();
+
                 ContentProviderOperation subscriptionUpdateOp = ContentProviderOperation
                         .newUpdate(DatabaseContract.Podcast.buildItemUri(updatedPodcastSubscription.getId()))
                         .withExpectedCount(1)
@@ -91,9 +113,15 @@ public class SubscriptionDownloader {
 
                 int newEpisodes = 0;
                 for (RssItem item : updatedRssFeed.getChannel().getItemList()) {
-                    if (item.getPubDate().after(updatedPodcastSubscription.getDateUpdatedUtc()) &&
-                            !episodeAlreadyStored(item, updatedPodcastSubscription.getId())) {
-                        ops.add(buildEpisodeUpdateInsertOperation(item, updatedPodcastSubscription.getId()));
+                    if (item.getPubDate().after(podcast.getDateUpdatedUtc()) &&
+                            !episodeAlreadyStored(item, podcast.getId())) {
+                        String defaultThumbnail = updatedPodcastSubscription.getLocalLogoUrl() != null ?
+                                updatedPodcastSubscription.getLocalLogoUrl() : updatedPodcastSubscription.getLogoUrl();
+                        Episode newEpisode = createEpisodeFromRssItem(item, updatedPodcastSubscription.getId(), defaultThumbnail);
+                        ops.add(ContentProviderOperation
+                                .newInsert(DatabaseContract.Episode.CONTENT_URI)
+                                .withValues(mEpisodesConverter.convert(newEpisode))
+                                .build());
                         newEpisodes++;
                     }
                 }
@@ -109,11 +137,43 @@ public class SubscriptionDownloader {
         });
     }
 
-    private Observable<PodcastSubscription> storeNewSubscriptionData(RemotePodcastData source, @Nullable RSSFeed feed, Date timestampUtc) {
+    public Observable<PodcastSubscription> downloadSubscriptionThumbnail(PodcastSubscription subscription) {
+        if (subscription.getLocalLogoUrl() != null) {
+            return Observable.just(subscription);
+        }
+
+        return Observable.create(subscriber -> {
+            File localImageFile = downloadPodcastThumbnail(mContext, subscription.getLogoUrl());
+            if (localImageFile == null) {
+                subscriber.onError(new RuntimeException("Failed To download the image file."));
+                return;
+            }
+            try {
+                String filePath = localImageFile.toURI().toString();
+                ContentValues values = new ContentValues(1);
+                values.put(DatabaseContract.Podcast.LOCAL_LOGO_URL, filePath);
+                mContext.getContentResolver().update(
+                        DatabaseContract.Podcast.buildItemUri(subscription.getId()),
+                        values,
+                        null,
+                        null);
+                PodcastSubscription updatedPodcast = new PodcastSubscription.Builder(subscription)
+                        .setLocalLogoUrl(filePath)
+                        .build();
+                subscriber.onNext(updatedPodcast);
+                subscriber.onCompleted();
+            } catch (Exception e) {
+                subscriber.onError(e);
+            }
+        });
+    }
+
+    private Observable<PodcastSubscription> storeNewSubscriptionData(RemotePodcastData source, @Nullable RSSFeed feed, @Nullable File imageFile, Date timestampUtc) {
         return Observable.<PodcastSubscription>create(subscriber -> {
             try {
                 PodcastSubscription podcastSubscription = new PodcastSubscription.Builder(source)
                         .setDateUpdated(timestampUtc)
+                        .setLocalLogoUrl(imageFile != null ? imageFile.toURI().toString() : null)
                         .build();
 
                 ArrayList<ContentProviderOperation> ops = new ArrayList<>();
@@ -122,7 +182,9 @@ public class SubscriptionDownloader {
 
                 if (feed != null && !feed.getChannel().getItemList().isEmpty()) {
                     for (RssItem item : feed.getChannel().getItemList()) {
-                        ops.add(buildEpisodeInsertOperations(item, 0));
+
+                        Episode newEpisode = createEpisodeFromRssItem(item, 0, source.getLogoUrl());
+                        ops.add(buildEpisodeInsertOperations(newEpisode, 0));
                         newEpisodes++;
                     }
                 }
@@ -164,8 +226,7 @@ public class SubscriptionDownloader {
                 .build();
     }
 
-    private ContentProviderOperation buildEpisodeInsertOperations(RssItem item, int backReferenceIndex) {
-        Episode newEpisode = createEpisodeFromRssItem(item, 0);
+    private ContentProviderOperation buildEpisodeInsertOperations(Episode newEpisode, int backReferenceIndex) {
         return ContentProviderOperation
                 .newInsert(DatabaseContract.Episode.CONTENT_URI)
                 .withValues(mEpisodesConverter.convert(newEpisode))
@@ -173,26 +234,20 @@ public class SubscriptionDownloader {
                 .build();
     }
 
-    private ContentProviderOperation buildEpisodeUpdateInsertOperation(RssItem item, long parentId) {
-        Episode newEpisode = createEpisodeFromRssItem(item, parentId);
-        return ContentProviderOperation
-                .newInsert(DatabaseContract.Episode.CONTENT_URI)
-                .withExpectedCount(1)
-                .withValues(mEpisodesConverter.convert(newEpisode))
-                .build();
-    }
 
-    private Episode createEpisodeFromRssItem(RssItem source, long parentId) {
+    private Episode createEpisodeFromRssItem(RssItem source, long parentId, String defautThumbnailUrl) {
+        ContentMetaData data = extractMediaMetaData(source);
         return new Episode(0,
                 parentId,
                 source.getTitle(),
                 source.getDescription(),
                 source.getContent().getContentUrl(),
-                source.getContent().getMimeType(),
+                data.getMimeType() != null ? data.getMimeType() : source.getContent().getMimeType(),
                 null,
                 source.getContent().getContentLength(),
                 Episode.REMOTE,
-                null,
+                data.getDuration(),
+                data.getThumbnailFrame() != null ? data.getThumbnailFrame().toURI().toString() : defautThumbnailUrl,
                 false,
                 null,
                 source.getPubDate());
@@ -203,7 +258,7 @@ public class SubscriptionDownloader {
         try {
             queryResults = mContext.getContentResolver().query(DatabaseContract.Episode.CONTENT_URI,
                     new String[]{DatabaseContract.Episode.PODCAST_ID, DatabaseContract.Episode.CONTENT_URL},
-                    DatabaseContract.Episode.PODCAST_ID + "=? "
+                    DatabaseContract.Episode.PODCAST_ID + "=? AND "
                             + DatabaseContract.Episode.CONTENT_URL + " =?",
                     new String[]{String.valueOf(parentId), item.getContent().getContentUrl()},
                     null);
@@ -215,6 +270,143 @@ public class SubscriptionDownloader {
             if (queryResults != null) {
                 queryResults.close();
             }
+        }
+    }
+
+    private ContentMetaData extractMediaMetaData(RssItem item) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            Uri episodeUri = Uri.parse(item.getContent().getContentUrl());
+            retriever.setDataSource(episodeUri.toString(), Collections.emptyMap());
+            return buildMetaDataWithRetriever(retriever, item);
+        } catch (IllegalArgumentException e) {
+            return buildFallbackFromRssItem(item);
+        } finally {
+            retriever.release();
+        }
+    }
+
+    private ContentMetaData buildFallbackFromRssItem(RssItem item) {
+        return new ContentMetaData(null, item.getContent().getMimeType(), null, false, false);
+    }
+
+    private ContentMetaData buildMetaDataWithRetriever(MediaMetadataRetriever retriever, RssItem item) {
+        String mimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+        if (TextUtils.isEmpty(mimeType)) {
+            mimeType = item.getContent().getMimeType();
+        }
+        boolean hasVideo = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) != null;
+        File thumbnailFile = null;
+        if ((mimeType != null && mimeType.startsWith("video")) || hasVideo) {
+            Bitmap thumbBitmap = retriever.getFrameAtTime();
+            if (thumbBitmap != null) {
+                try {
+                    thumbnailFile = saveThumbnail(mContext, thumbBitmap, Bitmap.CompressFormat.PNG);
+                } finally {
+                    thumbBitmap.recycle();
+                }
+            }
+        }
+        String duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        return new ContentMetaData(
+                !TextUtils.isEmpty(duration) ? Long.parseLong(duration) : null,
+                mimeType,
+                thumbnailFile,
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) != null,
+                hasVideo);
+    }
+
+    private File downloadPodcastThumbnail(Context context, String url) {
+        Response imageResponse;
+        try {
+            Request imageRequest = new Request.Builder().get().url(url).build();
+            imageResponse = mHttpClient.newCall(imageRequest).execute();
+            if (!imageResponse.isSuccessful()) {
+                return null;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+
+        BufferedSink sink = null;
+        try {
+            String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+            String filename = String.format("%s.%s", UUID.randomUUID(), extension);
+            File dataFile = new File(context.getDir("thumbnails", Context.MODE_PRIVATE), filename);
+            sink = Okio.buffer(Okio.sink(dataFile));
+            sink.writeAll(imageResponse.body().source());
+            return dataFile;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            try {
+                if (sink != null) {
+                    sink.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private File saveThumbnail(Context context, Bitmap thumbnail, Bitmap.CompressFormat compressFormat) {
+        if (thumbnail == null) {
+            throw new IllegalArgumentException("Null bitmap argument.");
+        }
+
+        FileOutputStream out = null;
+        try {
+            String filename = String.format("%s.%s", UUID.randomUUID(), compressFormat.toString().toLowerCase());
+            File dataFile = new File(context.getFilesDir(), "thumbnails/" + filename);
+            out = new FileOutputStream(dataFile);
+            boolean bitmapCompressed = thumbnail.compress(compressFormat, 100, out);
+            return bitmapCompressed ? dataFile : null;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static class ContentMetaData {
+        private final Long duration;
+        private final String mimeType;
+        private final File thumbnailFrame;
+        private final boolean hasAudio;
+        private final boolean hasVideo;
+
+        private ContentMetaData(Long duration, String mimeType, File thumbnailFrame, boolean hasAudio, boolean hasVideo) {
+            this.duration = duration;
+            this.mimeType = mimeType;
+            this.thumbnailFrame = thumbnailFrame;
+            this.hasAudio = hasAudio;
+            this.hasVideo = hasVideo;
+        }
+
+        public Long getDuration() {
+            return duration;
+        }
+
+        public String getMimeType() {
+            return mimeType;
+        }
+
+        public File getThumbnailFrame() {
+            return thumbnailFrame;
+        }
+
+        public boolean isHasAudio() {
+            return hasAudio;
+        }
+
+        public boolean isHasVideo() {
+            return hasVideo;
         }
     }
 }

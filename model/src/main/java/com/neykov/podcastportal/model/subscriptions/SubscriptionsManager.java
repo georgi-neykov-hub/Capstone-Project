@@ -1,10 +1,13 @@
 package com.neykov.podcastportal.model.subscriptions;
 
 import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.OperationApplicationException;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.neykov.podcastportal.model.BaseManager;
 import com.neykov.podcastportal.model.entity.Episode;
@@ -15,7 +18,10 @@ import com.neykov.podcastportal.model.entity.converter.SubscriptionConverter;
 import com.neykov.podcastportal.model.persistence.DatabaseContract;
 import com.squareup.sqlbrite.BriteContentResolver;
 
+import org.joda.time.DateTime;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -105,7 +111,40 @@ public class SubscriptionsManager extends BaseManager {
         }).subscribeOn(Schedulers.io());
     }
 
-    public Observable<PodcastSubscription> subscribeForPodcast(RemotePodcastData podcast) {
+    public Observable<PodcastSubscription> subscribeForPodcast(RemotePodcastData podcast, boolean fetchEpisodesImmediately) {
+        if (fetchEpisodesImmediately) {
+            return subscribeForPodcast(podcast);
+        }
+        return Observable.<PodcastSubscription>create(subscriber -> {
+            try {
+                PodcastSubscription.Builder builder = new PodcastSubscription.Builder(podcast)
+                        .setDateUpdated(new Date(0));
+
+                ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+                ops.add(ContentProviderOperation.newInsert(DatabaseContract.Podcast.CONTENT_URI)
+                        .withValues(mSubscriptionConverter.convert(builder.build()))
+                        .build());
+
+                ContentProviderResult[] results = getApplicationContext().getContentResolver().applyBatch(DatabaseContract.CONTENT_AUTHORITY, ops);
+                long insertedItemId = ContentUris.parseId(results[0].uri);
+                PodcastSubscription subscription = builder.setId(insertedItemId).build();
+                subscriber.onNext(subscription);
+                subscriber.onCompleted();
+            } catch (RemoteException | OperationApplicationException e) {
+                subscriber.onError(e);
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .doOnNext(podcastSubscription1 -> mSubscriptionDownloader.downloadSubscriptionThumbnail(podcastSubscription1)
+                        .subscribeOn(Schedulers.io())
+                        .onErrorReturn(throwable1 -> podcastSubscription1)
+                        .flatMap(this::updateSubscription)
+                        .onErrorReturn(throwable -> null)
+                        .subscribeOn(Schedulers.io())
+                        .subscribe());
+    }
+
+    private Observable<PodcastSubscription> subscribeForPodcast(RemotePodcastData podcast) {
         return mSubscriptionDownloader.fetchSubscriptionAndEpisodesData(podcast)
                 .subscribeOn(Schedulers.io());
     }
