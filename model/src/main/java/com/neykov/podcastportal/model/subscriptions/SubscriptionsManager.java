@@ -5,9 +5,8 @@ import android.content.ContentProviderResult;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.OperationApplicationException;
-import android.net.Uri;
 import android.os.RemoteException;
-import android.util.Log;
+import android.service.media.MediaBrowserService;
 
 import com.neykov.podcastportal.model.BaseManager;
 import com.neykov.podcastportal.model.entity.Episode;
@@ -16,9 +15,9 @@ import com.neykov.podcastportal.model.entity.PodcastSubscription;
 import com.neykov.podcastportal.model.entity.converter.EpisodesConverter;
 import com.neykov.podcastportal.model.entity.converter.SubscriptionConverter;
 import com.neykov.podcastportal.model.persistence.DatabaseContract;
+import com.neykov.podcastportal.model.utils.Global;
 import com.squareup.sqlbrite.BriteContentResolver;
 
-import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,7 +35,7 @@ public class SubscriptionsManager extends BaseManager {
     private SubscriptionDownloader mSubscriptionDownloader;
 
     @Inject
-    public SubscriptionsManager(Context context, BriteContentResolver mResolver, SubscriptionDownloader downloader) {
+    public SubscriptionsManager(@Global Context context, BriteContentResolver mResolver, SubscriptionDownloader downloader) {
         super(context, mResolver);
         this.mSubscriptionDownloader = downloader;
         this.mSubscriptionConverter = new SubscriptionConverter();

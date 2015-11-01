@@ -47,7 +47,7 @@
         android:id="@+id/playerSlidingPanelFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.neykov.podcastportal.view.player.PlayerSlidingFragment"
+        android:name="com.neykov.podcastportal.view.player.view.PlayerSlidingFragment"
         tools:layout="@layout/fragment_player_sliding_panel"/>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

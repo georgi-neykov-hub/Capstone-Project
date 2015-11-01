@@ -27,6 +27,7 @@ import com.neykov.podcastportal.model.rss.RSSFeed;
 import com.neykov.podcastportal.model.rss.RssChannel;
 import com.neykov.podcastportal.model.rss.RssFeedParser;
 import com.neykov.podcastportal.model.rss.RssItem;
+import com.neykov.podcastportal.model.utils.Global;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -65,7 +66,7 @@ public class SubscriptionDownloader {
     private SubscriptionConverter mSubscriptionConverter;
 
     @Inject
-    public SubscriptionDownloader(Context context, OkHttpClient mHttpClient) {
+    public SubscriptionDownloader(@Global Context context, OkHttpClient mHttpClient) {
         this.mContext = context;
         this.mHttpClient = mHttpClient;
         this.mEpisodesConverter = new EpisodesConverter();
