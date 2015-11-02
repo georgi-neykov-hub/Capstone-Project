@@ -1,13 +1,10 @@
 package com.neykov.podcastportal.view.player.presenter;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.support.v4.media.session.MediaControllerCompat;
+import android.os.Bundle;
 
+import com.neykov.podcastportal.playback.PlaybackConnectionListener;
+import com.neykov.podcastportal.playback.PlaybackConnector;
 import com.neykov.podcastportal.playback.PlaybackService;
 import com.neykov.podcastportal.model.utils.Global;
 import com.neykov.podcastportal.view.base.BasePresenter;
@@ -17,73 +14,59 @@ import javax.inject.Inject;
 
 public class PlayerSlidingViewPresenter extends BasePresenter<PlayerSlidingView> {
 
-    private Context mContext;
     private PlaybackService.PlaybackInterface mPlaybackInterface;
-    private MediaControllerCompat mMediaController;
+    private PlaybackConnector mConnector;
 
     @Inject
     public PlayerSlidingViewPresenter(@Global Context context) {
-        this.mContext = context;
+        this.mConnector = new PlaybackConnector(context, mConnectionListener);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedState) {
+        super.onCreate(savedState);
+        mConnector.connect();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mConnector.disconnect();
+        super.onDestroy();
     }
 
     @Override
     protected void onTakeView(PlayerSlidingView playerSlidingView) {
         super.onTakeView(playerSlidingView);
-        bindToService();
         if(mPlaybackInterface != null){
-            playerSlidingView.onConnected(mPlaybackInterface, mMediaController);
+            playerSlidingView.onConnected(mPlaybackInterface);
         }
     }
 
     @Override
     protected void onDropView() {
-        unbindFromService();
+        if(mPlaybackInterface != null){
+            //noinspection ConstantConditions
+            getView().onDisconnected();
+        }
         super.onDropView();
     }
 
-    private void bindToService(){
-        Intent serviceIntent = new Intent(mContext, PlaybackService.class);
-        mContext.bindService(serviceIntent, mPlaybackServiceConnection, Context.BIND_AUTO_CREATE);
-    }
+    private final PlaybackConnectionListener mConnectionListener = new PlaybackConnectionListener() {
+        @Override
+        public void onConnected(PlaybackService.PlaybackInterface playbackInterface) {
+            mPlaybackInterface = playbackInterface;
+            if(getView() != null){
+                getView().onConnected(playbackInterface);
+            }
+        }
 
-    private void unbindFromService(){
-        if(mPlaybackInterface != null){
+        @Override
+        public void onDisconnected() {
             if(getView() != null){
                 getView().onDisconnected();
-            }
-            mPlaybackInterface.setVideoPlaybackSurface(null);
-            mPlaybackInterface.setOnVideoSizeChangedListener(null);
-            mMediaController = null;
-            mPlaybackInterface = null;
-        }
-        mContext.unbindService(mPlaybackServiceConnection);
-    }
-
-    private final ServiceConnection mPlaybackServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mPlaybackInterface = (PlaybackService.PlaybackInterface) service;
-            try {
-                mMediaController = new MediaControllerCompat(mContext, mPlaybackInterface.getMediaSessionToken());
-            } catch (RemoteException e) {
-                throw new RuntimeException("Error while creating MediaController.",e);
-            }
-            if(getView() != null){
-                getView().onConnected(mPlaybackInterface, mMediaController);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            if(mPlaybackInterface != null){
-                if(getView() != null){
-                    getView().onDisconnected();
-                }
-                mPlaybackInterface.setVideoPlaybackSurface(null);
-                mPlaybackInterface.setOnVideoSizeChangedListener(null);
-                mMediaController = null;
                 mPlaybackInterface = null;
             }
         }
     };
+
 }

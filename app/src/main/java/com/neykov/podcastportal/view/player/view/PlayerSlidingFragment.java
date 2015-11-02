@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -72,6 +73,8 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     private ScheduledExecutorService mExecutorService;
     private ScheduledFuture<?> mScheduleFuture;
     private Handler mHandler;
+
+    private boolean mVideoAttached;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -149,9 +152,13 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     }
 
     @Override
-    public void onConnected(PlaybackService.PlaybackInterface playbackInterface, MediaControllerCompat controller) {
+    public void onConnected(PlaybackService.PlaybackInterface playbackInterface) {
         mPlaybackInterface = playbackInterface;
-        mMediaController = controller;
+        try {
+            mMediaController = new MediaControllerCompat(getContext(), playbackInterface.getMediaSessionToken());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Cannot create MediaController.", e);
+        }
         mMediaController.registerCallback(mMediaControllerCallback);
         PlaybackStateCompat state = mMediaController.getPlaybackState();
         updatePlaybackState(state);
@@ -161,10 +168,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
             scheduleSeekbarUpdate();
         }
 
-        if (mVideoView.getSurfaceTexture() != null) {
-            playbackInterface.setVideoPlaybackSurface(new Surface(mVideoView.getSurfaceTexture()));
-            mPlaybackInterface.setOnVideoSizeChangedListener(mVideoSizeChangedListener);
-        }
+        attachVideoSurface();
 
         MediaMetadataCompat metadata = mMediaController.getMetadata();
         if (metadata != null) {
@@ -176,16 +180,11 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
 
     @Override
     public void onDisconnected() {
+        detachVideoSurface();
         mPlaybackInterface = null;
         mMediaController.unregisterCallback(mMediaControllerCallback);
         mMediaController = null;
         mLastPlaybackState = null;
-        toggleControls(false);
-    }
-
-    @Override
-    public void onVideoDimensionsAvailable(int width, int height) {
-
     }
 
     private void setEventListeners() {
@@ -252,6 +251,22 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
         }
     }
 
+    private void attachVideoSurface(){
+        if (!mVideoAttached && mPlaybackInterface != null && mVideoView.getSurfaceTexture() != null) {
+            mPlaybackInterface.setVideoPlaybackSurface(new Surface(mVideoView.getSurfaceTexture()));
+            mPlaybackInterface.setOnVideoSizeChangedListener(mVideoSizeChangedListener);
+            mVideoAttached = true;
+        }
+    }
+
+    private void detachVideoSurface(){
+        if (mVideoAttached && mPlaybackInterface != null) {
+            mPlaybackInterface.setVideoPlaybackSurface(null);
+            mPlaybackInterface.setOnVideoSizeChangedListener(null);
+            mVideoAttached = false;
+        }
+    }
+
     private void updateMediaDescription(MediaDescriptionCompat description) {
         if (description == null) {
             return;
@@ -276,7 +291,6 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
             return;
         }
         mLastPlaybackState = state;
-
 
         switch (state.getState()) {
             case PlaybackStateCompat.STATE_PLAYING:
@@ -358,8 +372,6 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
                 ViewGroup.LayoutParams params = mVideoView.getLayoutParams();
                 params.height = desiredHeight;
                 mVideoView.requestLayout();
-            }else {
-                mVideoView.setVisibility(View.GONE);
             }
         }
     };
@@ -367,11 +379,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     private TextureView.SurfaceTextureListener mSurfaceListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
-            if (mPlaybackInterface != null) {
-                Surface surface = new Surface(surfaceTexture);
-                mPlaybackInterface.setVideoPlaybackSurface(surface);
-                mPlaybackInterface.setOnVideoSizeChangedListener(mVideoSizeChangedListener);
-            }
+            attachVideoSurface();
         }
 
         @Override
@@ -381,9 +389,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-            if (mPlaybackInterface != null) {
-                mPlaybackInterface.setVideoPlaybackSurface(null);
-            }
+            detachVideoSurface();
             return true;
         }
 

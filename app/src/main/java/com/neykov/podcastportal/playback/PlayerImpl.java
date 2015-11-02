@@ -54,6 +54,7 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
     private final AudioManager mAudioManager;
     private MediaPlayer mMediaPlayer;
     private Surface mVideoSurface;
+    private boolean mVideoSurfaceAttached;
 
     private final IntentFilter mAudioNoisyIntentFilter =
             new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
@@ -135,7 +136,7 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
         mPlayOnFocusGain = true;
         tryToGetAudioFocus();
         registerAudioNoisyReceiver();
-        boolean mediaHasChanged = mCurrentEpisode == null || mCurrentEpisode.getId() == target.getId();
+        boolean mediaHasChanged = mCurrentEpisode == null || mCurrentEpisode.getId() != target.getId();
         boolean sourceHasChanged = !mediaHasChanged && mCurrentEpisode.canBePlayedLocally() != target.canBePlayedLocally();
         if (mediaHasChanged) {
             mCurrentEpisode = target;
@@ -149,6 +150,9 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
             configMediaPlayerState();
         } else {
             mState = PlaybackStateCompat.STATE_STOPPED;
+            if (mCallback != null) {
+                mCallback.onPlaybackStatusChanged(mState);
+            }
             relaxResources(false); // release everything except MediaPlayer
             String source = mCurrentEpisode.getContentUrl();
 
@@ -244,16 +248,34 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
 
     @Override
     public void setVideoPlaybackSurface(Surface surface) {
-        createMediaPlayerIfNeeded();
-        if (surface != null) {
-            mMediaPlayer.setSurface(surface);
+        if (surface != null && surface != mVideoSurface) {
             mVideoSurface = surface;
+            if(mMediaPlayer != null){
+                attachVideoSurface();
+            }
+        } else if (surface == null && mVideoSurface != null) {
+            detachVideoSurface();
+            mVideoSurface = null;
+        }
+    }
+
+    private void attachVideoSurface(){
+        if(!mVideoSurfaceAttached && mVideoSurface != null){
+            mMediaPlayer.setSurface(mVideoSurface);
+            mVideoSurfaceAttached = true;
             if (mCallback != null) {
                 mCallback.onVideoSizeChanged(mMediaPlayer.getVideoWidth(), mMediaPlayer.getVideoHeight());
             }
-        } else if (mVideoSurface != null) {
-            mVideoSurface = null;
-            mMediaPlayer.setSurface(null);
+        }
+    }
+
+    private void detachVideoSurface(){
+        if(mVideoSurfaceAttached || mVideoSurface != null){
+            if(mMediaPlayer != null){
+                mMediaPlayer.setSurface(null);
+            }
+            mVideoSurfaceAttached = false;
+            mCallback = null;
         }
     }
 
@@ -425,7 +447,7 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
 
     @Override
     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-        if (mCallback != null) {
+        if (mVideoSurfaceAttached && mCallback != null) {
             mCallback.onVideoSizeChanged(width, height);
         }
     }
@@ -452,6 +474,8 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
             mMediaPlayer.setOnErrorListener(this);
             mMediaPlayer.setOnSeekCompleteListener(this);
             mMediaPlayer.setOnVideoSizeChangedListener(this);
+
+            attachVideoSurface();
         } else {
             mMediaPlayer.reset();
         }
@@ -471,6 +495,7 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
 
         // stop and release the Media Player, if it's available
         if (releaseMediaPlayer && mMediaPlayer != null) {
+            detachVideoSurface();
             mMediaPlayer.reset();
             mMediaPlayer.release();
             mMediaPlayer = null;
