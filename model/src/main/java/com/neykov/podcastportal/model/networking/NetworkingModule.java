@@ -6,6 +6,7 @@ import android.content.Context;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.neykov.podcastportal.model.utils.Global;
 import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.picasso.OkHttpDownloader;
@@ -22,17 +23,16 @@ import retrofit.client.OkClient;
 import retrofit.converter.GsonConverter;
 
 /**
- *
  * @author Georgi
- * A Dagger 2 module providing network-related dependencies
+ *         A Dagger 2 module providing network-related dependencies
  */
 @Module
 public class NetworkingModule {
 
-    public static final int OKHTTP_CACHE_SIZE_BYTES = 10 * 1024 *1024;
-    public static final int HTTP_CONNECT_TIMEOUT_MS = 10*1000;
-    public static final int HTTP_READOUT_TIMEOUT_MS = 20*1000;
-    public static final int HTTP_WRITE_TIMEOUT_MS = 20*1000;
+    public static final int OKHTTP_CACHE_SIZE_BYTES = 50 * 1024 * 1024;
+    public static final int HTTP_CONNECT_TIMEOUT_MS = 10 * 1000;
+    public static final int HTTP_READOUT_TIMEOUT_MS = 20 * 1000;
+    public static final int HTTP_WRITE_TIMEOUT_MS = 20 * 1000;
 
     private static final String GPODDER_DATE_FORMAT = "yyyy-MM-ddTHH:mm:ssZ";
 
@@ -41,13 +41,14 @@ public class NetworkingModule {
 
     @Provides
     @Singleton
-    Picasso providePicasso(Context context, OkHttpClient httpClient){
+    Picasso providePicasso(@Global Context context, OkHttpClient httpClient) {
         return new Picasso.Builder(context)
                 .downloader(new OkHttpDownloader(httpClient))
                 .build();
     }
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     ITunesSearchService provideITunesSearchService(OkHttpClient okHttpClient, Gson gson) {
         return new RestAdapter.Builder()
                 .setEndpoint(ITUNES_SEARCH_API_BASE_URL)
@@ -58,12 +59,13 @@ public class NetworkingModule {
                 .create(ITunesSearchService.class);
     }
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     GPodderService provideGPodderService(OkHttpClient okHttpClient) {
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
                 .excludeFieldsWithoutExposeAnnotation()
-                //.setDateFormat(GPODDER_DATE_FORMAT)
+                        //.setDateFormat(GPODDER_DATE_FORMAT)
                 .create();
 
         return new RestAdapter.Builder()
@@ -74,8 +76,9 @@ public class NetworkingModule {
                 .create(GPodderService.class);
     }
 
-    @Provides @Singleton
-    OkHttpClient provideOkHttpClient(Application application, UserAgentInterceptor interceptor) {
+    @Provides
+    @Singleton
+    OkHttpClient provideOkHttpClient(@Global Context application, UserAgentInterceptor interceptor) {
         OkHttpClient client = new OkHttpClient();
 
         //Set Cache size and Timeout limits
@@ -89,7 +92,8 @@ public class NetworkingModule {
         return client;
     }
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     Gson provideGson() {
         return new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)

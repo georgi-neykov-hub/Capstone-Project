@@ -1,6 +1,7 @@
 package com.neykov.podcastportal.view.player.presenter;
 
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 
 import com.neykov.podcastportal.model.entity.PlaylistEntry;
 import com.neykov.podcastportal.model.playlist.PlaylistManager;
@@ -29,14 +30,29 @@ public class PlaylistPresenter extends BasePresenter<PlaylistView> implements Pl
 
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
-        PlaylistEntry target = getAdapter().getItem(fromPosition);
-        PlaylistEntry anchor = getAdapter().getItem(toPosition);
+        mAdapter.moveItem(fromPosition, toPosition);
     }
 
     @Override
     public void onItemDismiss(int position) {
         PlaylistEntry entry = getAdapter().getItem(position);
-        this.add(mPlaylistManager.remove(entry).subscribe());
+        getAdapter().removeItem(position);
+        remove(entry);
+    }
+
+    @Override
+    public void onItemMoveCompleted(int currentPosition, int originalPosition) {
+        if(mAdapter.getItemCount() == 1){
+            return;
+        }
+        PlaylistEntry target = getAdapter().getItem(currentPosition);
+        if(currentPosition > 0){
+            PlaylistEntry aboveEntry = getAdapter().getItem(currentPosition - 1);
+            moveAfter(target, aboveEntry);
+        }else {
+            PlaylistEntry belowEntry = getAdapter().getItem(1);
+            moveBefore(target, belowEntry);
+        }
     }
 
     @Override
@@ -65,6 +81,6 @@ public class PlaylistPresenter extends BasePresenter<PlaylistView> implements Pl
 
 
     public void remove(PlaylistEntry entry){
-
+        this.add(mPlaylistManager.remove(entry).subscribe());
     }
 }

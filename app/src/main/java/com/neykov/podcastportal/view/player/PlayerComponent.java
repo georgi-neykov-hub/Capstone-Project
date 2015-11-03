@@ -1,6 +1,7 @@
 package com.neykov.podcastportal.view.player;
 
 import com.neykov.podcastportal.view.player.presenter.PlayerPresenter;
+import com.neykov.podcastportal.view.player.presenter.PlayerSlidingViewPresenter;
 import com.neykov.podcastportal.view.player.presenter.PlaylistPresenter;
 import com.neykov.podcastportal.view.subscriptions.presenter.EpisodesListPresenter;
 import com.neykov.podcastportal.view.subscriptions.presenter.MyPodcastsPresenter;
@@ -14,4 +15,5 @@ import dagger.Subcomponent;
 public interface PlayerComponent {
     PlayerPresenter createPlayerPresenter();
     PlaylistPresenter createPlaylistPresenter();
+    PlayerSlidingViewPresenter createPlayerSlidingViewPresenter();
 }

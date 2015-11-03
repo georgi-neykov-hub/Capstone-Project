@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class BaseAdapter<ItemType, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
@@ -51,6 +52,28 @@ public abstract class BaseAdapter<ItemType, VH extends RecyclerView.ViewHolder> 
         }
     }
 
+    public void removeItem(ItemType item) {
+        if (item == null) {
+            throw new IllegalArgumentException("Null item provided.");
+        }
+
+        int position = mItems.indexOf(item);
+        if (position == -1) {
+            throw new IllegalArgumentException("Item not found.");
+        }
+
+        this.removeItem(position);
+    }
+
+    public void removeItem(int position) {
+        if (position < 0 || position >= mItems.size()) {
+            throw new IllegalArgumentException("Invalid position provided.");
+        }
+
+        mItems.remove(position);
+        notifyItemRemoved(position);
+    }
+
     public void setData(Collection<ItemType> items){
         if(items == null){
             throw new IllegalArgumentException("Null collection provided.");
@@ -67,6 +90,31 @@ public abstract class BaseAdapter<ItemType, VH extends RecyclerView.ViewHolder> 
             mItems.clear();
             notifyItemRangeRemoved(0, count);
         }
+    }
+
+    public void moveItem(int currentPosition, int newPosition){
+        if (currentPosition < 0 || currentPosition >= mItems.size()) {
+            throw new IllegalArgumentException("Invalid position provided.");
+        }
+
+        if (newPosition < 0 || newPosition >= mItems.size()) {
+            throw new IllegalArgumentException("Invalid new position provided.");
+        }
+
+        if(currentPosition == newPosition) {
+            return;
+        }
+
+        if (currentPosition < newPosition) {
+            for (int i = currentPosition; i < newPosition; i++) {
+                Collections.swap(mItems, i, i + 1);
+            }
+        } else {
+            for (int i = currentPosition; i > newPosition; i--) {
+                Collections.swap(mItems, i, i - 1);
+            }
+        }
+        notifyItemMoved(currentPosition, newPosition);
     }
 
     public void swapItem(int position, ItemType replacement){

@@ -8,12 +8,15 @@ import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.RemoteException;
+import android.support.annotation.Nullable;
+import android.util.Pair;
 
 import com.neykov.podcastportal.model.BaseManager;
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.PlaylistEntry;
 import com.neykov.podcastportal.model.entity.converter.PlaylistConverter;
 import com.neykov.podcastportal.model.persistence.DatabaseContract;
+import com.neykov.podcastportal.model.utils.Global;
 import com.squareup.sqlbrite.BriteContentResolver;
 import com.squareup.sqlbrite.SqlBrite;
 
@@ -26,22 +29,60 @@ import javax.inject.Inject;
 
 import rx.Observable;
 import rx.Single;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subjects.BehaviorSubject;
+import rx.subjects.Subject;
 
 public class PlaylistManager extends BaseManager {
 
     private PlaylistConverter mPlaylistConverter;
+    private BehaviorSubject<Pair<Long, Map<Long, PlaylistEntry>>> mDataSubject;
 
     @Inject
-    public PlaylistManager(Context mApplicationContext, BriteContentResolver resolver) {
+    public PlaylistManager(@Global Context mApplicationContext, BriteContentResolver resolver) {
         super(mApplicationContext, resolver);
         mPlaylistConverter = new PlaylistConverter();
+        mDataSubject = BehaviorSubject.create();
+        subscribeForPlaylistChanges();
     }
 
-    public Observable<List<PlaylistEntry>> getPlaylistStream() {
-        return getBriteResolver().createQuery(
+    private void subscribeForPlaylistChanges() {
+        Observable<Pair<Long, Map<Long, PlaylistEntry>>> mDataObservable = getBriteResolver().createQuery(
                 DatabaseContract.PlaylistEntry.CONTENT_URI,
                 null, null, null, null, true)
-                .map(this::convertToSortedList);
+                .map(this::buildData)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+        mDataObservable.subscribe(mDataSubject);
+    }
+
+    public
+    @Nullable
+    PlaylistEntry getItem(long itemId) {
+        return mDataSubject.map(longMapPair -> longMapPair.second.get(itemId))
+                .toBlocking()
+                .first();
+    }
+
+    public
+    @Nullable
+    PlaylistEntry getFirstItem() {
+        return mDataSubject.map(longMapPair -> {
+            PlaylistEntry firstEntry = null;
+            Long firstItemId = longMapPair.first;
+            if (firstItemId != null) {
+                firstEntry = longMapPair.second.get(firstItemId);
+            }
+            return firstEntry;
+        }).toBlocking()
+                .first();
+    }
+
+
+    public Observable<List<PlaylistEntry>> getPlaylistStream() {
+        return mDataSubject.map(longMapPair -> buildSortedList(longMapPair.first, longMapPair.second))
+                .subscribeOn(Schedulers.computation());
     }
 
     public Single<PlaylistEntry> addToTop(Episode episode) {
@@ -138,14 +179,6 @@ public class PlaylistManager extends BaseManager {
         });
     }
 
-    public Single<PlaylistEntry> getFirstItem() {
-        return getItemAfter(null).toSingle();
-    }
-
-    public Single<PlaylistEntry> getLastItem() {
-        return getItemBefore(null).toSingle();
-    }
-
     public Single<Void> remove(PlaylistEntry entry) {
         return remove(entry.getEpisode());
     }
@@ -156,15 +189,11 @@ public class PlaylistManager extends BaseManager {
             ops.add(ContentProviderOperation.newDelete(DatabaseContract.PlaylistEntry.buildItemUri(episode.getPlaylistEntryId()))
                     .withExpectedCount(1)
                     .build());
-            ops.add(ContentProviderOperation.newUpdate(DatabaseContract.Episode.buildItemUri(episode.getId()))
-            .withValue(DatabaseContract.Episode.PODCAST_ID, episode.getPodcastId())
-            .withValue(DatabaseContract.Episode.PLAYLIST_ENTRY_ID, null)
-            .withExpectedCount(1)
-            .build());
-
             try {
                 getApplicationContext().getContentResolver()
                         .applyBatch(DatabaseContract.CONTENT_AUTHORITY, ops);
+                getApplicationContext().getContentResolver().notifyChange(DatabaseContract.Episode.buildItemUri(episode.getId()), null);
+                getApplicationContext().getContentResolver().notifyChange(DatabaseContract.Episode.buildSubscriptionEpisodesUri(episode.getPodcastId()), null);
                 singleSubscriber.onSuccess(null);
             } catch (RemoteException | OperationApplicationException e) {
                 singleSubscriber.onError(e);
@@ -319,39 +348,48 @@ public class PlaylistManager extends BaseManager {
         });
     }
 
-    private List<PlaylistEntry> convertToSortedList(SqlBrite.Query playlistEntriesQuery) {
-        Map<Long, PlaylistEntry> prevItemIdToEntryMap = new HashMap<>();
-        Cursor results = playlistEntriesQuery.run();
-        Long currentPrevId = null;
-        final int itemCоunt = results.getCount();
-        List<PlaylistEntry> sortedEntries = new ArrayList<>(itemCоunt);
-        try {
-            PlaylistEntry entry;
-            while (results.moveToNext()) {
-                entry = mPlaylistConverter.convert(results);
-                if (entry.getPreviousItemId() == null){
-                    currentPrevId = entry.getId();
-                    sortedEntries.add(entry);
-                } else {
-                    prevItemIdToEntryMap.put(entry.getPreviousItemId(), entry);
-                }
-            }
-        } finally {
-            results.close();
+    private List<PlaylistEntry> buildSortedList(final long firstItemId, Map<Long, PlaylistEntry> idToItemMap) {
+        if (idToItemMap.isEmpty()) {
+            return new ArrayList<>(0);
         }
 
-
         PlaylistEntry entryValue;
-        int itemsProcessed = sortedEntries.size();
-
+        final int itemCоunt = idToItemMap.size();
+        List<PlaylistEntry> sortedEntries = new ArrayList<>(itemCоunt);
+        int itemsProcessed = 0;
+        Long currentItemId = firstItemId;
         while (itemsProcessed < itemCоunt) {
-            entryValue = prevItemIdToEntryMap.get(currentPrevId);
-            currentPrevId = entryValue.getId();
+            entryValue = idToItemMap.get(currentItemId);
+            currentItemId = entryValue.getNextItemId();
             sortedEntries.add(entryValue);
             itemsProcessed++;
         }
 
         return sortedEntries;
+    }
+
+    private Pair<Long, Map<Long, PlaylistEntry>> buildData(SqlBrite.Query playlistEntriesQuery) {
+        Map<Long, PlaylistEntry> idToEntryMap = new HashMap<>();
+        Cursor results = playlistEntriesQuery.run();
+        Long fisrtItemId = null;
+        try {
+            PlaylistEntry entry;
+            while (results.moveToNext()) {
+                entry = mPlaylistConverter.convert(results);
+                if (entry.getPreviousItemId() == null) {
+                    fisrtItemId = entry.getId();
+                }
+                idToEntryMap.put(entry.getId(), entry);
+            }
+        } finally {
+            results.close();
+        }
+
+        if (fisrtItemId == null && idToEntryMap.size() > 0) {
+            throw new AssertionError("Entry map is not empty, but the ID of the first item is null.");
+        }
+
+        return new Pair<>(fisrtItemId, idToEntryMap);
     }
 
     private Observable<PlaylistEntry> getItemBefore(Long itemId) {

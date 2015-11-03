@@ -59,10 +59,11 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_EPISODES_TABLE = "CREATE TABLE " + Episode.TABLE_NAME + " (" +
             Episode.EPISODE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             Episode.TITLE + " TEXT NOT NULL," +
-            Episode.DESCRIPTION + " TEXT NOT NULL," +
-            Episode.CONTENT_URL + " TEXT NOT NULL," +
+            Episode.DESCRIPTION + " TEXT NOT NULL, " +
+            Episode.CONTENT_URL + " TEXT NOT NULL, " +
+            Episode.THUMBNAIL + " TEXT NOT NULL," +
             Episode.MIME_TYPE + " TEXT NOT NULL," +
-            Episode.LENGTH + " INTEGER," +
+            Episode.DURATION + " INTEGER," +
             Episode.PODCAST_ID + " INTEGER NOT NULL," +
             Episode.PLAYLIST_ENTRY_ID + " INTEGER DEFAULT NULL," +
             Episode.WATCHED + " INTEGER NOT NULL," +
@@ -81,15 +82,16 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
             PlaylistEntry.NEXT_ITEM_ID + " INTEGER," +
             PlaylistEntry.PREVIOUS_ITEM_ID + " INTEGER," +
             "FOREIGN KEY (" + PlaylistEntry.EPISODE_ID + ") REFERENCES " + Episode.TABLE_NAME + "(" + Episode.EPISODE_ID + ") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, " +
-            "FOREIGN KEY (" + PlaylistEntry.PREVIOUS_ITEM_ID + ") REFERENCES " + PlaylistEntry.TABLE_NAME + "(" + PlaylistEntry.PLAYLIST_ENTRY_ID + ") ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED" +
+            "FOREIGN KEY (" + PlaylistEntry.NEXT_ITEM_ID + ") REFERENCES " + PlaylistEntry.TABLE_NAME + "(" + PlaylistEntry.PLAYLIST_ENTRY_ID + ") ON DELETE NO ACTION, " +
+            "FOREIGN KEY (" + PlaylistEntry.PREVIOUS_ITEM_ID + ") REFERENCES " + PlaylistEntry.TABLE_NAME + "(" + PlaylistEntry.PLAYLIST_ENTRY_ID + ") ON DELETE NO ACTION" +
             " );";
 
     private static final String SQL_TRIGGERS =
             "CREATE TRIGGER updatePlaylistLinksOnDelete AFTER DELETE ON " + PlaylistEntry.TABLE_NAME + " " +
                     "BEGIN \n" +
-                    "UPDATE " + PlaylistEntry.TABLE_NAME + " SET " + PlaylistEntry.NEXT_ITEM_ID + " = old." + PlaylistEntry.NEXT_ITEM_ID +
-                    " WHERE " + PlaylistEntry.NEXT_ITEM_ID + " = old." + PlaylistEntry.PLAYLIST_ENTRY_ID + ";\n" +
-                    " UPDATE " + PlaylistEntry.TABLE_NAME + " SET " + PlaylistEntry.PREVIOUS_ITEM_ID + " = old." + PlaylistEntry.PREVIOUS_ITEM_ID +
-                    " WHERE " + PlaylistEntry.PREVIOUS_ITEM_ID + " = old." + PlaylistEntry.PREVIOUS_ITEM_ID + ";\n" +
+                    "UPDATE " + PlaylistEntry.TABLE_NAME + " SET " + PlaylistEntry.PREVIOUS_ITEM_ID + " = old." + PlaylistEntry.PREVIOUS_ITEM_ID +
+                    " WHERE " + PlaylistEntry.PLAYLIST_ENTRY_ID + " = old." + PlaylistEntry.NEXT_ITEM_ID + ";\n" +
+                    " UPDATE " + PlaylistEntry.TABLE_NAME + " SET " + PlaylistEntry.NEXT_ITEM_ID + " = old." + PlaylistEntry.NEXT_ITEM_ID +
+                    " WHERE " + PlaylistEntry.PLAYLIST_ENTRY_ID + " = old." + PlaylistEntry.PREVIOUS_ITEM_ID + ";\n" +
                     " END;";
 }

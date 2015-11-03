@@ -3,11 +3,14 @@ package com.neykov.podcastportal.view.player.view;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
-public class PlaylistItemTouchCallback extends ItemTouchHelper.Callback {
+import com.neykov.podcastportal.view.widget.ExtendedItemTouchCallback;
+
+public class PlaylistItemTouchCallback extends ExtendedItemTouchCallback {
 
     public interface PlaylistItemMoveHandler {
         void onItemMove(int fromPosition, int toPosition);
         void onItemDismiss(int position);
+        void onItemMoveCompleted(int currentPosition, int originalPosition);
     }
 
     private PlaylistItemMoveHandler mItemMoveHandler;
@@ -47,6 +50,16 @@ public class PlaylistItemTouchCallback extends ItemTouchHelper.Callback {
         }
 
         return false;
+    }
+
+    @Override
+    public void onMoveCompleted(RecyclerView.ViewHolder viewHolder, int originalPosition) {
+        int holderPosition = viewHolder.getAdapterPosition();
+        if(holderPosition != RecyclerView.NO_POSITION &&
+                holderPosition != originalPosition &&
+                mItemMoveHandler != null){
+            mItemMoveHandler.onItemMoveCompleted(holderPosition, originalPosition);
+        }
     }
 
     @Override

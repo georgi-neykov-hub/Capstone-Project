@@ -7,6 +7,10 @@ import android.database.Cursor;
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.persistence.DatabaseContract;
 
+import org.joda.time.format.PeriodFormat;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
+
 import java.util.Date;
 
 public class EpisodesConverter implements Converter<Episode>, TransactionConverter<Episode> {
@@ -23,7 +27,8 @@ public class EpisodesConverter implements Converter<Episode>, TransactionConvert
         values.put(DatabaseContract.Episode.FILE_URL, entity.getFileUrl());
         values.put(DatabaseContract.Episode.FILE_SIZE, entity.getFileSize());
         values.put(DatabaseContract.Episode.DOWNLOAD_STATE, entity.getDownloadState());
-        values.put(DatabaseContract.Episode.LENGTH, entity.getFileSize());
+        values.put(DatabaseContract.Episode.DURATION, entity.getDuration());
+        values.put(DatabaseContract.Episode.THUMBNAIL, entity.getThumbnail());
         values.put(DatabaseContract.Episode.WATCHED, entity.isWatched() ? 1 : 0);
         values.put(DatabaseContract.Episode.PLAYLIST_ENTRY_ID, entity.getPlaylistEntryId());
         values.put(DatabaseContract.Episode.RELEASE_DATE, entity.getReleased().getTime());
@@ -33,8 +38,9 @@ public class EpisodesConverter implements Converter<Episode>, TransactionConvert
     @Override
     public Episode convert(Cursor valueCursor) {
         int playlistIdIndex = valueCursor.getColumnIndex(DatabaseContract.Episode.PLAYLIST_ENTRY_ID);
+        int durationIndex = valueCursor.getColumnIndex(DatabaseContract.Episode.DURATION);
         Long playlistEntryId = valueCursor.isNull(playlistIdIndex) ? null : valueCursor.getLong(playlistIdIndex);
-
+        Long duration = valueCursor.isNull(durationIndex) ? null : valueCursor.getLong(durationIndex);
         return new Episode(
                 valueCursor.getLong(valueCursor.getColumnIndex(DatabaseContract.Episode.EPISODE_ID)),
                 valueCursor.getLong(valueCursor.getColumnIndex(DatabaseContract.Episode.PODCAST_ID)),
@@ -45,7 +51,8 @@ public class EpisodesConverter implements Converter<Episode>, TransactionConvert
                 valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.FILE_URL)),
                 valueCursor.getLong(valueCursor.getColumnIndex(DatabaseContract.Episode.FILE_SIZE)),
                 valueCursor.getInt(valueCursor.getColumnIndex(DatabaseContract.Episode.DOWNLOAD_STATE)),
-                valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.LENGTH)),
+                duration,
+                valueCursor.getString(valueCursor.getColumnIndex(DatabaseContract.Episode.THUMBNAIL)),
                 valueCursor.getInt(valueCursor.getColumnIndex(DatabaseContract.Episode.WATCHED))> 0,
                 playlistEntryId,
                 new Date(valueCursor.getLong(valueCursor.getColumnIndex(DatabaseContract.Episode.RELEASE_DATE))));

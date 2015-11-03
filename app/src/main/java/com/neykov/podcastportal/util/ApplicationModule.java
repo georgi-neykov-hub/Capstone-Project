@@ -3,6 +3,8 @@ package com.neykov.podcastportal.util;
 import android.app.Application;
 import android.content.Context;
 
+import com.neykov.podcastportal.model.utils.Global;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -22,7 +24,7 @@ public class ApplicationModule {
         return mApplication;
     }
 
-    @Provides @Singleton
+    @Provides @Singleton @Global
     Context provideApplicationContext(){
         return mApplication.getApplicationContext();
     }

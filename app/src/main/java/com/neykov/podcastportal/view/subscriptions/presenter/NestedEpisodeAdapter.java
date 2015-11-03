@@ -146,7 +146,7 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
         private void onBind(Episode episode, String fallbackThumbnailUrl){
             mTitleTextView.setText(episode.getTitle());
             Picasso.with(mThumbnailView.getContext())
-                    .load(fallbackThumbnailUrl)
+                    .load(episode.getThumbnail())
                     .fit()
                     .centerCrop()
                     .placeholder(R.color.photo_placeholder)

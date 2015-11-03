@@ -1,35 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sliding_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:background="#CBA">
+    android:gravity="bottom"
+    sothree:umanoPanelHeight="?listPreferredItemHeight"
+    sothree:umanoShadowHeight="4dp">
 
-
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:minHeight="?attr/actionBarSize"
-            android:theme="@style/AppTheme.Toolbar"
-            app:title="@string/navigation_player"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
-    </android.support.design.widget.AppBarLayout>
-
-    <fragment
-        android:id="@+id/playerPlaylistFragment"
-        android:name="com.neykov.podcastportal.view.player.view.PlaylistFragment"
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:layout="@layout/fragment_base_list" />
+        tools:background="#CBA">
 
 
-</android.support.design.widget.CoordinatorLayout>
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:minHeight="?attr/actionBarSize"
+                android:theme="@style/AppTheme.Toolbar"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:title="@string/navigation_player" />
+
+        </android.support.design.widget.AppBarLayout>
+
+        <fragment
+            android:id="@+id/playerPlaylistFragment"
+            android:name="com.neykov.podcastportal.view.player.view.PlaylistFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            tools:layout="@layout/fragment_base_list" />
+
+
+    </android.support.design.widget.CoordinatorLayout>
+
+    <fragment
+        android:id="@+id/playerSlidingPanelFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.neykov.podcastportal.view.player.view.PlayerSlidingFragment"
+        tools:layout="@layout/fragment_player_sliding_panel"/>
+
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>

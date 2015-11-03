@@ -1,6 +1,6 @@
 package com.neykov.podcastportal.view.player.presenter;
 
-import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +12,7 @@ import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.PlaylistEntry;
 import com.neykov.podcastportal.view.base.adapter.BaseAdapter;
 import com.neykov.podcastportal.view.base.adapter.BaseListenerViewHolder;
+import com.squareup.picasso.Picasso;
 
 public class PlaylistEntryAdapter extends BaseAdapter<PlaylistEntry, PlaylistEntryAdapter.EntryViewHolder> {
 
@@ -31,7 +32,7 @@ public class PlaylistEntryAdapter extends BaseAdapter<PlaylistEntry, PlaylistEnt
 
     protected static class EntryViewHolder extends BaseListenerViewHolder<Void>{
 
-        private static final String NULL_LENGTH_LABEL = "--:--";
+        private static final String NULL_DURATION_LABEL = "--:--";
 
         private ImageView mThumbnailView;
         private ImageView mWatchedIconView;
@@ -53,8 +54,21 @@ public class PlaylistEntryAdapter extends BaseAdapter<PlaylistEntry, PlaylistEnt
             mTitleTextView.setText(episode.getTitle());
             mPodcastNameView.setText(entry.getPodcastTitle());
             mWatchedIconView.setVisibility(View.GONE);
-            mLengthTextView.setText(episode.getMediaLength() != null ?
-                    episode.getMediaLength() : NULL_LENGTH_LABEL);
+            mLengthTextView.setText(getDurationLabel(episode));
+            Picasso.with(mThumbnailView.getContext())
+                    .load(episode.getThumbnail())
+                    .fit()
+                    .centerCrop()
+                    .placeholder(R.color.photo_placeholder)
+                    .into(mThumbnailView);
+        }
+
+        protected String getDurationLabel(Episode episode){
+            if(episode.getDuration() != null){
+                return DateUtils.formatElapsedTime(episode.getDuration()/1000);
+            }else {
+                return NULL_DURATION_LABEL;
+            }
         }
     }
 }

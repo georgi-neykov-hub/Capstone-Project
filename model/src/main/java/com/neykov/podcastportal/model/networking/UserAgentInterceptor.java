@@ -3,6 +3,7 @@ package com.neykov.podcastportal.model.networking;
 import android.content.Context;
 import android.provider.Settings;
 
+import com.neykov.podcastportal.model.utils.Global;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -18,7 +19,7 @@ public class UserAgentInterceptor implements Interceptor {
     private final String mUserAgentValue;
 
     @Inject
-    public UserAgentInterceptor(Context context){
+    public UserAgentInterceptor(@Global Context context){
         mUserAgentValue = context.getPackageName()+ " / " + Settings.Secure.ANDROID_ID;
     }
 

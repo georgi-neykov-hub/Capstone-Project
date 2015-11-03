@@ -3,5 +3,6 @@
 
     <color name="photo_placeholder">#666</color>
     <color name="subcription_card_color">#FFE7AD</color>
+    <color name="surface_base_color">#FFFAFAFA</color>
 
 </resources>
