@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.neykov.podcastportal.model.utils.Global;
 
@@ -13,11 +15,16 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public class PlaybackSessionConnector implements PlaybackSessionProvider{
+import rx.Observable;
+import rx.subjects.BehaviorSubject;
+import rx.subjects.Subject;
+
+public class PlaybackSessionConnector implements PlaybackSessionProvider {
 
     private Context mContext;
-    private PlaybackService.PlaybackSession mPlaybackSession;
+    private PlaybackSession mPlaybackSession;
     private boolean mBoundToService;
+    private Subject<PlaybackSession, PlaybackSession> mPlaybackSessionSubject;
 
     private List<PlaybackSessionConnectionListener> mListeners;
 
@@ -25,6 +32,7 @@ public class PlaybackSessionConnector implements PlaybackSessionProvider{
     public PlaybackSessionConnector(@Global Context context) {
         this.mContext = context;
         mListeners = new ArrayList<>();
+        mPlaybackSessionSubject = BehaviorSubject.create();
     }
 
     public void connectToSession() {
@@ -35,14 +43,51 @@ public class PlaybackSessionConnector implements PlaybackSessionProvider{
         unbindFromService();
     }
 
-    private void notifySessionDisconnected(PlaybackService.PlaybackSession session){
-        for (PlaybackSessionConnectionListener l : mListeners){
+    public void destroy(){
+        if(mBoundToService){
+            disconnectFromSession();
+        }
+        mPlaybackSessionSubject.onCompleted();
+    }
+
+    @NonNull
+    @Override
+    public Observable<PlaybackSession> getStream() {
+        return mPlaybackSessionSubject.asObservable();
+    }
+
+    @Nullable
+    @Override
+    public PlaybackSession getPlaybackSession() {
+        return mPlaybackSession;
+    }
+
+    @Override
+    public void addMediaSessionConnectionListener(PlaybackSessionConnectionListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("Null listener provided.");
+        }
+        mListeners.add(listener);
+    }
+
+    @Override
+    public void removeMediaSessionConnectionListener(PlaybackSessionConnectionListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("Null listener provided.");
+        }
+        mListeners.remove(listener);
+    }
+
+    private void notifySessionConnected(PlaybackSession session) {
+        mPlaybackSessionSubject.onNext(session);
+        for (PlaybackSessionConnectionListener l : mListeners) {
             l.onConnected(session);
         }
     }
 
-    private void notifySessionDisconnected(){
-        for (PlaybackSessionConnectionListener l : mListeners){
+    private void notifySessionDisconnected() {
+        mPlaybackSessionSubject.onNext(null);
+        for (PlaybackSessionConnectionListener l : mListeners) {
             l.onDisconnected();
         }
     }
@@ -55,9 +100,11 @@ public class PlaybackSessionConnector implements PlaybackSessionProvider{
     }
 
     private void unbindFromService() {
-        notifyAndReleaseResources();
-        mContext.unbindService(mPlaybackServiceConnection);
-        mBoundToService = false;
+        if (mBoundToService) {
+            notifyAndReleaseResources();
+            mContext.unbindService(mPlaybackServiceConnection);
+            mBoundToService = false;
+        }
     }
 
     private void notifyAndReleaseResources() {
@@ -72,8 +119,8 @@ public class PlaybackSessionConnector implements PlaybackSessionProvider{
     private final ServiceConnection mPlaybackServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mPlaybackSession = (PlaybackService.PlaybackSession) service;
-            notifySessionDisconnected(mPlaybackSession);
+            mPlaybackSession = (PlaybackSession) service;
+            notifySessionConnected(mPlaybackSession);
         }
 
         @Override
@@ -81,22 +128,6 @@ public class PlaybackSessionConnector implements PlaybackSessionProvider{
             notifyAndReleaseResources();
         }
     };
-
-    @Override
-    public void addMediaSessionConnectionListener(PlaybackSessionConnectionListener listener) {
-        if(listener == null){
-            throw new IllegalArgumentException("Null listener provided.");
-        }
-        mListeners.add(listener);
-    }
-
-    @Override
-    public void removeMediaSessionConnectionListener(PlaybackSessionConnectionListener listener) {
-        if(listener == null){
-            throw new IllegalArgumentException("Null listener provided.");
-        }
-        mListeners.remove(listener);
-    }
 }
 
 

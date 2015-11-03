@@ -137,7 +137,7 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
         tryToGetAudioFocus();
         registerAudioNoisyReceiver();
         boolean mediaHasChanged = mCurrentEpisode == null || mCurrentEpisode.getId() != target.getId();
-        boolean sourceHasChanged = !mediaHasChanged && mCurrentEpisode.canBePlayedLocally() != target.canBePlayedLocally();
+        boolean sourceHasChanged = mediaHasChanged || mCurrentEpisode.canBePlayedLocally() != target.canBePlayedLocally();
         if (mediaHasChanged) {
             mCurrentEpisode = target;
         }

@@ -17,7 +17,7 @@ public abstract class BaseManager {
     /**
      * Returns the global application {@linkplain Context}.
      */
-    protected Context getApplicationContext() {
+    public Context getApplicationContext() {
         return mApplicationContext;
     }
 

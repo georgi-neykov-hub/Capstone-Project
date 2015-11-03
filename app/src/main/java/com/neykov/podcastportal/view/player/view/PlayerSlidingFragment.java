@@ -29,7 +29,7 @@ import android.widget.TextView;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.playback.OnVideoSizeChangedListener;
-import com.neykov.podcastportal.playback.PlaybackService;
+import com.neykov.podcastportal.playback.PlaybackSession;
 import com.neykov.podcastportal.view.base.fragment.BaseViewFragment;
 import com.neykov.podcastportal.view.player.presenter.PlayerSlidingViewPresenter;
 import com.squareup.picasso.Picasso;
@@ -64,7 +64,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     private Drawable mPlayDrawable;
     private Drawable mVideoBackgroundDrawable;
 
-    private PlaybackService.PlaybackSession mPlaybackSession;
+    private PlaybackSession mPlaybackSession;
     private MediaControllerCompat mMediaController;
     private PlaybackStateCompat mLastPlaybackState;
 
@@ -150,7 +150,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     }
 
     @Override
-    public void onConnected(PlaybackService.PlaybackSession playbackSession) {
+    public void onConnected(PlaybackSession playbackSession) {
         mPlaybackSession = playbackSession;
         try {
             mMediaController = new MediaControllerCompat(getContext(), playbackSession.getMediaSessionToken());

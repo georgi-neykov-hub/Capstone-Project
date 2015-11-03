@@ -1,10 +1,13 @@
 package com.neykov.podcastportal.view.player.presenter;
 
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v7.widget.RecyclerView;
 
 import com.neykov.podcastportal.model.entity.PlaylistEntry;
 import com.neykov.podcastportal.model.playlist.PlaylistManager;
+import com.neykov.podcastportal.playback.PlaybackSessionConnector;
 import com.neykov.podcastportal.view.base.BasePresenter;
 import com.neykov.podcastportal.view.player.view.PlaylistItemTouchCallback;
 import com.neykov.podcastportal.view.player.view.PlaylistView;
@@ -22,10 +25,33 @@ public class PlaylistPresenter extends BasePresenter<PlaylistView> implements Pl
     private PlaylistManager mPlaylistManager;
     private PlaylistEntryAdapter mAdapter;
 
+    private PlaybackSessionConnector mConnector;
+
     @Inject
     public PlaylistPresenter(PlaylistManager manager) {
         this.mPlaylistManager = manager;
         mAdapter = new PlaylistEntryAdapter();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedState) {
+        super.onCreate(savedState);
+        mConnector = new PlaybackSessionConnector(mPlaylistManager.getApplicationContext());
+        mConnector.connectToSession();
+        this.restartable(PLAYLIST_STREAM_RESTARTABLE_ID, () -> mPlaylistManager.getPlaylistStream()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .onErrorReturn(throwable1 -> new ArrayList<>(0))
+                .subscribe(mAdapter::setData));
+        this.start(PLAYLIST_STREAM_RESTARTABLE_ID);
+    }
+
+    @Override
+    protected void onDestroy() {
+        mConnector.disconnectFromSession();
+        mConnector.destroy();
+        mConnector = null;
+        super.onDestroy();
     }
 
     @Override
@@ -55,17 +81,6 @@ public class PlaylistPresenter extends BasePresenter<PlaylistView> implements Pl
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedState) {
-        super.onCreate(savedState);
-        this.restartable(PLAYLIST_STREAM_RESTARTABLE_ID, () -> mPlaylistManager.getPlaylistStream()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .onErrorReturn(throwable1 -> new ArrayList<>(0))
-                .subscribe(mAdapter::setData));
-        this.start(PLAYLIST_STREAM_RESTARTABLE_ID);
-    }
-
     public PlaylistEntryAdapter getAdapter(){
         return mAdapter;
     }
@@ -79,6 +94,21 @@ public class PlaylistPresenter extends BasePresenter<PlaylistView> implements Pl
         this.add(mPlaylistManager.moveBefore(entry, anchor).subscribe());
     }
 
+    public void play(final PlaylistEntry entry) {
+        this.add(mConnector.getStream()
+                .skipWhile(playbackSession -> playbackSession == null)
+                .first()
+                .subscribe(playbackSession1 -> {
+                    try {
+                        MediaControllerCompat controller = new MediaControllerCompat(mPlaylistManager.getApplicationContext(),playbackSession1.getMediaSessionToken());
+                        controller.getTransportControls().skipToQueueItem(entry.getId());
+                        controller.getTransportControls().play();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
+                }));
+    }
 
     public void remove(PlaylistEntry entry){
         this.add(mPlaylistManager.remove(entry).subscribe());

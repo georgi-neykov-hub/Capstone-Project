@@ -3,10 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:sothree="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/sliding_layout"
+    android:id="@+id/slidingLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="bottom"
+    sothree:umanoInitialState="hidden"
     sothree:umanoPanelHeight="?listPreferredItemHeight"
     sothree:umanoShadowHeight="4dp">
 
@@ -43,11 +44,9 @@
 
     </android.support.design.widget.CoordinatorLayout>
 
-    <fragment
-        android:id="@+id/playerSlidingPanelFragment"
+    <FrameLayout
+        android:id="@+id/slidingContentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="com.neykov.podcastportal.view.player.view.PlayerSlidingFragment"
-        tools:layout="@layout/fragment_player_sliding_panel"/>
+        android:layout_height="match_parent"/>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

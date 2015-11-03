@@ -1,11 +1,20 @@
 package com.neykov.podcastportal.playback;
 
-/**
- * Created by Georgi on 2.11.2015 г..
- */
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import rx.Observable;
+
 public interface PlaybackSessionProvider {
 
+    @NonNull
+    Observable<PlaybackSession> getStream();
+
+    @Nullable
+    PlaybackSession getPlaybackSession();
+
     void addMediaSessionConnectionListener(PlaybackSessionConnectionListener listener);
+
     void removeMediaSessionConnectionListener(PlaybackSessionConnectionListener listener);
 
 }
