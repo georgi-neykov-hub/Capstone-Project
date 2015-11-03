@@ -3,8 +3,8 @@ package com.neykov.podcastportal.view.player.presenter;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.neykov.podcastportal.playback.PlaybackConnectionListener;
-import com.neykov.podcastportal.playback.PlaybackConnector;
+import com.neykov.podcastportal.playback.PlaybackSessionConnectionListener;
+import com.neykov.podcastportal.playback.PlaybackSessionConnector;
 import com.neykov.podcastportal.playback.PlaybackService;
 import com.neykov.podcastportal.model.utils.Global;
 import com.neykov.podcastportal.view.base.BasePresenter;
@@ -14,49 +14,49 @@ import javax.inject.Inject;
 
 public class PlayerSlidingViewPresenter extends BasePresenter<PlayerSlidingView> {
 
-    private PlaybackService.PlaybackInterface mPlaybackInterface;
-    private PlaybackConnector mConnector;
+    private PlaybackService.PlaybackSession mPlaybackSession;
+    private PlaybackSessionConnector mConnector;
 
     @Inject
     public PlayerSlidingViewPresenter(@Global Context context) {
-        this.mConnector = new PlaybackConnector(context, mConnectionListener);
+        this.mConnector = new PlaybackSessionConnector(context, mConnectionListener);
     }
 
     @Override
     protected void onCreate(Bundle savedState) {
         super.onCreate(savedState);
-        mConnector.connect();
+        mConnector.connectToSession();
     }
 
     @Override
     protected void onDestroy() {
-        mConnector.disconnect();
+        mConnector.disconnectFromSession();
         super.onDestroy();
     }
 
     @Override
     protected void onTakeView(PlayerSlidingView playerSlidingView) {
         super.onTakeView(playerSlidingView);
-        if(mPlaybackInterface != null){
-            playerSlidingView.onConnected(mPlaybackInterface);
+        if(mPlaybackSession != null){
+            playerSlidingView.onConnected(mPlaybackSession);
         }
     }
 
     @Override
     protected void onDropView() {
-        if(mPlaybackInterface != null){
+        if(mPlaybackSession != null){
             //noinspection ConstantConditions
             getView().onDisconnected();
         }
         super.onDropView();
     }
 
-    private final PlaybackConnectionListener mConnectionListener = new PlaybackConnectionListener() {
+    private final PlaybackSessionConnectionListener mConnectionListener = new PlaybackSessionConnectionListener() {
         @Override
-        public void onConnected(PlaybackService.PlaybackInterface playbackInterface) {
-            mPlaybackInterface = playbackInterface;
+        public void onConnected(PlaybackService.PlaybackSession playbackSession) {
+            mPlaybackSession = playbackSession;
             if(getView() != null){
-                getView().onConnected(playbackInterface);
+                getView().onConnected(playbackSession);
             }
         }
 
@@ -64,7 +64,7 @@ public class PlayerSlidingViewPresenter extends BasePresenter<PlayerSlidingView>
         public void onDisconnected() {
             if(getView() != null){
                 getView().onDisconnected();
-                mPlaybackInterface = null;
+                mPlaybackSession = null;
             }
         }
     };

@@ -4,7 +4,6 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -61,7 +60,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
 
     private MediaSessionCompat mSession;
     private MediaSessionCompat.Token mSessionToken;
-    private PlaybackInterface mServiceBinder;
+    private PlaybackSessionBinder mServiceBinder;
 
     private OnVideoSizeChangedListener mVideoSizeListener;
 
@@ -71,7 +70,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
         LogHelper.d(TAG, "onCreate");
 
         mDelayedStopHandler = new DelayedStopHandler(this);
-        mServiceBinder = new PlaybackInterface(this);
+        mServiceBinder = new PlaybackSessionBinder(this);
         mPlayingQueue = new ArrayList<>();
 
         // Start a new MediaSession
@@ -439,22 +438,25 @@ public class PlaybackService extends ComponentService implements Player.Callback
 
     }
 
-    public static class PlaybackInterface extends Binder{
+    private static class PlaybackSessionBinder extends Binder implements com.neykov.podcastportal.playback.PlaybackSession {
 
         private WeakReference<PlaybackService> mServiceRef;
 
-        private PlaybackInterface(@NonNull PlaybackService service){
+        private PlaybackSessionBinder(@NonNull PlaybackService service){
             mServiceRef = new WeakReference<>(service);
         }
 
+        @Override
         public MediaSessionCompat.Token getMediaSessionToken(){
             return mServiceRef.get().getMediaSession().getSessionToken();
         }
 
+        @Override
         public void setVideoPlaybackSurface(Surface surface){
             mServiceRef.get().setVideoPlaybackSurface(surface);
         }
 
+        @Override
         public void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener){
             mServiceRef.get().setOnVideoSizeChangedListener(listener);
         }

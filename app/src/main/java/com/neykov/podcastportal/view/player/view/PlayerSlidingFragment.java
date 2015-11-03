@@ -17,7 +17,6 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.TextureView;
@@ -29,7 +28,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.model.LogHelper;
 import com.neykov.podcastportal.playback.OnVideoSizeChangedListener;
 import com.neykov.podcastportal.playback.PlaybackService;
 import com.neykov.podcastportal.view.base.fragment.BaseViewFragment;
@@ -66,7 +64,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     private Drawable mPlayDrawable;
     private Drawable mVideoBackgroundDrawable;
 
-    private PlaybackService.PlaybackInterface mPlaybackInterface;
+    private PlaybackService.PlaybackSession mPlaybackSession;
     private MediaControllerCompat mMediaController;
     private PlaybackStateCompat mLastPlaybackState;
 
@@ -152,10 +150,10 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     }
 
     @Override
-    public void onConnected(PlaybackService.PlaybackInterface playbackInterface) {
-        mPlaybackInterface = playbackInterface;
+    public void onConnected(PlaybackService.PlaybackSession playbackSession) {
+        mPlaybackSession = playbackSession;
         try {
-            mMediaController = new MediaControllerCompat(getContext(), playbackInterface.getMediaSessionToken());
+            mMediaController = new MediaControllerCompat(getContext(), playbackSession.getMediaSessionToken());
         } catch (RemoteException e) {
             throw new RuntimeException("Cannot create MediaController.", e);
         }
@@ -181,7 +179,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     @Override
     public void onDisconnected() {
         detachVideoSurface();
-        mPlaybackInterface = null;
+        mPlaybackSession = null;
         mMediaController.unregisterCallback(mMediaControllerCallback);
         mMediaController = null;
         mLastPlaybackState = null;
@@ -252,17 +250,17 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     }
 
     private void attachVideoSurface(){
-        if (!mVideoAttached && mPlaybackInterface != null && mVideoView.getSurfaceTexture() != null) {
-            mPlaybackInterface.setVideoPlaybackSurface(new Surface(mVideoView.getSurfaceTexture()));
-            mPlaybackInterface.setOnVideoSizeChangedListener(mVideoSizeChangedListener);
+        if (!mVideoAttached && mPlaybackSession != null && mVideoView.getSurfaceTexture() != null) {
+            mPlaybackSession.setVideoPlaybackSurface(new Surface(mVideoView.getSurfaceTexture()));
+            mPlaybackSession.setOnVideoSizeChangedListener(mVideoSizeChangedListener);
             mVideoAttached = true;
         }
     }
 
     private void detachVideoSurface(){
-        if (mVideoAttached && mPlaybackInterface != null) {
-            mPlaybackInterface.setVideoPlaybackSurface(null);
-            mPlaybackInterface.setOnVideoSizeChangedListener(null);
+        if (mVideoAttached && mPlaybackSession != null) {
+            mPlaybackSession.setVideoPlaybackSurface(null);
+            mPlaybackSession.setOnVideoSizeChangedListener(null);
             mVideoAttached = false;
         }
     }
