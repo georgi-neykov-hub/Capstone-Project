@@ -1,5 +1,6 @@
 package com.neykov.podcastportal.view.subscriptions.presenter;
 
+import android.content.res.Resources;
 import android.support.v7.internal.view.SupportMenuInflater;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -133,11 +134,13 @@ public class MyPodcastsAdapter extends BaseStateAdapter<SubscriptionAdapterItem,
     protected static class SubscriptionViewHolder extends BaseListenerViewHolder<ItemListener>{
 
         private TextView mTitleTextView;
+        private TextView mEpisodeCountTextView;
         private RecyclerView mEpisodesRecyclerView;
 
         protected SubscriptionViewHolder(View itemView) {
             super(itemView);
             mTitleTextView = (TextView) itemView.findViewById(R.id.title);
+            mEpisodeCountTextView = (TextView) itemView.findViewById(R.id.subTitle);
             mEpisodesRecyclerView = (RecyclerView) itemView.findViewById(R.id.items);
             RecyclerView.LayoutManager manager = new LinearLayoutManager(mEpisodesRecyclerView.getContext(), LinearLayoutManager.HORIZONTAL, false);
             RecyclerView.ItemDecoration decoration = new SpaceItemDecoration(
@@ -155,6 +158,12 @@ public class MyPodcastsAdapter extends BaseStateAdapter<SubscriptionAdapterItem,
 
         private void onBind(SubscriptionAdapterItem item){
             mTitleTextView.setText(item.getSubscription().getTitle());
+            Resources resources = mEpisodeCountTextView.getResources();
+            int episodeCоunt = item.getAdapter().getItemCount();
+            CharSequence countLabel = episodeCоunt == 1 ?
+                    resources.getString(R.string.subscription_episode_count_single) :
+                    resources.getString(R.string.subscription_episode_count, episodeCоunt);
+            mEpisodeCountTextView.setText(countLabel);
             mEpisodesRecyclerView.swapAdapter(item.getAdapter(), false);
         }
 

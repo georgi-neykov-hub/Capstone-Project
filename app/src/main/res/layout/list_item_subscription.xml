@@ -23,7 +23,7 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceListItemSmall"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             android:singleLine="true"
             tools:text="Title"/>
 
@@ -68,7 +68,7 @@
         android:id="@+id/items"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="152dp"
+        android:minHeight="@dimen/episode_card_height"
         android:layout_below="@+id/namesContainer"
         android:layout_marginBottom="@dimen/rhythm_space_single"/>
 

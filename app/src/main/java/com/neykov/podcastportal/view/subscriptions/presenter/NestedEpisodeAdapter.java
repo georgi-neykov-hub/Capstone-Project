@@ -4,6 +4,8 @@ import android.os.Parcelable;
 import android.support.v7.internal.view.SupportMenuInflater;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,7 +23,6 @@ import com.neykov.podcastportal.view.base.adapter.OnItemClickListener;
 import com.squareup.picasso.Picasso;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdapter.EpisodeViewHolder> {
 
@@ -122,8 +123,15 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
 
     protected static class EpisodeViewHolder extends BaseListenerViewHolder<EpisodeItemListener>{
 
+        private static final String NULL_DURATION_LABEL = "--:--";
+
         private ImageView mThumbnailView;
         private TextView mTitleTextView;
+        private TextView mDurationTextView;
+        private ImageView mMediaTypeIconView;
+        private ImageView mDownloadStateIconView;
+        private View mWatchedView;
+        private View mPlaylistIconView;
         private MenuItem mDownloadMenuItem;
         private MenuItem mPlaylistAddTopItem;
         private MenuItem mPlaylistAddEndItem;
@@ -134,6 +142,11 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
             mThumbnailView = (ImageView) itemView.findViewById(R.id.thumbnail);
             mTitleTextView = (TextView) itemView.findViewById(R.id.title);
 
+            mWatchedView = itemView.findViewById(R.id.watched);
+            mPlaylistIconView = itemView.findViewById(R.id.addedInPlaylist);
+            mDurationTextView = (TextView) itemView.findViewById(R.id.duration);
+            mMediaTypeIconView = (ImageView) itemView.findViewById(R.id.mediaType);
+            mDownloadStateIconView = (ImageView) itemView.findViewById(R.id.downloadState);
             ActionMenuView menuView = (ActionMenuView) itemView.findViewById(R.id.menu);
             menuView.setOnMenuItemClickListener(mMenuItemCLickListener);
             Menu itemMenu = menuView.getMenu();
@@ -146,18 +159,61 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
 
         private void onBind(Episode episode, String fallbackThumbnailUrl){
             mTitleTextView.setText(episode.getTitle());
+            mDurationTextView.setText(getDurationLabel(episode));
+            String thumbnailUrl = !TextUtils.isEmpty(episode.getThumbnail()) ? episode.getThumbnail() : fallbackThumbnailUrl;
             Picasso.with(mThumbnailView.getContext())
-                    .load(episode.getThumbnail())
+                    .load(thumbnailUrl)
                     .fit()
                     .centerCrop()
                     .placeholder(R.color.photo_placeholder)
                     .into(mThumbnailView);
+            bindMediaType(episode);
+            bindDownloadState(episode);
             mDownloadMenuItem.setVisible(episode.getDownloadState() != DatabaseContract.Episode.DOWNLOADED);
             mDownloadMenuItem.setEnabled(episode.getDownloadState() == DatabaseContract.Episode.REMOTE);
-
             mPlaylistRemoveItem.setVisible(episode.getPlaylistEntryId() != null);
             mPlaylistAddEndItem.setVisible(!mPlaylistRemoveItem.isVisible());
             mPlaylistAddTopItem.setVisible(!mPlaylistRemoveItem.isVisible());
+            mWatchedView.setVisibility(episode.isWatched() ? View.VISIBLE : View.GONE);
+            mPlaylistIconView.setVisibility(episode.getPlaylistEntryId() != null ? View.VISIBLE : View.GONE);
+
+        }
+
+        private void bindMediaType(Episode episode){
+            int mediaTypeIcon;
+            if (episode.getMimeType() == null){
+                mediaTypeIcon = R.drawable.ic_media_type_unknown;
+            } else if (episode.getMimeType().startsWith("audio")) {
+                mediaTypeIcon = R.drawable.ic_image_audiotrack;
+            } else {
+                mediaTypeIcon = R.drawable.ic_av_movie;
+            }
+            mMediaTypeIconView.setImageResource(mediaTypeIcon);
+        }
+
+        private void bindDownloadState(Episode episode){
+            int stateIcon;
+            switch (episode.getDownloadState()){
+                case DatabaseContract.Episode.DOWNLOADED:
+                    stateIcon = R.drawable.ic_content_save;
+                    break;
+                case DatabaseContract.Episode.DOWNLOADING:
+                    stateIcon = R.drawable.ic_file_file_download;
+                    break;
+                default:
+                case DatabaseContract.Episode.REMOTE:
+                    stateIcon = R.drawable.ic_file_cloud;
+                    break;
+            }
+            mDownloadStateIconView.setImageResource(stateIcon);
+        }
+
+        protected String getDurationLabel(Episode episode) {
+            if (episode.getDuration() != null) {
+                return DateUtils.formatElapsedTime(episode.getDuration() / 1000);
+            } else {
+                return NULL_DURATION_LABEL;
+            }
         }
 
         private final ActionMenuView.OnMenuItemClickListener mMenuItemCLickListener = item -> {

@@ -22,5 +22,8 @@
     <string name="label_share">Share</string>
     <string name="content_description_podcast_image">Podcast Image</string>
     <string name="action_refresh">Refresh</string>
+    <string name="subscription_episode_count">%1$d Episodes</string>
+    <string name="subscription_episode_count_single">1 Episode</string>
+
     <string name="action_unsubscribe">Unsubscribe</string>
 </resources>

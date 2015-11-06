@@ -40,7 +40,7 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
         mAdapter.setEpisodeItemListener(mEpisodeItemListener);
 
         this.restartable(RESTARTABLE_ID_SUBSCRIPTIONS,
-                () -> mManager.getSubscriptionsStream(false)
+                () -> mManager.getSubscriptionsStream(true)
                         .doOnNext(podcastItems -> mRowsSubscriptions.clear())
                         .flatMap(subscriptions1 -> Observable.from(subscriptions1).map(this::getAdapterItem).toList())
                         .subscribeOn(Schedulers.io())
