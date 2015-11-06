@@ -1,14 +1,15 @@
 package com.neykov.podcastportal.model.subscriptions;
 
+import android.app.DownloadManager;
 import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.MediaMetadata;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -24,14 +25,12 @@ import com.neykov.podcastportal.model.entity.converter.SubscriptionConverter;
 import com.neykov.podcastportal.model.persistence.DatabaseContract;
 import com.neykov.podcastportal.model.rss.Content;
 import com.neykov.podcastportal.model.rss.RSSFeed;
-import com.neykov.podcastportal.model.rss.RssChannel;
 import com.neykov.podcastportal.model.rss.RssFeedParser;
 import com.neykov.podcastportal.model.rss.RssItem;
 import com.neykov.podcastportal.model.utils.Global;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-import com.squareup.picasso.Picasso;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -43,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -51,7 +49,6 @@ import javax.inject.Singleton;
 
 import okio.BufferedSink;
 import okio.Okio;
-import retrofit.mime.MimeUtil;
 import rx.Observable;
 
 @Singleton
@@ -65,6 +62,8 @@ public class SubscriptionDownloader {
     private EpisodesConverter mEpisodesConverter;
     private SubscriptionConverter mSubscriptionConverter;
 
+    private DownloadManager mDownloadManager;
+
     @Inject
     public SubscriptionDownloader(@Global Context context, OkHttpClient mHttpClient) {
         this.mContext = context;
@@ -72,6 +71,7 @@ public class SubscriptionDownloader {
         this.mEpisodesConverter = new EpisodesConverter();
         this.mSubscriptionConverter = new SubscriptionConverter();
         this.mFeedParser = new RssFeedParser();
+        this.mDownloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
     }
 
     public Observable<PodcastSubscription> fetchSubscriptionUpdates(PodcastSubscription podcastSubscription) {
@@ -256,13 +256,13 @@ public class SubscriptionDownloader {
                 data.getMimeType() != null ? data.getMimeType() : source.getContent().getMimeType(),
                 null,
                 source.getContent().getContentLength(),
-                Episode.REMOTE,
+                DatabaseContract.Episode.REMOTE,
+                null,
                 data.getDuration(),
                 data.getThumbnailFrame() != null ? data.getThumbnailFrame().toURI().toString() : defautThumbnailUrl,
                 false,
                 null,
-                source.getPubDate());
-    }
+                source.getPubDate());}
 
     private boolean episodeAlreadyStored(RssItem item, long parentId) {
         Cursor queryResults = null;
@@ -383,6 +383,42 @@ public class SubscriptionDownloader {
                 e.printStackTrace();
             }
         }
+    }
+
+    public Observable<Episode> scheduleDownload(Episode episode) {
+        return Observable.create(subscriber -> {
+            try {
+                Uri remoteUri = Uri.parse(episode.getContentUrl());
+                String filename = remoteUri.getLastPathSegment();
+                DownloadManager.Request request = new DownloadManager.Request(remoteUri)
+                        .setAllowedOverMetered(false)
+                        .setAllowedOverRoaming(false)
+                        .setDescription(episode.getDescription())
+                        .setMimeType(episode.getMimeType())
+                        .setTitle(episode.getTitle())
+                        .setVisibleInDownloadsUi(false)
+                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                        .setDestinationInExternalFilesDir(mContext, Environment.DIRECTORY_PODCASTS, filename);
+
+                long downloadId = mDownloadManager.enqueue(request);
+                ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+                ops.add(ContentProviderOperation.newUpdate(DatabaseContract.Episode.buildItemUri(episode.getId()))
+                        .withValue(DatabaseContract.Episode.PODCAST_ID, episode.getPodcastId())
+                        .withValue(DatabaseContract.Episode.DOWNLOAD_ID, downloadId)
+                        .withValue(DatabaseContract.Episode.DOWNLOAD_STATE, DatabaseContract.Episode.DOWNLOADING)
+                        .withExpectedCount(1)
+                        .build());
+                mContext.getContentResolver().applyBatch(DatabaseContract.CONTENT_AUTHORITY, ops);
+
+                Episode updatedEpisode = new Episode.Builder(episode).setDownloadId(downloadId)
+                        .setDownloadState(DatabaseContract.Episode.DOWNLOADING)
+                        .build();
+                subscriber.onNext(updatedEpisode);
+                subscriber.onCompleted();
+            } catch (RemoteException | OperationApplicationException e) {
+                subscriber.onError(e);
+            }
+        });
     }
 
     private static class ContentMetaData {

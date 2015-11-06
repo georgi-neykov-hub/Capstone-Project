@@ -2,6 +2,10 @@ package com.neykov.podcastportal.model.persistence;
 
 import android.content.ContentUris;
 import android.net.Uri;
+import android.support.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public final class DatabaseContract {
 
@@ -47,11 +51,21 @@ public final class DatabaseContract {
         public static final String FILE_URL = "FileURL";
         public static final String FILE_SIZE = "FileSize";
         public static final String DOWNLOAD_STATE = "DownloadState";
+        public static final String DOWNLOAD_ID = "DownloadId";
         public static final String DURATION = "Duration";
         public static final String WATCHED = "Watched";
         public static final String WEBSITE = "Website";
         public static final String PLAYLIST_ENTRY_ID = PlaylistEntry.PLAYLIST_ENTRY_ID;
         public static final String RELEASE_DATE = "ReleaseDate";
+
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({REMOTE, DOWNLOADED, DOWNLOADING})
+        public @interface DownloadState {
+        }
+
+        public final static int REMOTE = 0;
+        public final static int DOWNLOADING = 1;
+        public final static int DOWNLOADED = 2;
 
         public static Uri buildItemUri(long id){
             return ContentUris.withAppendedId(CONTENT_URI, id);

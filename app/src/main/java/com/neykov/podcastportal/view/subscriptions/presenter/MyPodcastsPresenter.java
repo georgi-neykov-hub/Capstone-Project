@@ -1,6 +1,7 @@
 package com.neykov.podcastportal.view.subscriptions.presenter;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.PodcastSubscription;
@@ -89,9 +90,19 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
     private void unsubscribe(PodcastSubscription podcastSubscription){
         this.add(mManager.unsubscribeFromPodcast(podcastSubscription)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(remotePodcastData -> {}, throwable -> {}));
+                .subscribe(remotePodcastData -> {
+                }, throwable -> {
+                }));
     }
 
+    private void startDownload(Episode episode){
+        this.add(mManager.requestDownload(episode)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(remotePodcastData -> {
+                }, throwable -> {
+                }));
+    }
 
     private final MyPodcastsAdapter.ItemListener mSubscriptionItemListener = new MyPodcastsAdapter.ItemListener() {
         @Override
@@ -128,7 +139,7 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
 
         @Override
         public void onDownload(Episode episode) {
-
+            startDownload(episode);
         }
 
         @Override

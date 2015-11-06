@@ -78,6 +78,10 @@ public class SubscriptionsManager extends BaseManager {
                 .subscribeOn(Schedulers.io());
     }
 
+    public Observable<Episode> requestDownload(Episode episode){
+        return mSubscriptionDownloader.scheduleDownload(episode);
+    }
+
     public Observable<RemotePodcastData> unsubscribeFromPodcast(PodcastSubscription podcastSubscription) {
         if (podcastSubscription == null || podcastSubscription.getId() == null) {
             throw new IllegalArgumentException("Null or invalid Subscription argument provided.");

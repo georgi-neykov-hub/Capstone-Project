@@ -1,22 +1,13 @@
 package com.neykov.podcastportal.model.entity;
 
 
-import android.support.annotation.IntDef;
+import android.support.annotation.Nullable;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import com.neykov.podcastportal.model.persistence.DatabaseContract;
+
 import java.util.Date;
 
 public class Episode implements EpisodeData {
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({REMOTE, DOWNLOADED, DOWNLOADING})
-    @interface DownloadState {
-    }
-
-    public final static int REMOTE = 0;
-    public final static int DOWNLOADING = 1;
-    public final static int DOWNLOADED = 2;
 
     private long id;
     private long podcastId;
@@ -27,14 +18,30 @@ public class Episode implements EpisodeData {
     private String fileUrl;
     private Long fileSize;
     private String thumbnail;
-    @DownloadState
+    
+    @DatabaseContract.Episode.DownloadState
     private int downloadState;
+    private Long downloadId;
     private Long duration;
     private boolean watched;
     private Long playlistEntryId;
     private Date released;
 
-    public Episode(long id, long podcastId, String title, String description, String contentUrl, String mimeType, String fileUrl, Long fileSize, int downloadState, Long duration, String thumbnail, boolean watched, Long playlistEntryId, Date released) {
+    public Episode(long id,
+                   long podcastId,
+                   String title,
+                   String description,
+                   String contentUrl,
+                   String mimeType,
+                   String fileUrl,
+                   Long fileSize,
+                   @DatabaseContract.Episode.DownloadState int downloadState,
+                   Long downloadId,
+                   Long duration,
+                   String thumbnail,
+                   boolean watched,
+                   Long playlistEntryId,
+                   Date released) {
         this.id = id;
         this.podcastId = podcastId;
         this.title = title;
@@ -44,6 +51,7 @@ public class Episode implements EpisodeData {
         this.fileUrl = fileUrl;
         this.fileSize = fileSize;
         this.downloadState = downloadState;
+        this.downloadId = downloadId;
         this.duration = duration;
         this.watched = watched;
         this.playlistEntryId = playlistEntryId;
@@ -104,17 +112,21 @@ public class Episode implements EpisodeData {
     }
 
     public
-    @DownloadState
+    @DatabaseContract.Episode.DownloadState
     int getDownloadState() {
         return downloadState;
     }
 
+    public @Nullable Long getDownloadId(){
+        return downloadId;
+    }
+    
     public boolean isWatched() {
         return watched;
     }
 
     public boolean canBePlayedLocally(){
-        return downloadState == DOWNLOADED;
+        return downloadState == DatabaseContract.Episode.DOWNLOADED;
     }
 
     @Override
@@ -154,5 +166,125 @@ public class Episode implements EpisodeData {
         result = 31 * result + (int) (podcastId ^ (podcastId >>> 32));
         result = 31 * result + contentUrl.hashCode();
         return result;
+    }
+    
+    public static class Builder {
+
+        private long id;
+        private long podcastId;
+        private String title;
+        private String description;
+        private String contentUrl;
+        private String mimeType;
+        private String fileUrl;
+        private Long fileSize;
+        private int downloadState;
+        private Long downloadId;
+        private Long duration;
+        private String thumbnail;
+        private boolean watched;
+        private Long playlistEntryId;
+        private Date released;
+
+        public Builder(Episode episode) {
+            if(episode == null){
+                throw new IllegalArgumentException("Null episode provided.");
+            }
+            
+            this.id = episode.id;
+            this.podcastId = episode.podcastId;
+            this.title = episode.title;
+            this.description = episode.description;
+            this.contentUrl = episode.contentUrl;
+            this.mimeType = episode.mimeType;
+            this.fileUrl = episode.fileUrl;
+            this.fileSize = episode.fileSize;
+            this.downloadState = episode.downloadState;
+            this.downloadId = episode.downloadId;
+            this.duration = episode.duration;
+            this.thumbnail = episode.thumbnail;
+            this.watched = episode.watched;
+            this.playlistEntryId = episode.playlistEntryId;
+            this.released = episode.released;
+        }
+
+        public Builder setId(long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setPodcastId(long podcastId) {
+            this.podcastId = podcastId;
+            return this;
+        }
+
+        public Builder setTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder setDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder setContentUrl(String contentUrl) {
+            this.contentUrl = contentUrl;
+            return this;
+        }
+
+        public Builder setMimeType(String mimeType) {
+            this.mimeType = mimeType;
+            return this;
+        }
+
+        public Builder setFileUrl(String fileUrl) {
+            this.fileUrl = fileUrl;
+            return this;
+        }
+
+        public Builder setFileSize(Long fileSize) {
+            this.fileSize = fileSize;
+            return this;
+        }
+
+        public Builder setDownloadState(@DatabaseContract.Episode.DownloadState int downloadState) {
+            this.downloadState = downloadState;
+            return this;
+        }
+
+        public Builder setDownloadId(Long downloadId) {
+            this.downloadId = downloadId;
+            return this;
+        }
+
+        public Builder setDuration(Long duration) {
+            this.duration = duration;
+            return this;
+        }
+
+        public Builder setThumbnail(String thumbnail) {
+            this.thumbnail = thumbnail;
+            return this;
+        }
+
+        public Builder setWatched(boolean watched) {
+            this.watched = watched;
+            return this;
+        }
+
+        public Builder setPlaylistEntryId(Long playlistEntryId) {
+            this.playlistEntryId = playlistEntryId;
+            return this;
+        }
+
+        public Builder setReleased(Date released) {
+            this.released = released;
+            return this;
+        }
+
+        public Episode build() {
+            return new Episode(id, podcastId, title, description, contentUrl, mimeType, fileUrl, fileSize, downloadState, downloadId, duration, thumbnail, watched, playlistEntryId, released);
+        }
     }
 }

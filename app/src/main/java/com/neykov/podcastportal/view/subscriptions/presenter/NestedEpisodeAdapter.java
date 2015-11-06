@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.Episode;
+import com.neykov.podcastportal.model.persistence.DatabaseContract;
 import com.neykov.podcastportal.view.base.adapter.BaseAdapter;
 import com.neykov.podcastportal.view.base.adapter.BaseListenerViewHolder;
 import com.neykov.podcastportal.view.base.adapter.OnItemClickListener;
@@ -151,8 +152,8 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
                     .centerCrop()
                     .placeholder(R.color.photo_placeholder)
                     .into(mThumbnailView);
-            mDownloadMenuItem.setVisible(episode.getDownloadState() != Episode.DOWNLOADED);
-            mDownloadMenuItem.setEnabled(episode.getDownloadState() == Episode.REMOTE);
+            mDownloadMenuItem.setVisible(episode.getDownloadState() != DatabaseContract.Episode.DOWNLOADED);
+            mDownloadMenuItem.setEnabled(episode.getDownloadState() == DatabaseContract.Episode.REMOTE);
 
             mPlaylistRemoveItem.setVisible(episode.getPlaylistEntryId() != null);
             mPlaylistAddEndItem.setVisible(!mPlaylistRemoveItem.isVisible());

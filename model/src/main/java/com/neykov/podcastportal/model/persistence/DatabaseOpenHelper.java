@@ -69,6 +69,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
             Episode.WATCHED + " INTEGER NOT NULL," +
             Episode.WEBSITE + " TEXT," +
             Episode.RELEASE_DATE + " INTEGER," +
+            Episode.DOWNLOAD_ID + " INTEGER, " +
             Episode.DOWNLOAD_STATE + " INTEGER NOT NULL, " +
             Episode.FILE_URL + " TEXT," +
             Episode.FILE_SIZE + " INTEGER," +
