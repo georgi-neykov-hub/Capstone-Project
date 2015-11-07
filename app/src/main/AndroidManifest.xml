@@ -8,19 +8,22 @@
     <application
         android:name=".PodcastPortal"
         android:allowBackup="true"
+        android:largeHeap="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".view.subscriptions.MyPodcastsActivity"/>
+        <activity android:name=".view.subscriptions.MyPodcastsActivity">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
 
 
         <activity android:name=".view.explore.ExploreActivity" />
         <activity android:name=".view.player.PlayerActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
         </activity>
 
         <provider
@@ -28,9 +31,13 @@
             android:authorities="com.neykov.podcastportal"
             android:enabled="true"
             android:exported="false"
-            android:multiprocess="false"></provider>
+            android:multiprocess="false"/>
 
-        <service android:name=".playback.PlaybackService" android:exported="false" android:enabled="true"/>
+        <service android:name=".playback.PlaybackService" android:exported="false" android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
 
 
     </application>

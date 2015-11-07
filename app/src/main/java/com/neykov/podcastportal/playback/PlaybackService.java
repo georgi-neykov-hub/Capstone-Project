@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.Surface;
@@ -74,7 +75,8 @@ public class PlaybackService extends ComponentService implements Player.Callback
         mPlayingQueue = new ArrayList<>();
 
         // Start a new MediaSession
-        mSession = new MediaSessionCompat(this, "PlaybackService");
+
+        mSession = new MediaSessionCompat(this, "PlaybackService", new ComponentName(this, PlaybackService.class), null);
         mSessionToken = mSession.getSessionToken();
         mSession.setCallback(mSessionCallback);
         mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
@@ -113,6 +115,8 @@ public class PlaybackService extends ComponentService implements Player.Callback
                         handlePauseRequest();
                     }
                 }
+            } else if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
+                MediaButtonReceiver.handleIntent(mSession, startIntent);
             }
         }
         // Reset the delay handler to enqueue a message to stop the service if

@@ -20,8 +20,8 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.NotificationCompat;
 
-import com.neykov.podcastportal.model.LogHelper;
 import com.neykov.podcastportal.R;
+import com.neykov.podcastportal.model.LogHelper;
 import com.neykov.podcastportal.model.utils.ResourceHelper;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -36,7 +36,6 @@ public class MediaNotificationManager extends BroadcastReceiver {
     public static final String ACTION_PLAY = "com.example.android.uamp.play";
     public static final String ACTION_PREV = "com.example.android.uamp.prev";
     public static final String ACTION_NEXT = "com.example.android.uamp.next";
-    public static final String ACTION_STOP_CASTING = "com.example.android.uamp.stop_cast";
 
     private final PlaybackService mService;
     private MediaSessionCompat.Token mSessionToken;
@@ -63,7 +62,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
         mPlayerActivityComponent = playerActivity;
         updateSessionToken();
 
-        mNotificationColor =  ResourceHelper.getThemeColor(mService,
+        mNotificationColor = ResourceHelper.getThemeColor(mService,
                 R.attr.colorPrimary, Color.DKGRAY);
 
         mNotificationManager = (NotificationManager) mService
@@ -102,7 +101,6 @@ public class MediaNotificationManager extends BroadcastReceiver {
                 filter.addAction(ACTION_PAUSE);
                 filter.addAction(ACTION_PLAY);
                 filter.addAction(ACTION_PREV);
-                filter.addAction(ACTION_STOP_CASTING);
                 mService.registerReceiver(this, filter);
 
                 mService.startForeground(NOTIFICATION_ID, notification);
@@ -146,10 +144,13 @@ public class MediaNotificationManager extends BroadcastReceiver {
             case ACTION_PREV:
                 mTransportControls.skipToPrevious();
                 break;
+            case Intent.ACTION_MEDIA_BUTTON:
+
             default:
                 LogHelper.w(TAG, "Unknown intent ignored. Action=", action);
         }
     }
+
 
     /**
      * Update the state based on a change on the session token. Called either when
@@ -260,13 +261,12 @@ public class MediaNotificationManager extends BroadcastReceiver {
                         .setMediaSession(mSessionToken))
                 .setColor(mNotificationColor)
                 .setSmallIcon(R.drawable.ic_notification)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setUsesChronometer(true)
                 .setContentIntent(createContentIntent(description))
                 .setContentTitle(description.getTitle())
                 .setContentText(description.getSubtitle());
 
-        Bitmap art = null;
         if (description.getIconUri() != null) {
             String artUrl = description.getIconUri().toString();
             loadArtwork(artUrl, notificationBuilder);
