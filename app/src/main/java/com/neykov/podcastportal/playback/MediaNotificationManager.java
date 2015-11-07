@@ -323,6 +323,9 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
     private void loadArtwork(final String bitmapUrl, final NotificationCompat.Builder builder) {
         Picasso.with(mService).load(bitmapUrl)
+                .resizeDimen(R.dimen.notification_image_size, R.dimen.notification_image_size)
+                .centerCrop()
+                .onlyScaleDown()
                 .into(new Target() {
                     @Override
                     public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {

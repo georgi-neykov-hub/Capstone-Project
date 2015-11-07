@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadata;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -34,6 +36,7 @@ import com.neykov.podcastportal.view.base.fragment.BaseViewFragment;
 import com.neykov.podcastportal.view.player.presenter.PlayerSlidingViewPresenter;
 import com.squareup.picasso.Picasso;
 
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -161,18 +164,13 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
         PlaybackStateCompat state = mMediaController.getPlaybackState();
         updatePlaybackState(state);
         updateProgress();
-        if (state != null && (state.getState() == PlaybackStateCompat.STATE_PLAYING ||
-                state.getState() == PlaybackStateCompat.STATE_BUFFERING)) {
-            scheduleSeekbarUpdate();
-        }
 
         attachVideoSurface();
 
         MediaMetadataCompat metadata = mMediaController.getMetadata();
         if (metadata != null) {
             updateDuration(metadata);
-            MediaDescriptionCompat description = metadata.getDescription();
-            updateMediaDescription(description);
+            updateMediaDescription(metadata);
         }
     }
 
@@ -189,7 +187,8 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
         mPlayPauseButton.setOnClickListener(v -> {
             MediaControllerCompat.TransportControls controls = mMediaController.getTransportControls();
             @PlaybackStateCompat.State int state = mMediaController.getPlaybackState().getState();
-            if (state == PlaybackStateCompat.STATE_PLAYING) {
+            if (state == PlaybackStateCompat.STATE_PLAYING ||
+                    state == PlaybackStateCompat.STATE_BUFFERING) {
                 controls.pause();
             } else {
                 controls.play();
@@ -217,7 +216,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mMediaController.getTransportControls().seekTo(seekBar.getProgress());
-                scheduleSeekbarUpdate();
+                seekBar.setEnabled(false);
             }
         });
 
@@ -249,23 +248,24 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
         }
     }
 
-    private void attachVideoSurface(){
+    private void attachVideoSurface() {
         if (!mVideoAttached && mPlaybackSession != null && mVideoView.getSurfaceTexture() != null) {
-            mPlaybackSession.setVideoPlaybackSurface(new Surface(mVideoView.getSurfaceTexture()));
             mPlaybackSession.setOnVideoSizeChangedListener(mVideoSizeChangedListener);
+            mPlaybackSession.setVideoPlaybackSurface(new Surface(mVideoView.getSurfaceTexture()));
             mVideoAttached = true;
         }
     }
 
-    private void detachVideoSurface(){
+    private void detachVideoSurface() {
         if (mVideoAttached && mPlaybackSession != null) {
-            mPlaybackSession.setVideoPlaybackSurface(null);
             mPlaybackSession.setOnVideoSizeChangedListener(null);
+            mPlaybackSession.setVideoPlaybackSurface(null);
             mVideoAttached = false;
         }
     }
 
-    private void updateMediaDescription(MediaDescriptionCompat description) {
+    private void updateMediaDescription(MediaMetadataCompat metadata) {
+        MediaDescriptionCompat description = metadata.getDescription();
         if (description == null) {
             return;
         }
@@ -276,7 +276,24 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
                 .load(description.getIconUri())
                 .fit()
                 .centerCrop()
+                .placeholder(R.color.photo_placeholder)
                 .into(mThumbnailArtImageView);
+
+        String mimeType = metadata.getString(MediaMetadataCompat.METADATA_KEY_GENRE);
+        boolean mediaHasVideo = mimeType != null && mimeType.startsWith("video");
+        if (mediaHasVideo) {
+            mVideoView.setVisibility(View.VISIBLE);
+            mFullArtImageView.setImageResource(android.R.color.black);
+        } else {
+            mVideoView.setVisibility(View.GONE);
+            Picasso.with(getContext()).cancelRequest(mFullArtImageView);
+            Picasso.with(getContext())
+                    .load(description.getIconUri())
+                    .fit()
+                    .centerInside()
+                    .placeholder(R.color.photo_placeholder)
+                    .into(mFullArtImageView);
+        }
     }
 
     private void updateDuration(MediaMetadataCompat metadata) {
@@ -289,6 +306,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
             return;
         }
         mLastPlaybackState = state;
+        updateProgress();
 
         switch (state.getState()) {
             case PlaybackStateCompat.STATE_PLAYING:
@@ -307,6 +325,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
                 mPlayPauseButton.setImageDrawable(mPlayDrawable);
                 stopSeekbarUpdate();
                 break;
+            case PlaybackStateCompat.STATE_ERROR:
             case PlaybackStateCompat.STATE_NONE:
             case PlaybackStateCompat.STATE_STOPPED:
                 mLoadingView.setVisibility(View.INVISIBLE);
@@ -318,6 +337,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
                 break;
             case PlaybackStateCompat.STATE_BUFFERING:
                 mPlayPauseButton.setEnabled(false);
+                mPlayPauseButton.setImageDrawable(mPauseDrawable);
                 mLoadingView.setVisibility(View.VISIBLE);
                 mSeekBar.setEnabled(false);
                 stopSeekbarUpdate();
@@ -343,6 +363,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     }
 
     private MediaControllerCompat.Callback mMediaControllerCallback = new MediaControllerCompat.Callback() {
+
         @Override
         public void onPlaybackStateChanged(PlaybackStateCompat state) {
             updatePlaybackState(state);
@@ -351,8 +372,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             if (metadata != null) {
-                MediaDescriptionCompat description = metadata.getDescription();
-                updateMediaDescription(description);
+                updateMediaDescription(metadata);
                 updateDuration(metadata);
             }
         }
@@ -361,10 +381,10 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     private OnVideoSizeChangedListener mVideoSizeChangedListener = new OnVideoSizeChangedListener() {
         @Override
         public void onVideoSizeChanged(int width, int height) {
-            if(width != 0 || height != 0){
+            if (width != 0 || height != 0) {
                 mFullArtImageView.setImageDrawable(mVideoBackgroundDrawable);
                 mVideoView.setVisibility(View.VISIBLE);
-                float aspectRatio = width / (float)height;
+                float aspectRatio = width / (float) height;
                 int frameWidth = mVideoView.getWidth();
                 int desiredHeight = (int) (frameWidth / aspectRatio);
                 ViewGroup.LayoutParams params = mVideoView.getLayoutParams();

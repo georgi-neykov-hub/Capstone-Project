@@ -85,7 +85,6 @@ public class PlaybackService extends ComponentService implements Player.Callback
         mPlaylistManager = getModelComponent().getPlaylistComponent().getPlaylistManager();
 
         mPlayback = new PlayerImpl(this);
-        mPlayback.setState(PlaybackStateCompat.STATE_NONE);
         mPlayback.setCallback(this);
         mPlayback.start();
 
@@ -212,7 +211,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
      * Handle a request to play music
      */
     private void handlePlayRequest(PlaylistEntry entry) {
-        LogHelper.d(TAG, "handlePlayRequest: mState=" + mPlayback.getState());
+        LogHelper.d(TAG, "handlePlayRequest: mState=" + mPlayback.getPlaybackState());
 
         mDelayedStopHandler.clearDispatchedStops();
         if (!mServiceStarted) {
@@ -237,7 +236,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
      * Handle a request to pause music
      */
     private void handlePauseRequest() {
-        LogHelper.d(TAG, "handlePauseRequest: mState=" + mPlayback.getState());
+        LogHelper.d(TAG, "handlePauseRequest: mState=" + mPlayback.getPlaybackState());
         mPlayback.pause();
         // reset the delayed stop handler.
         mDelayedStopHandler.dispatchDelayedStop();
@@ -247,7 +246,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
      * Handle a request to stop music
      */
     private void handleStopRequest(String withError) {
-        LogHelper.d(TAG, "handleStopRequest: mState=" + mPlayback.getState() + " error=", withError);
+        LogHelper.d(TAG, "handleStopRequest: mState=" + mPlayback.getPlaybackState() + " error=", withError);
         mPlayback.stop(true);
         // reset the delayed stop handler.
         mDelayedStopHandler.dispatchDelayedStop();
@@ -267,6 +266,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
                 .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, episode.getDuration())
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, String.valueOf(entry.getId()))
                 .putString(MediaMetadataCompat.METADATA_KEY_ART_URI, episode.getThumbnail())
+                .putString(MediaMetadataCompat.METADATA_KEY_GENRE, episode.getMimeType())
                 .build();
         mSession.setMetadata(mediaData);
     }
@@ -277,9 +277,9 @@ public class PlaybackService extends ComponentService implements Player.Callback
      * @param error if not null, error message to present to the user.
      */
     private void updatePlaybackState(String error) {
-        LogHelper.d(TAG, "updatePlaybackState, playback state=" + mPlayback.getState());
+        LogHelper.d(TAG, "updatePlaybackState, playback state=" + mPlayback.getPlaybackState());
         long position = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
-        if (mPlayback != null && mPlayback.isConnected()) {
+        if (mPlayback != null) {
             position = mPlayback.getCurrentStreamPosition();
         }
 
@@ -295,12 +295,11 @@ public class PlaybackService extends ComponentService implements Player.Callback
             stateBuilder.setErrorMessage(error);
             state = PlaybackStateCompat.STATE_ERROR;
         } else {
-            state = mPlayback.getState();
+            state = mPlayback.getPlaybackState();
         }
         //noinspection ResourceType
         stateBuilder.setState(state, position, 1.0f, SystemClock.elapsedRealtime());
         stateBuilder.setActiveQueueItemId(getCurrentQueueItemId());
-
         mSession.setPlaybackState(stateBuilder.build());
 
         if (state == PlaybackStateCompat.STATE_PLAYING || state == PlaybackStateCompat.STATE_PAUSED) {
@@ -359,47 +358,6 @@ public class PlaybackService extends ComponentService implements Player.Callback
     public void onVideoSizeChanged(int width, int height) {
         if(mVideoSizeListener != null){
             mVideoSizeListener.onVideoSizeChanged(width, height);
-        }
-    }
-
-    /**
-     * Helper to switch to a different Playback instance
-     *
-     * @param playback switch to this playback
-     */
-    private void switchToPlayer(PlayerImpl playback, boolean resumePlaying) {
-        if (playback == null) {
-            throw new IllegalArgumentException("Playback cannot be null");
-        }
-        // suspend the current one.
-        int oldState = mPlayback.getState();
-        int pos = mPlayback.getCurrentStreamPosition();
-        Episode currentEpisode = mPlayback.getCurrentEpisode();
-        LogHelper.d(TAG, "Current position from " + playback + " is ", pos);
-        mPlayback.stop(false);
-        playback.setCallback(this);
-        playback.setCurrentStreamPosition(pos < 0 ? 0 : pos);
-        playback.setCurrentEpisode(currentEpisode);
-        playback.start();
-        // finally swap the instance
-        mPlayback = playback;
-        switch (oldState) {
-            case PlaybackStateCompat.STATE_BUFFERING:
-            case PlaybackStateCompat.STATE_CONNECTING:
-            case PlaybackStateCompat.STATE_PAUSED:
-                mPlayback.pause();
-                break;
-            case PlaybackStateCompat.STATE_PLAYING:
-                if (resumePlaying) {
-                    mPlayback.play(currentEpisode);
-                } else {
-                    mPlayback.pause();
-                }
-                break;
-            case PlaybackStateCompat.STATE_NONE:
-                break;
-            default:
-                LogHelper.d(TAG, "Default called. Old state is ", oldState);
         }
     }
 
@@ -511,13 +469,13 @@ public class PlaybackService extends ComponentService implements Player.Callback
 
         @Override
         public void onPause() {
-            LogHelper.d(TAG, "pause. current state=" + mPlayback.getState());
+            LogHelper.d(TAG, "pause. current state=" + mPlayback.getPlaybackState());
             handlePauseRequest();
         }
 
         @Override
         public void onStop() {
-            LogHelper.d(TAG, "stop. current state=" + mPlayback.getState());
+            LogHelper.d(TAG, "stop. current state=" + mPlayback.getPlaybackState());
             handleStopRequest(null);
         }
 

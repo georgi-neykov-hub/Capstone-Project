@@ -15,6 +15,7 @@ import com.neykov.podcastportal.model.LogHelper;
 import com.neykov.podcastportal.model.entity.Episode;
 
 
+import java.io.File;
 import java.io.IOException;
 
 import static android.media.MediaPlayer.OnCompletionListener;
@@ -79,7 +80,7 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
         this.mAudioManager = (AudioManager) service.getSystemService(Context.AUDIO_SERVICE);
         // Create the Wifi lock (this does not acquire the lock, this just creates it)
         this.mWifiLock = ((WifiManager) service.getSystemService(Context.WIFI_SERVICE))
-                .createWifiLock(WifiManager.WIFI_MODE_FULL, "uAmp_lock");
+                .createWifiLock(WifiManager.WIFI_MODE_FULL, "podcastPortal_lock");
     }
 
     @Override
@@ -88,10 +89,7 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
 
     @Override
     public void stop(boolean notifyListeners) {
-        mState = PlaybackStateCompat.STATE_STOPPED;
-        if (notifyListeners && mCallback != null) {
-            mCallback.onPlaybackStatusChanged(mState);
-        }
+        moveToPlaybackState(PlaybackStateCompat.STATE_STOPPED);
         mCurrentPosition = getCurrentStreamPosition();
         // Give up Audio focus
         giveUpAudioFocus();
@@ -104,20 +102,10 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
     }
 
     @Override
-    public void setState(@PlaybackStateCompat.State int state) {
-        this.mState = state;
-    }
-
-    @Override
     public
     @PlaybackStateCompat.State
-    int getState() {
+    int getPlaybackState() {
         return mState;
-    }
-
-    @Override
-    public boolean isConnected() {
-        return true;
     }
 
     @Override
@@ -127,8 +115,11 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
 
     @Override
     public int getCurrentStreamPosition() {
-        return mMediaPlayer != null ?
-                mMediaPlayer.getCurrentPosition() : mCurrentPosition;
+        if(mMediaPlayer != null && mState != PlaybackStateCompat.STATE_BUFFERING){
+            return mMediaPlayer.getCurrentPosition();
+        } else {
+            return mCurrentPosition;
+        }
     }
 
     @Override
@@ -138,28 +129,34 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
         registerAudioNoisyReceiver();
         boolean mediaHasChanged = mCurrentEpisode == null || mCurrentEpisode.getId() != target.getId();
         boolean sourceHasChanged = mediaHasChanged || mCurrentEpisode.canBePlayedLocally() != target.canBePlayedLocally();
-        if (mediaHasChanged) {
+        if (mediaHasChanged || sourceHasChanged) {
             mCurrentEpisode = target;
         }
 
-        if (mediaHasChanged || sourceHasChanged) {
+        if (mediaHasChanged) {
             mCurrentPosition = 0;
+        } else if(mMediaPlayer != null && getPlaybackState() != PlaybackStateCompat.STATE_ERROR){
+            mCurrentPosition = mMediaPlayer.getCurrentPosition();
         }
 
-        if (mState == PlaybackStateCompat.STATE_PAUSED && !mediaHasChanged && mMediaPlayer != null) {
+        if (!mediaHasChanged && mMediaPlayer != null && mState == PlaybackStateCompat.STATE_PAUSED) {
             configMediaPlayerState();
         } else {
-            mState = PlaybackStateCompat.STATE_STOPPED;
-            if (mCallback != null) {
-                mCallback.onPlaybackStatusChanged(mState);
+            moveToPlaybackState(PlaybackStateCompat.STATE_STOPPED);
+            if(mMediaPlayer != null){
+                mMediaPlayer.reset();
             }
+
             relaxResources(false); // release everything except MediaPlayer
-            String source = mCurrentEpisode.getContentUrl();
+
+            boolean canPlayFromLocalResource = mCurrentEpisode.getFileUrl() != null &&
+                    new File(mCurrentEpisode.getFileUrl()).exists();
+
+            String source = canPlayFromLocalResource? mCurrentEpisode.getFileUrl() : mCurrentEpisode.getContentUrl();
 
             try {
+                moveToPlaybackState(PlaybackStateCompat.STATE_BUFFERING);
                 createMediaPlayerIfNeeded();
-
-                mState = PlaybackStateCompat.STATE_BUFFERING;
 
                 mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mMediaPlayer.setDataSource(source);
@@ -174,12 +171,9 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
                 // If we are streaming from the internet, we want to hold a
                 // Wifi lock, which prevents the Wifi radio from going to
                 // sleep while the song is playing.
-                mWifiLock.acquire();
-
-                if (mCallback != null) {
-                    mCallback.onPlaybackStatusChanged(mState);
+                if(!canPlayFromLocalResource) {
+                    mWifiLock.acquire();
                 }
-
             } catch (IOException ex) {
                 LogHelper.e(TAG, ex, "Exception playing song");
                 if (mCallback != null) {
@@ -201,28 +195,26 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
             relaxResources(false);
             giveUpAudioFocus();
         }
-        mState = PlaybackStateCompat.STATE_PAUSED;
-        if (mCallback != null) {
-            mCallback.onPlaybackStatusChanged(mState);
-        }
+        moveToPlaybackState(PlaybackStateCompat.STATE_PAUSED);
         unregisterAudioNoisyReceiver();
     }
 
     @Override
     public void seekTo(int position) {
         LogHelper.d(TAG, "seekTo called with ", position);
-
-        if (mMediaPlayer == null) {
-            // If we do not have a current media player, simply update the current position
-            mCurrentPosition = position;
-        } else {
+        mCurrentPosition = position;
+        if (mMediaPlayer != null) {
             if (mMediaPlayer.isPlaying()) {
-                mState = PlaybackStateCompat.STATE_BUFFERING;
+                moveToPlaybackState(PlaybackStateCompat.STATE_BUFFERING);
             }
             mMediaPlayer.seekTo(position);
-            if (mCallback != null) {
-                mCallback.onPlaybackStatusChanged(mState);
-            }
+        }
+    }
+
+    private void moveToPlaybackState(@PlaybackStateCompat.State int newState){
+        mState = newState;
+        if (mCallback != null) {
+            mCallback.onPlaybackStatusChanged(mState);
         }
     }
 
@@ -275,7 +267,6 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
                 mMediaPlayer.setSurface(null);
             }
             mVideoSurfaceAttached = false;
-            mCallback = null;
         }
     }
 
@@ -439,6 +430,7 @@ public class PlayerImpl implements Player, AudioManager.OnAudioFocusChangeListen
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         LogHelper.e(TAG, "Media player error: what=" + what + ", extra=" + extra);
+        moveToPlaybackState(PlaybackStateCompat.STATE_ERROR);
         if (mCallback != null) {
             mCallback.onError("MediaPlayer error " + what + " (" + extra + ")");
         }

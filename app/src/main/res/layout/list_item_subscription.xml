@@ -5,7 +5,8 @@
     android:id="@+id/userDetailsContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/rhythm_space_single">
+    android:layout_marginTop="@dimen/rhythm_space_single"
+    android:animateLayoutChanges="true">
 
     <LinearLayout
         android:id="@+id/namesContainer"

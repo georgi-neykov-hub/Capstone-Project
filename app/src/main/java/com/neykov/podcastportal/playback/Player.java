@@ -1,5 +1,6 @@
 package com.neykov.podcastportal.playback;
 
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -25,19 +26,9 @@ public interface Player {
     void stop(boolean notifyListeners);
 
     /**
-     * Set the latest playback state as determined by the caller.
-     */
-    void setState(int state);
-
-    /**
      * Get the current {@link android.media.session.PlaybackState#getState()}
      */
-    int getState();
-
-    /**
-     * @return boolean that indicates that this is ready to be used.
-     */
-    boolean isConnected();
+    int getPlaybackState();
 
     /**
      * @return boolean indicating whether the player is playing or is supposed to be
@@ -99,7 +90,7 @@ public interface Player {
          * Implementations can use this callback to update
          * playback state on the media sessions.
          */
-        void onPlaybackStatusChanged(int state);
+        void onPlaybackStatusChanged(@PlaybackStateCompat.State int state);
 
         /**
          * @param error to be added to the PlaybackState
