@@ -16,7 +16,12 @@
         <item name="colorButtonNormal">?attr/colorAccent</item>
         <item name="dialogTheme">@style/AppDialogTheme</item>
         <item name="drawerArrowStyle">@style/AppTheme.Toolbar.DrawerArrowStyle</item>
-        <item name="cardStyle">@style/CardView.Light</item>
+        <item name="cardStyle">@style/AppTheme.CardViewStyle</item>
+    </style>
+
+    <style name="AppTheme.CardViewStyle" parent="CardView.Light">
+        <item name="cardUseCompatPadding">true</item>
+        <item name="cardPreventCornerOverlap">false</item>
     </style>
 
     <style name="AppDialogTheme" parent="Theme.AppCompat.Light.Dialog">

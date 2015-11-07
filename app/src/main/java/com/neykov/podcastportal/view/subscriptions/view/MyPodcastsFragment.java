@@ -27,6 +27,7 @@ public class MyPodcastsFragment extends ToolbarViewFragment<MyPodcastsPresenter>
     }
 
     private RecyclerView.LayoutManager mLayoutManager;
+    private RecyclerView mRecyclerView;
 
     @NonNull
     @Override
@@ -38,14 +39,16 @@ public class MyPodcastsFragment extends ToolbarViewFragment<MyPodcastsPresenter>
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_my_podcasts, container, false);
-        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.podcastsList);
-        configureRecycleView(recyclerView, savedInstanceState);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.podcastsList);
+        configureRecycleView(mRecyclerView, savedInstanceState);
         return rootView;
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        mRecyclerView.setAdapter(null);
+        mRecyclerView = null;
         mLayoutManager = null;
     }
 

@@ -22,17 +22,21 @@ import com.squareup.sqlbrite.BriteContentResolver;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import rx.Observable;
 import rx.schedulers.Schedulers;
+import rx.subjects.Subject;
 
 public class SubscriptionsManager extends BaseManager {
 
     private SubscriptionConverter mSubscriptionConverter;
     private EpisodesConverter mEpisodesConverter;
     private SubscriptionDownloader mSubscriptionDownloader;
+
+    private Set<Long> mUpdatingSubscriptionsSet;
 
     @Inject
     public SubscriptionsManager(@Global Context context, BriteContentResolver mResolver, SubscriptionDownloader downloader) {
@@ -42,15 +46,27 @@ public class SubscriptionsManager extends BaseManager {
         this.mEpisodesConverter = new EpisodesConverter();
     }
 
+    public Observable<PodcastSubscription> getPodcastStream(long podcastId, boolean notifyForEpisodeChanges){
+        return getBriteResolver().createQuery(
+                DatabaseContract.Podcast
+                .buildItemUri(podcastId),
+                null,
+                null,
+                null,
+                null,
+                notifyForEpisodeChanges)
+                .mapToOne(mSubscriptionConverter::convert);
+    }
+
     public Observable<List<Episode>> getLatestEpisodes(PodcastSubscription podcastSubscription, int count) {
         return getBriteResolver().createQuery(
                 DatabaseContract.Episode.buildSubscriptionEpisodesUri(podcastSubscription.getId()),
                 null,
                 null,
                 null,
-                count > -1 ? DatabaseContract.Episode.RELEASE_DATE :
-                        DatabaseContract.Episode.RELEASE_DATE + " LIMIT " + String.valueOf(count),
-                true)
+                count > -1 ? DatabaseContract.Episode.RELEASE_DATE + " DESC" :
+                        DatabaseContract.Episode.RELEASE_DATE + " DESC LIMIT " + String.valueOf(count),
+                false)
                 .mapToList(mEpisodesConverter::convert);
     }
 
@@ -75,6 +91,8 @@ public class SubscriptionsManager extends BaseManager {
 
     public Observable<PodcastSubscription> updateSubscription(PodcastSubscription podcastSubscription) {
         return mSubscriptionDownloader.fetchSubscriptionUpdates(podcastSubscription)
+                .doOnSubscribe(() -> {
+                })
                 .subscribeOn(Schedulers.io());
     }
 
@@ -141,6 +159,14 @@ public class SubscriptionsManager extends BaseManager {
                         .onErrorReturn(throwable -> null)
                         .subscribeOn(Schedulers.io())
                         .subscribe());
+    }
+
+    private void addSubscriptionToUpdates(long id){
+        mUpdatingSubscriptionsSet.add(id);
+    }
+
+    private void removeSubscriptionFromUpdateSet(long id){
+        mUpdatingSubscriptionsSet.remove(id);
     }
 
     private Observable<PodcastSubscription> subscribeForPodcast(RemotePodcastData podcast) {

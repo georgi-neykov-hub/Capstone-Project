@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="?cardStyle"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:cardUseCompatPadding="true">
+    android:layout_height="wrap_content">
 
     <RelativeLayout
         android:layout_width="match_parent"

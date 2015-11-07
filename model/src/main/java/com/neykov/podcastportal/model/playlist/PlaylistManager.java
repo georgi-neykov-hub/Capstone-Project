@@ -183,19 +183,24 @@ public class PlaylistManager extends BaseManager {
         return remove(entry.getEpisode());
     }
 
-    public Single<Void> remove(Episode episode) {
+    public Single<Void> remove(final Episode episode) {
         return Single.create(singleSubscriber -> {
             ArrayList<ContentProviderOperation> ops = new ArrayList<>(1);
-            ops.add(ContentProviderOperation.newDelete(DatabaseContract.PlaylistEntry.buildItemUri(episode.getPlaylistEntryId()))
-                    .build());
+
             ops.add(ContentProviderOperation.newUpdate(DatabaseContract.Episode.buildItemUri(episode.getId()))
-            .withExpectedCount(1)
-            .withValue(DatabaseContract.Episode.PODCAST_ID, episode.getPodcastId())
-            .withValue(DatabaseContract.Episode.PLAYLIST_ENTRY_ID, null)
-            .build());
+                    .withExpectedCount(1)
+                    .withValue(DatabaseContract.Episode.PLAYLIST_ENTRY_ID, null)
+                    .withValue(DatabaseContract.Episode.PODCAST_ID, episode.getPodcastId())
+                    .build());
+
+            ops.add(ContentProviderOperation
+                    .newDelete(DatabaseContract.PlaylistEntry.buildItemUri(episode.getPlaylistEntryId()))
+                    .withExpectedCount(1)
+                    .build());
             try {
                 getApplicationContext().getContentResolver()
                         .applyBatch(DatabaseContract.CONTENT_AUTHORITY, ops);
+
                 singleSubscriber.onSuccess(null);
             } catch (RemoteException | OperationApplicationException e) {
                 singleSubscriber.onError(e);

@@ -1,7 +1,6 @@
 package com.neykov.podcastportal.view.subscriptions.presenter;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.PodcastSubscription;
@@ -11,11 +10,11 @@ import com.neykov.podcastportal.view.base.BasePresenter;
 import com.neykov.podcastportal.view.base.ErrorDisplayView;
 import com.neykov.podcastportal.view.subscriptions.view.MyPodcastsView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.internal.util.SubscriptionList;
@@ -37,16 +36,12 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
         this.mAdapter = new MyPodcastsAdapter();
         this.mRowsSubscriptions = new SubscriptionList();
         mAdapter.setSubscriptionItemListener(mSubscriptionItemListener);
-        mAdapter.setEpisodeItemListener(mEpisodeItemListener);
 
         this.restartable(RESTARTABLE_ID_SUBSCRIPTIONS,
-                () -> mManager.getSubscriptionsStream(true)
-                        .doOnNext(podcastItems -> mRowsSubscriptions.clear())
-                        .flatMap(subscriptions1 -> Observable.from(subscriptions1).map(this::getAdapterItem).toList())
+                () -> mManager.getSubscriptionsStream(false)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .doOnNext(mAdapter::setData)
-                        .map(List::size)
+                        .map(this::createAttachRowAdapterItems)
                         .compose(delayUntilViewAvailable())
                         .subscribe(delivery -> delivery.split(
                                 (podcastsView, podcastCount) -> podcastsView.hideLoadingIndicator(),
@@ -76,15 +71,30 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
         mAdapter.clearItems();
     }
 
-    private SubscriptionAdapterItem getAdapterItem(PodcastSubscription podcastSubscription) {
-        SubscriptionAdapterItem item = new SubscriptionAdapterItem(podcastSubscription);
-        Subscription episodesSubscription = mManager.getLatestEpisodes(podcastSubscription, -1)
-                .retry()
-                .onErrorReturn(throwable -> null)
-                .filter(episodes -> episodes != null)
-                .subscribe(episodes1 -> item.getAdapter().setData(episodes1));
-        mRowsSubscriptions.add(episodesSubscription);
-        return item;
+    private int createAttachRowAdapterItems(List<PodcastSubscription> podcasts){
+        mRowsSubscriptions.clear();
+        List<SubscriptionAdapterItem> items = new ArrayList<>(podcasts.size());
+        PodcastSubscription currentSubscription;
+        for (int position = 0; position < podcasts.size(); position++){
+            currentSubscription = podcasts.get(position);
+            SubscriptionAdapterItem item = new SubscriptionAdapterItem(currentSubscription);
+            items.add(item);
+
+            final int currentPosition = position;
+            Subscription episodesSubscription = mManager.getLatestEpisodes(currentSubscription, -1)
+                    .retry()
+                    .onErrorReturn(throwable -> null)
+                    .filter(episodes -> episodes != null)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(episodes1 -> {
+                        item.getAdapter().setData(episodes1);
+                        mAdapter.notifyDataSetChanged();
+                    });
+            mRowsSubscriptions.add(episodesSubscription);
+        }
+        mAdapter.setData(items);
+        return mAdapter.getItemCount();
     }
 
     private void unsubscribe(PodcastSubscription podcastSubscription){
@@ -104,6 +114,7 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
                 }));
     }
 
+    @SuppressWarnings("FieldCanBeLocal")
     private final MyPodcastsAdapter.ItemListener mSubscriptionItemListener = new MyPodcastsAdapter.ItemListener() {
         @Override
         public void onUnsubscribeClick(int position) {
@@ -115,13 +126,6 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
             mManager.updateSubscription(getAdapter().getItem(position).getSubscription());
         }
 
-        @Override
-        public void onItemClick(int position) {
-
-        }
-    };
-
-    private final SubscriptionAdapterItem.EpisodeItemListener mEpisodeItemListener = new SubscriptionAdapterItem.EpisodeItemListener() {
         @Override
         public void onAddToPlaylistTop(Episode episode) {
             add(mPlaylistManager.addToTop(episode).subscribe());

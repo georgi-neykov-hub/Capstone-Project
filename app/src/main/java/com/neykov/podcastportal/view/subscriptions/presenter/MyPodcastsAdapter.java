@@ -14,28 +14,23 @@ import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.view.base.adapter.BaseListenerViewHolder;
 import com.neykov.podcastportal.view.base.adapter.BaseStateAdapter;
-import com.neykov.podcastportal.view.base.adapter.OnItemClickListener;
 import com.neykov.podcastportal.view.widget.SpaceItemDecoration;
 
 import java.lang.ref.WeakReference;
 
 public class MyPodcastsAdapter extends BaseStateAdapter<SubscriptionAdapterItem, MyPodcastsAdapter.SubscriptionViewHolder> {
 
-    public interface ItemListener extends OnItemClickListener {
+    public interface ItemListener extends SubscriptionAdapterItem.EpisodeItemListener {
         void onUnsubscribeClick(int position);
         void onRefreshClick(int position);
     }
 
     private WeakReference<ItemListener> mOuterSubscriptionListenerRef;
-    private WeakReference<SubscriptionAdapterItem.EpisodeItemListener> mOuterEpisodeListenerRef;
 
-    public void setSubscriptionItemListener(ItemListener listener){
+    public void setSubscriptionItemListener(ItemListener listener) {
         mOuterSubscriptionListenerRef = new WeakReference<>(listener);
     }
 
-    public void setEpisodeItemListener(SubscriptionAdapterItem.EpisodeItemListener listener){
-        mOuterEpisodeListenerRef = new WeakReference<>(listener);
-    }
 
     @Override
     public void setHasStableIds(boolean hasStableIds) {
@@ -51,23 +46,28 @@ public class MyPodcastsAdapter extends BaseStateAdapter<SubscriptionAdapterItem,
     public SubscriptionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View itemView = inflater.inflate(R.layout.list_item_subscription, parent, false);
-        SubscriptionViewHolder holder = new SubscriptionViewHolder(itemView);
-        holder.setListener(mProxySubscriptionItemListener);
-        return holder;
+        return new SubscriptionViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(SubscriptionViewHolder holder, int position) {
         SubscriptionAdapterItem item = getItem(position);
         holder.onBind(item);
-        item.setItemListener(mProxyEpisodeItemListener);
+        holder.setListener(mProxySubscriptionItemListener);
+    }
+
+    @Override
+    public void onViewRecycled(SubscriptionViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.setListener(null);
+        holder.onRecycle();
     }
 
     private final ItemListener mProxySubscriptionItemListener = new ItemListener() {
         @Override
         public void onUnsubscribeClick(int position) {
             ItemListener listener = mOuterSubscriptionListenerRef.get();
-            if(listener != null){
+            if (listener != null) {
                 listener.onUnsubscribeClick(position);
             }
         }
@@ -75,67 +75,59 @@ public class MyPodcastsAdapter extends BaseStateAdapter<SubscriptionAdapterItem,
         @Override
         public void onRefreshClick(int position) {
             ItemListener listener = mOuterSubscriptionListenerRef.get();
-            if(listener != null){
+            if (listener != null) {
                 listener.onRefreshClick(position);
             }
         }
 
         @Override
-        public void onItemClick(int position) {
-            ItemListener listener = mOuterSubscriptionListenerRef.get();
-            if(listener != null){
-                listener.onItemClick(position);
-            }
-        }
-    };
-
-    private final SubscriptionAdapterItem.EpisodeItemListener mProxyEpisodeItemListener = new SubscriptionAdapterItem.EpisodeItemListener() {
-        @Override
         public void onAddToPlaylistTop(Episode episode) {
-            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterEpisodeListenerRef.get();
-            if(listener != null){
+            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterSubscriptionListenerRef.get();
+            if (listener != null) {
                 listener.onAddToPlaylistTop(episode);
             }
         }
 
         @Override
         public void onAddToPlaylistEnd(Episode episode) {
-            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterEpisodeListenerRef.get();
-            if(listener != null){
+            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterSubscriptionListenerRef.get();
+            if (listener != null) {
                 listener.onAddToPlaylistEnd(episode);
             }
         }
 
         @Override
         public void onRemoveFromPlaylist(Episode episode) {
-            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterEpisodeListenerRef.get();
-            if(listener != null){
+            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterSubscriptionListenerRef.get();
+            if (listener != null) {
                 listener.onRemoveFromPlaylist(episode);
             }
         }
 
         @Override
         public void onDownload(Episode episode) {
-            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterEpisodeListenerRef.get();
-            if(listener != null){
+            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterSubscriptionListenerRef.get();
+            if (listener != null) {
                 listener.onDownload(episode);
             }
         }
 
         @Override
         public void onSelected(Episode episode) {
-            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterEpisodeListenerRef.get();
-            if(listener != null){
+            SubscriptionAdapterItem.EpisodeItemListener listener = mOuterSubscriptionListenerRef.get();
+            if (listener != null) {
                 listener.onSelected(episode);
             }
         }
     };
 
-    protected static class SubscriptionViewHolder extends BaseListenerViewHolder<ItemListener>{
+    protected static class SubscriptionViewHolder extends BaseListenerViewHolder<ItemListener> {
 
         private TextView mTitleTextView;
         private TextView mEpisodeCountTextView;
         private RecyclerView mEpisodesRecyclerView;
+
+        private SubscriptionAdapterItem mBoundItem;
 
         protected SubscriptionViewHolder(View itemView) {
             super(itemView);
@@ -151,35 +143,55 @@ public class MyPodcastsAdapter extends BaseStateAdapter<SubscriptionAdapterItem,
                     SpaceItemDecoration.HORIZONTAL);
             mEpisodesRecyclerView.addItemDecoration(decoration);
             mEpisodesRecyclerView.setLayoutManager(manager);
-            ActionMenuView menuView = ((ActionMenuView)itemView.findViewById(R.id.menu));
+            ActionMenuView menuView = ((ActionMenuView) itemView.findViewById(R.id.menu));
             new SupportMenuInflater(menuView.getContext()).inflate(R.menu.menu_subscription, menuView.getMenu());
             menuView.setOnMenuItemClickListener(mMenuItemListener);
         }
 
-        private void onBind(SubscriptionAdapterItem item){
+        private void onBind(SubscriptionAdapterItem item) {
+            mBoundItem = item;
             mTitleTextView.setText(item.getSubscription().getTitle());
-            Resources resources = mEpisodeCountTextView.getResources();
-            int episodeCоunt = item.getAdapter().getItemCount();
-            CharSequence countLabel = episodeCоunt == 1 ?
-                    resources.getString(R.string.subscription_episode_count_single) :
-                    resources.getString(R.string.subscription_episode_count, episodeCоunt);
-            mEpisodeCountTextView.setText(countLabel);
+            int episodeCount = item.getAdapter().getItemCount();
+            bindEpisodeCountLabel(episodeCount);
             mEpisodesRecyclerView.swapAdapter(item.getAdapter(), false);
+            mEpisodesRecyclerView.setVisibility(episodeCount > 0 ? View.VISIBLE : View.GONE);
         }
 
-        private final View.OnClickListener mClickListener = view -> {
-            int position = getAdapterPosition();
-            ItemListener listener = getListener();
-            if(listener != null && position != RecyclerView.NO_POSITION){
-                listener.onItemClick(position);
+        @Override
+        public void setListener(ItemListener listener) {
+            super.setListener(listener);
+            if (mBoundItem != null) {
+                mBoundItem.setItemListener(listener);
             }
-        };
+        }
+
+        private void bindEpisodeCountLabel(int episodeCount){
+            Resources resources = mEpisodeCountTextView.getResources();
+            CharSequence countLabel;
+            switch (episodeCount){
+                case 0:
+                countLabel = resources.getString(R.string.subscription_episode_count_empty);
+                break;
+                case 1:
+                    countLabel = resources.getString(R.string.subscription_episode_count_single);
+                    break;
+                default:
+                    countLabel = resources.getString(R.string.subscription_episode_count, episodeCount);
+                    break;
+            }
+            mEpisodeCountTextView.setText(countLabel);
+        }
+
+        private void onRecycle() {
+            mBoundItem.setItemListener(null);
+            mBoundItem = null;
+        }
 
         private final ActionMenuView.OnMenuItemClickListener mMenuItemListener = item -> {
             int position = getAdapterPosition();
             ItemListener listener = getListener();
-            if(listener != null && position != RecyclerView.NO_POSITION){
-                switch (item.getItemId()){
+            if (listener != null && position != RecyclerView.NO_POSITION) {
+                switch (item.getItemId()) {
                     case R.id.unsubscribe:
                         listener.onUnsubscribeClick(position);
                         return true;

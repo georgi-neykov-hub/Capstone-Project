@@ -43,6 +43,11 @@ public class NestedEpisodeAdapter extends BaseAdapter<Episode, NestedEpisodeAdap
     }
 
     @Override
+    public void setHasStableIds(boolean hasStableIds) {
+        super.setHasStableIds(true);
+    }
+
+    @Override
     public long getItemId(int position) {
         return getItem(position).getId();
     }

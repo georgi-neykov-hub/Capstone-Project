@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="?cardStyle"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    app:cardUseCompatPadding="true">
+    android:layout_height="wrap_content">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -65,11 +64,11 @@
             android:layout_alignEnd="@+id/thumbnail"
             android:layout_below="@+id/title"
             android:layout_alignBottom="@+id/iconsContainer"
-            android:layout_toEndOf="@+id/iconsContainer"
             android:layout_marginEnd="@dimen/rhythm_space_single"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"
             tools:text="200:34"
             android:gravity="center_vertical|end"
+            android:singleLine="true"
             />
 
 

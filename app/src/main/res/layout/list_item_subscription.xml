@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/userDetailsContainer"
     android:layout_width="match_parent"
@@ -14,6 +13,8 @@
         android:layout_height="wrap_content"
         android:minHeight="40dp"
         android:orientation="vertical"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/menuContainer"
         android:layout_marginBottom="@dimen/rhythm_space_single"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:paddingStart="3dp"
@@ -24,6 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textStyle="bold"
             android:singleLine="true"
             tools:text="Title"/>
 
@@ -40,23 +42,20 @@
     </LinearLayout>
 
     <FrameLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/menuContainer"
+        android:layout_width="40dp"
         android:layout_height="wrap_content"
         android:minWidth="40dp"
         android:minHeight="40dp"
         android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/namesContainer"
-        android:layout_toRightOf="@+id/namesContainer"
         android:layout_alignBottom="@+id/namesContainer"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginLeft="@dimen/rhythm_space_single"
         android:layout_marginStart="@dimen/rhythm_space_single">
 
         <android.support.v7.widget.ActionMenuView
             android:id="@+id/menu"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:gravity="end"
             android:layout_gravity="end|center_vertical"
             android:theme="@style/AppTheme.ActionMenu"

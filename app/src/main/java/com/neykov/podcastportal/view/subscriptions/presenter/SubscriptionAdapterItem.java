@@ -33,6 +33,10 @@ class SubscriptionAdapterItem {
         return mPodcastSubscription;
     }
 
+    public void setEpisodes(List<Episode> episodes){
+        mNestedEpisodeAdapter.setData(episodes);
+    }
+
     public void setItemListener(EpisodeItemListener listener){
         mListener = listener;
     }
