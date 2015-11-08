@@ -2,12 +2,14 @@ package com.neykov.podcastportal.model;
 
 import android.util.Log;
 
+import com.neykov.podcastportal.BuildConfig;
+
 /**
  * Created by Georgi on 31.10.2015 г..
  */
 public class LogHelper {
 
-    private static final String LOG_PREFIX = "uamp_";
+    private static final String LOG_PREFIX = "pp_";
     private static final int LOG_PREFIX_LENGTH = LOG_PREFIX.length();
     private static final int MAX_LOG_TAG_LENGTH = 23;
 

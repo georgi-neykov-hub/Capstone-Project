@@ -2,13 +2,16 @@ package com.neykov.podcastportal.model.subscriptions;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.OperationApplicationException;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.service.media.MediaBrowserService;
 
 import com.neykov.podcastportal.model.BaseManager;
+import com.neykov.podcastportal.model.LogHelper;
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.entity.PodcastSubscription;
@@ -20,6 +23,7 @@ import com.squareup.sqlbrite.BriteContentResolver;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -36,8 +40,6 @@ public class SubscriptionsManager extends BaseManager {
     private EpisodesConverter mEpisodesConverter;
     private SubscriptionDownloader mSubscriptionDownloader;
 
-    private Set<Long> mUpdatingSubscriptionsSet;
-
     @Inject
     public SubscriptionsManager(@Global Context context, BriteContentResolver mResolver, SubscriptionDownloader downloader) {
         super(context, mResolver);
@@ -46,10 +48,14 @@ public class SubscriptionsManager extends BaseManager {
         this.mEpisodesConverter = new EpisodesConverter();
     }
 
-    public Observable<PodcastSubscription> getPodcastStream(long podcastId, boolean notifyForEpisodeChanges){
+    public void requestSync(){
+        ContentResolver.requestSync(null, DatabaseContract.CONTENT_AUTHORITY, new Bundle());
+    }
+
+    public Observable<PodcastSubscription> getPodcastStream(long podcastId, boolean notifyForEpisodeChanges) {
         return getBriteResolver().createQuery(
                 DatabaseContract.Podcast
-                .buildItemUri(podcastId),
+                        .buildItemUri(podcastId),
                 null,
                 null,
                 null,
@@ -96,7 +102,7 @@ public class SubscriptionsManager extends BaseManager {
                 .subscribeOn(Schedulers.io());
     }
 
-    public Observable<Episode> requestDownload(Episode episode){
+    public Observable<Episode> requestDownload(Episode episode) {
         return mSubscriptionDownloader.scheduleDownload(episode);
     }
 
@@ -147,6 +153,7 @@ public class SubscriptionsManager extends BaseManager {
                 PodcastSubscription subscription = builder.setId(insertedItemId).build();
                 subscriber.onNext(subscription);
                 subscriber.onCompleted();
+                this.requestSync();
             } catch (RemoteException | OperationApplicationException e) {
                 subscriber.onError(e);
             }
@@ -161,13 +168,45 @@ public class SubscriptionsManager extends BaseManager {
                         .subscribe());
     }
 
-    private void addSubscriptionToUpdates(long id){
-        mUpdatingSubscriptionsSet.add(id);
+    /*package*/ List<PodcastSubscription> getSyncTargets(long[] podcastIds) {
+
+        if(podcastIds == null){
+            throw new IllegalArgumentException("Null Podcast Id array provided.");
+        }
+
+        if(podcastIds.length == 0){
+            return Collections.emptyList();
+        }
+
+        final int parameterCount = podcastIds.length;
+        String whereStatement;
+        if (parameterCount == 1) {
+            whereStatement = DatabaseContract.Podcast.PODCAST_ID + "=?";
+        } else {
+
+            StringBuilder sb = new StringBuilder(parameterCount * 2 - 1);
+            sb.append(DatabaseContract.Podcast.PODCAST_ID)
+                    .append(" IN (");
+            for (int i = 1; i < parameterCount; i++) {
+                sb.append(",?");
+            }
+
+            sb.append(')');
+            whereStatement = sb.toString();
+        }
+
+        String[] whereArgs = new String[parameterCount];
+        for (int index = 0; index < parameterCount; index++){
+            whereArgs[index] = String.valueOf(podcastIds[index]);
+        }
+
+        return getBriteResolver()
+                .createQuery(DatabaseContract.Podcast.CONTENT_URI, null, whereStatement, whereArgs, null, false)
+                .mapToList(mSubscriptionConverter::convert)
+                .toBlocking()
+                .first();
     }
 
-    private void removeSubscriptionFromUpdateSet(long id){
-        mUpdatingSubscriptionsSet.remove(id);
-    }
 
     private Observable<PodcastSubscription> subscribeForPodcast(RemotePodcastData podcast) {
         return mSubscriptionDownloader.fetchSubscriptionAndEpisodesData(podcast)

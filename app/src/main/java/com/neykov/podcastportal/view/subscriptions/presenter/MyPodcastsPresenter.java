@@ -1,6 +1,8 @@
 package com.neykov.podcastportal.view.subscriptions.presenter;
 
+import android.content.ContentResolver;
 import android.os.Bundle;
+import android.support.v4.content.ContentResolverCompat;
 
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.PodcastSubscription;
@@ -123,6 +125,7 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
 
         @Override
         public void onRefreshClick(int position) {
+            mManager.requestSync();
             mManager.updateSubscription(getAdapter().getItem(position).getSubscription());
         }
 

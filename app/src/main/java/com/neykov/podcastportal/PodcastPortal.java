@@ -1,10 +1,13 @@
 package com.neykov.podcastportal;
 
 import android.app.Application;
+import android.content.ContentResolver;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.neykov.podcastportal.model.ModelComponent;
 import com.neykov.podcastportal.model.ModelComponentProvider;
+import com.neykov.podcastportal.model.persistence.DatabaseContract;
 import com.neykov.podcastportal.util.ApplicationModule;
 import com.neykov.podcastportal.view.base.DependencyResolverProvider;
 import com.squareup.picasso.Picasso;

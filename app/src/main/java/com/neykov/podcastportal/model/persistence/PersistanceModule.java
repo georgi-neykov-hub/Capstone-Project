@@ -2,7 +2,7 @@ package com.neykov.podcastportal.model.persistence;
 
 import android.content.Context;
 
-import com.neykov.podcastportal.model.BuildConfig;
+import com.neykov.podcastportal.BuildConfig;
 import com.neykov.podcastportal.model.utils.Global;
 import com.squareup.sqlbrite.BriteContentResolver;
 import com.squareup.sqlbrite.SqlBrite;

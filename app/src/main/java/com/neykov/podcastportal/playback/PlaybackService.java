@@ -78,7 +78,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
         mSession.setCallback(mSessionCallback);
         mSessionToken = mSession.getSessionToken();
 
-        mPlaylistManager = getModelComponent().getPlaylistComponent().getPlaylistManager();
+        mPlaylistManager = getModelComponent().getPlaylistManager();
 
         mPlayback = new PlayerImpl(this);
         mPlayback.setCallback(this);
