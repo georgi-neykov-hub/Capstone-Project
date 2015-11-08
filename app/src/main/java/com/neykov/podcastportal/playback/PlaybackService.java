@@ -4,7 +4,6 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,11 +12,12 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaButtonReceiver;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.view.KeyEvent;
 import android.view.Surface;
 
 import com.neykov.podcastportal.model.LogHelper;
@@ -28,8 +28,6 @@ import com.neykov.podcastportal.model.utils.ComponentService;
 import com.neykov.podcastportal.view.player.PlayerActivity;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PlaybackService extends ComponentService implements Player.Callback {
 
@@ -51,7 +49,6 @@ public class PlaybackService extends ComponentService implements Player.Callback
     // Music catalog manager
     private PlaylistManager mPlaylistManager;
     // "Now playing" queue:
-    private List<MediaSessionCompat.QueueItem> mPlayingQueue;
     private PlaylistEntry mCurrentPlayingItem;
     private MediaNotificationManager mMediaNotificationManager;
     // Indicates whether the service was started.
@@ -72,15 +69,14 @@ public class PlaybackService extends ComponentService implements Player.Callback
 
         mDelayedStopHandler = new DelayedStopHandler(this);
         mServiceBinder = new PlaybackSessionBinder(this);
-        mPlayingQueue = new ArrayList<>();
 
         // Start a new MediaSession
 
-        mSession = new MediaSessionCompat(this, "PlaybackService", new ComponentName(this, PlaybackService.class), null);
-        mSessionToken = mSession.getSessionToken();
-        mSession.setCallback(mSessionCallback);
+        mSession = new MediaSessionCompat(this, "PlaybackService", new ComponentName(this, MediaButtonReceiver.class), null);
         mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mSession.setCallback(mSessionCallback);
+        mSessionToken = mSession.getSessionToken();
 
         mPlaylistManager = getModelComponent().getPlaylistComponent().getPlaylistManager();
 
@@ -157,54 +153,16 @@ public class PlaybackService extends ComponentService implements Player.Callback
         return mSessionToken;
     }
 
-    public MediaSessionCompat getMediaSession(){
+    public MediaSessionCompat getMediaSession() {
         return mSession;
     }
 
-    private void setVideoPlaybackSurface(Surface surface){
+    private void setVideoPlaybackSurface(Surface surface) {
         mPlayback.setVideoPlaybackSurface(surface);
     }
 
-    private void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener){
+    private void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener) {
         mVideoSizeListener = listener;
-    }
-
-    private List<MediaSessionCompat.QueueItem> buildQueue(Long currentPlaylistItemId) {
-        if (currentPlaylistItemId == null) {
-            return new ArrayList<>(0);
-        }
-        List<MediaSessionCompat.QueueItem> queueItems = new ArrayList<>(3);
-        PlaylistEntry entry = mPlaylistManager.getItem(currentPlaylistItemId);
-        queueItems.add(buildQueueItem(entry));
-        if (entry.getNextItemId() != null) {
-            PlaylistEntry nextEntry = mPlaylistManager.getItem(entry.getNextItemId());
-            queueItems.add(buildQueueItem(nextEntry));
-        }
-
-        if (entry.getPreviousItemId() != null) {
-            PlaylistEntry prevEntry = mPlaylistManager.getItem(entry.getPreviousItemId());
-            queueItems.add(0, buildQueueItem(prevEntry));
-        }
-
-        return queueItems;
-    }
-
-    private MediaSessionCompat.QueueItem buildQueueItem(@NonNull PlaylistEntry entry) {
-        return new MediaSessionCompat.QueueItem(buildDescription(entry), entry.getId());
-
-    }
-
-    private MediaDescriptionCompat buildDescription(PlaylistEntry entry) {
-        Episode episode = entry.getEpisode();
-        String mediaUri = episode.canBePlayedLocally() ? episode.getFileUrl() : episode.getContentUrl();
-        return new MediaDescriptionCompat.Builder()
-                .setMediaId(String.valueOf(entry.getId()))
-                .setTitle(episode.getTitle())
-                .setSubtitle(entry.getPodcastTitle())
-                .setDescription(episode.getDescription())
-                .setIconUri(Uri.parse(episode.getThumbnail()))
-                .setMediaUri(Uri.parse(mediaUri))
-                .build();
     }
 
     /**
@@ -323,7 +281,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
     }
 
 
-    private long getCurrentQueueItemId(){
+    private long getCurrentQueueItemId() {
         return mCurrentPlayingItem != null ?
                 mCurrentPlayingItem.getId() : MediaSessionCompat.QueueItem.UNKNOWN_ID;
     }
@@ -356,7 +314,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
 
     @Override
     public void onVideoSizeChanged(int width, int height) {
-        if(mVideoSizeListener != null){
+        if (mVideoSizeListener != null) {
             mVideoSizeListener.onVideoSizeChanged(width, height);
         }
     }
@@ -404,27 +362,69 @@ public class PlaybackService extends ComponentService implements Player.Callback
 
         private WeakReference<PlaybackService> mServiceRef;
 
-        private PlaybackSessionBinder(@NonNull PlaybackService service){
+        private PlaybackSessionBinder(@NonNull PlaybackService service) {
             mServiceRef = new WeakReference<>(service);
         }
 
         @Override
-        public MediaSessionCompat.Token getMediaSessionToken(){
+        public MediaSessionCompat.Token getMediaSessionToken() {
             return mServiceRef.get().getMediaSession().getSessionToken();
         }
 
         @Override
-        public void setVideoPlaybackSurface(Surface surface){
+        public void setVideoPlaybackSurface(Surface surface) {
             mServiceRef.get().setVideoPlaybackSurface(surface);
         }
 
         @Override
-        public void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener){
+        public void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener) {
             mServiceRef.get().setOnVideoSizeChangedListener(listener);
         }
     }
 
     private final MediaSessionCompat.Callback mSessionCallback = new MediaSessionCompat.Callback() {
+
+        @Override
+        public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+            if (Intent.ACTION_MEDIA_BUTTON.equals(mediaButtonEvent.getAction())) {
+                final KeyEvent event = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                if (event == null) return super.onMediaButtonEvent(mediaButtonEvent);
+                final int keycode = event.getKeyCode();
+                final int action = event.getAction();
+                if (event.getRepeatCount() == 0 && action == KeyEvent.ACTION_DOWN) {
+                    MediaControllerCompat.TransportControls controls = mSession.getController().getTransportControls();
+                    switch (keycode) {
+                        case KeyEvent.KEYCODE_MEDIA_STOP:
+                            controls.stop();
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                            if (mPlayback.isPlaying()) {
+                                controls.pause();
+                            } else {
+                                controls.play();
+                            }
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_NEXT:
+                            controls.skipToNext();
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                            controls.skipToPrevious();
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                            controls.pause();
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_PLAY:
+                            controls.play();
+                            break;
+                        default:
+                            return false;
+                    }
+
+                    return true;
+                }
+            }
+            return super.onMediaButtonEvent(mediaButtonEvent);
+        }
 
         @Override
         public void onPlay() {
