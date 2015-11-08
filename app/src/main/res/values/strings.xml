@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Podcast Portal</string>
+    <string name="accountType">com.neykov.podcastportal</string>
+    <string name="settingsAction">com.neykov.podcastportal.ACTION_SETTINGS</string>
 
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -27,4 +28,7 @@
     <string name="subscription_episode_count_empty">No Episode yet</string>
 
     <string name="action_unsubscribe">Unsubscribe</string>
+    <string name="title_activity_settings">Settings</string>
+
+
 </resources>

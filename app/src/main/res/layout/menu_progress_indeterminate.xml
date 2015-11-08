@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/rhythm_control_normal"
+    android:layout_height="@dimen/rhythm_control_normal"
+    android:padding="@dimen/rhythm_space_single"
+    android:indeterminate="true"/>

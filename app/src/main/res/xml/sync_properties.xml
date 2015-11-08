@@ -2,7 +2,7 @@
 <sync-adapter
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:contentAuthority="com.neykov.podcastportal"
-    android:accountType="com.neykov.podcastportal"
+    android:accountType="@string/accountType"
     android:userVisible="true"
     android:supportsUploading="false"
     android:allowParallelSyncs="false"

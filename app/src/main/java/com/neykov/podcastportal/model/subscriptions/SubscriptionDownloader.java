@@ -385,13 +385,13 @@ public class SubscriptionDownloader {
         }
     }
 
-    public Observable<Episode> scheduleDownload(Episode episode) {
+    public Observable<Episode> scheduleDownload(Episode episode, boolean allowOverMetered) {
         return Observable.create(subscriber -> {
             try {
                 Uri remoteUri = Uri.parse(episode.getContentUrl());
                 String filename = remoteUri.getLastPathSegment();
                 DownloadManager.Request request = new DownloadManager.Request(remoteUri)
-                        .setAllowedOverMetered(false)
+                        .setAllowedOverMetered(allowOverMetered)
                         .setAllowedOverRoaming(false)
                         .setDescription(episode.getDescription())
                         .setMimeType(episode.getMimeType())

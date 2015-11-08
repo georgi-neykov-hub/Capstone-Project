@@ -1,8 +1,6 @@
 package com.neykov.podcastportal.view.subscriptions.presenter;
 
-import android.content.ContentResolver;
 import android.os.Bundle;
-import android.support.v4.content.ContentResolverCompat;
 
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.PodcastSubscription;
@@ -25,6 +23,7 @@ import rx.schedulers.Schedulers;
 public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
 
     public static final int RESTARTABLE_ID_SUBSCRIPTIONS = 1;
+    public static final int RESTARTABLE_ID_SYNC_STATE = 2;
 
     private MyPodcastsAdapter mAdapter;
     private SubscriptionsManager mManager;
@@ -52,7 +51,15 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
                                     podcastsView.showError(ErrorDisplayView.ERROR_GENERAL);
                                 })));
 
-        this.start(RESTARTABLE_ID_SUBSCRIPTIONS);
+        this.restartable(RESTARTABLE_ID_SYNC_STATE,
+                () -> mManager.getSyncActiveObservable()
+                        .distinctUntilChanged()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .compose(deliverLatestCache())
+                        .subscribe(delivery -> delivery.split(
+                                        MyPodcastsView::onSyncStateChanged,
+                                (myPodcastsView1, throwable) -> {})
+                        ));
     }
 
     public MyPodcastsAdapter getAdapter() {
@@ -64,6 +71,7 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
         super.onCreate(savedState);
         this.add(mRowsSubscriptions);
         start(RESTARTABLE_ID_SUBSCRIPTIONS);
+        start(RESTARTABLE_ID_SYNC_STATE);
     }
 
     @Override
@@ -82,7 +90,6 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
             SubscriptionAdapterItem item = new SubscriptionAdapterItem(currentSubscription);
             items.add(item);
 
-            final int currentPosition = position;
             Subscription episodesSubscription = mManager.getLatestEpisodes(currentSubscription, -1)
                     .retry()
                     .onErrorReturn(throwable -> null)
@@ -97,6 +104,10 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
         }
         mAdapter.setData(items);
         return mAdapter.getItemCount();
+    }
+
+    public void requestSubscriptionsRefresh(){
+        mManager.requestImmediateSync();
     }
 
     private void unsubscribe(PodcastSubscription podcastSubscription){
@@ -125,8 +136,8 @@ public class MyPodcastsPresenter extends BasePresenter<MyPodcastsView> {
 
         @Override
         public void onRefreshClick(int position) {
-            mManager.requestSync();
-            mManager.updateSubscription(getAdapter().getItem(position).getSubscription());
+            mManager.requestImmediateSync();
+            //mManager.updateSubscription(getAdapter().getItem(position).getSubscription());
         }
 
         @Override

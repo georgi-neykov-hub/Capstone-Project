@@ -7,7 +7,6 @@ import com.neykov.podcastportal.util.ApplicationModule;
 import com.neykov.podcastportal.view.explore.DiscoverComponent;
 import com.neykov.podcastportal.view.player.PlayerComponent;
 import com.neykov.podcastportal.view.subscriptions.SubscriptionsComponent;
-import com.squareup.picasso.Picasso;
 
 import javax.inject.Singleton;
 

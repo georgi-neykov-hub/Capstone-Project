@@ -85,7 +85,7 @@ public class PodcastContentProvider extends ContentProvider {
                 .delete(tableName, whereStatement, selectionArgs);
         if (deletedRowsCount > 0) {
             //noinspection ConstantConditions
-            getContext().getContentResolver().notifyChange(uri, null);
+            getContext().getContentResolver().notifyChange(uri, null, false);
         }
         return deletedRowsCount;
     }
@@ -206,9 +206,9 @@ public class PodcastContentProvider extends ContentProvider {
         if (updatedRowsCount > 0) {
             if (match == EPISODE_BY_ID) {
                 long podcastId = values.getAsLong(DatabaseContract.Episode.PODCAST_ID);
-                resolver.notifyChange(DatabaseContract.Episode.buildSubscriptionEpisodesUri(podcastId), null);
+                resolver.notifyChange(DatabaseContract.Episode.buildSubscriptionEpisodesUri(podcastId), null, false);
             }
-            resolver.notifyChange(uri, null);
+            resolver.notifyChange(uri, null, false);
         }
         return updatedRowsCount;
     }
@@ -241,9 +241,9 @@ public class PodcastContentProvider extends ContentProvider {
         ContentResolver resolver = getContext().getContentResolver();
         if (match == EPISODES) {
             long podcastId = values.getAsLong(DatabaseContract.Episode.PODCAST_ID);
-            resolver.notifyChange(DatabaseContract.Episode.buildSubscriptionEpisodesUri(podcastId), null);
+            resolver.notifyChange(DatabaseContract.Episode.buildSubscriptionEpisodesUri(podcastId), null, false);
         }
-        resolver.notifyChange(baseUri, null);
+        resolver.notifyChange(baseUri, null, false);
         return newItemUri;
     }
 
@@ -285,7 +285,7 @@ public class PodcastContentProvider extends ContentProvider {
             database.setTransactionSuccessful();
             //noinspection ConstantConditions
             if (insertedRowCount > 0) {
-                getContext().getContentResolver().notifyChange(baseUri, null);
+                getContext().getContentResolver().notifyChange(baseUri, null, false);
             }
             return insertedRowCount;
         } finally {

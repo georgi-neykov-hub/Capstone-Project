@@ -8,10 +8,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
+import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
 import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.fragment.ToolbarViewFragment;
 import com.neykov.podcastportal.view.subscriptions.presenter.MyPodcastsPresenter;
@@ -28,6 +30,8 @@ public class MyPodcastsFragment extends ToolbarViewFragment<MyPodcastsPresenter>
 
     private RecyclerView.LayoutManager mLayoutManager;
     private RecyclerView mRecyclerView;
+    private MenuItem mRefreshItem;
+    private MenuItem mRefreshActiveItem;
 
     @NonNull
     @Override
@@ -50,6 +54,8 @@ public class MyPodcastsFragment extends ToolbarViewFragment<MyPodcastsPresenter>
         mRecyclerView.setAdapter(null);
         mRecyclerView = null;
         mLayoutManager = null;
+        mRefreshActiveItem = null;
+        mRefreshActiveItem = null;
     }
 
     @Override
@@ -60,10 +66,41 @@ public class MyPodcastsFragment extends ToolbarViewFragment<MyPodcastsPresenter>
         }
     }
 
+    @Override
+    public void onSyncStateChanged(SubscriptionsManager.SyncState newState) {
+        switch (newState){
+
+            case RUNNING:
+                mRefreshItem.setVisible(false);
+                break;
+            case PENDING:
+                mRefreshItem.setVisible(true);
+                mRefreshItem.setIcon(R.drawable.ic_file_cloud);
+                break;
+            case IDLE:
+                mRefreshItem.setIcon(R.drawable.ic_sync);
+                mRefreshItem.setVisible(true);
+                break;
+        }
+        mRefreshActiveItem.setVisible(!mRefreshItem.isVisible());
+    }
+
     @Nullable
     @Override
     protected Toolbar onSetToolbar(View view) {
         return (Toolbar) view.findViewById(R.id.toolbar);
+    }
+
+    @Override
+    protected void onConfigureToolbar(Toolbar toolbar) {
+        super.onConfigureToolbar(toolbar);
+        toolbar.inflateMenu(R.menu.menu_my_podcasts);
+        mRefreshItem = toolbar.getMenu().findItem(R.id.refresh);
+        mRefreshActiveItem = toolbar.getMenu().findItem(R.id.loadingIndicator);
+        mRefreshItem.setOnMenuItemClickListener(item -> {
+            getPresenter().requestSubscriptionsRefresh();
+            return true;
+        });
     }
 
     protected void configureRecycleView(@NonNull RecyclerView view, Bundle savedState) {

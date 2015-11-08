@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.SyncResult;
 import android.os.Bundle;
 
+import com.neykov.podcastportal.model.LogHelper;
 import com.neykov.podcastportal.model.ModelComponent;
 import com.neykov.podcastportal.model.ModelComponentProvider;
 import com.neykov.podcastportal.model.entity.PodcastSubscription;

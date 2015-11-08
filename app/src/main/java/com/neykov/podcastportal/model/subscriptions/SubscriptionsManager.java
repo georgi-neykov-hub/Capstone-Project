@@ -1,5 +1,6 @@
 package com.neykov.podcastportal.model.subscriptions;
 
+import android.accounts.Account;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
@@ -8,10 +9,8 @@ import android.content.Context;
 import android.content.OperationApplicationException;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.service.media.MediaBrowserService;
 
 import com.neykov.podcastportal.model.BaseManager;
-import com.neykov.podcastportal.model.LogHelper;
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.RemotePodcastData;
 import com.neykov.podcastportal.model.entity.PodcastSubscription;
@@ -19,6 +18,7 @@ import com.neykov.podcastportal.model.entity.converter.EpisodesConverter;
 import com.neykov.podcastportal.model.entity.converter.SubscriptionConverter;
 import com.neykov.podcastportal.model.persistence.DatabaseContract;
 import com.neykov.podcastportal.model.utils.Global;
+import com.neykov.podcastportal.model.utils.PreferencesHelper;
 import com.squareup.sqlbrite.BriteContentResolver;
 
 
@@ -26,12 +26,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
 import rx.Observable;
 import rx.schedulers.Schedulers;
+import rx.subjects.BehaviorSubject;
+import rx.subjects.SerializedSubject;
 import rx.subjects.Subject;
 
 public class SubscriptionsManager extends BaseManager {
@@ -39,17 +40,78 @@ public class SubscriptionsManager extends BaseManager {
     private SubscriptionConverter mSubscriptionConverter;
     private EpisodesConverter mEpisodesConverter;
     private SubscriptionDownloader mSubscriptionDownloader;
+    private Account mSyncAccount;
+    private PreferencesHelper mPreferencesHelper;
+
+    public enum SyncState {
+        RUNNING, PENDING, IDLE
+    }
+
+    private Subject<SyncState, SyncState> mSyncStateSubject;
 
     @Inject
-    public SubscriptionsManager(@Global Context context, BriteContentResolver mResolver, SubscriptionDownloader downloader) {
+    public SubscriptionsManager(@Global Context context, BriteContentResolver mResolver, SubscriptionDownloader downloader, Account syncAccount, PreferencesHelper helper) {
         super(context, mResolver);
         this.mSubscriptionDownloader = downloader;
         this.mSubscriptionConverter = new SubscriptionConverter();
         this.mEpisodesConverter = new EpisodesConverter();
+        this.mSyncAccount = syncAccount;
+        this.mPreferencesHelper = helper;
+        mSyncStateSubject = new SerializedSubject<>(BehaviorSubject.create(getSyncState()));
+        ContentResolver.addStatusChangeListener(
+                ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE | ContentResolver.SYNC_OBSERVER_TYPE_PENDING,
+                which -> {
+                    SyncState last = mSyncStateSubject.getValue();
+                    SyncState latest = getSyncState();
+                    if (last != latest) {
+                        mSyncStateSubject.onNext(latest);
+                    }
+                });
     }
 
-    public void requestSync(){
-        ContentResolver.requestSync(null, DatabaseContract.CONTENT_AUTHORITY, new Bundle());
+    public Observable<SyncState> getSyncActiveObservable() {
+        return mSyncStateSubject.asObservable();
+    }
+
+    public SyncState getSyncState() {
+        if (ContentResolver.isSyncActive(mSyncAccount, DatabaseContract.CONTENT_AUTHORITY)) {
+            return SyncState.RUNNING;
+        } else if (ContentResolver.isSyncPending(mSyncAccount, DatabaseContract.CONTENT_AUTHORITY)) {
+            return SyncState.PENDING;
+        } else {
+            return SyncState.IDLE;
+        }
+    }
+
+    public boolean isSyncRunning() {
+        return ContentResolver.isSyncActive(mSyncAccount, DatabaseContract.CONTENT_AUTHORITY);
+    }
+
+    public boolean isAutomaticSyncEnabled(){
+        return ContentResolver.getSyncAutomatically(mSyncAccount, DatabaseContract.CONTENT_AUTHORITY);
+    }
+
+    public void setSyncAutomatically(boolean enabled){
+        ContentResolver.setSyncAutomatically(mSyncAccount, DatabaseContract.CONTENT_AUTHORITY, enabled);
+    }
+
+    public void requestImmediateSync() {
+        Bundle syncOptions = new Bundle();
+        syncOptions.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+
+        ContentResolver.requestSync(mSyncAccount, DatabaseContract.CONTENT_AUTHORITY, new Bundle());
+    }
+
+    public void schedulePeriodicSync(int intervalMinutes) {
+        boolean syncIsTurnedOn = ContentResolver.getIsSyncable(mSyncAccount, DatabaseContract.CONTENT_AUTHORITY) > 0;
+        if (syncIsTurnedOn) {
+            long pollFrequncy = intervalMinutes * 60L;
+            ContentResolver.addPeriodicSync(mSyncAccount, DatabaseContract.CONTENT_AUTHORITY, new Bundle(), pollFrequncy);
+        }
+    }
+
+    public void removePeriodicSync(int intervalMinutes) {
+        ContentResolver.removePeriodicSync(mSyncAccount, DatabaseContract.CONTENT_AUTHORITY, new Bundle());
     }
 
     public Observable<PodcastSubscription> getPodcastStream(long podcastId, boolean notifyForEpisodeChanges) {
@@ -103,7 +165,7 @@ public class SubscriptionsManager extends BaseManager {
     }
 
     public Observable<Episode> requestDownload(Episode episode) {
-        return mSubscriptionDownloader.scheduleDownload(episode);
+        return mSubscriptionDownloader.scheduleDownload(episode, mPreferencesHelper.isDownloadOverMeteredEnabled());
     }
 
     public Observable<RemotePodcastData> unsubscribeFromPodcast(PodcastSubscription podcastSubscription) {
@@ -153,7 +215,7 @@ public class SubscriptionsManager extends BaseManager {
                 PodcastSubscription subscription = builder.setId(insertedItemId).build();
                 subscriber.onNext(subscription);
                 subscriber.onCompleted();
-                this.requestSync();
+                this.requestImmediateSync();
             } catch (RemoteException | OperationApplicationException e) {
                 subscriber.onError(e);
             }
@@ -170,11 +232,11 @@ public class SubscriptionsManager extends BaseManager {
 
     /*package*/ List<PodcastSubscription> getSyncTargets(long[] podcastIds) {
 
-        if(podcastIds == null){
+        if (podcastIds == null) {
             throw new IllegalArgumentException("Null Podcast Id array provided.");
         }
 
-        if(podcastIds.length == 0){
+        if (podcastIds.length == 0) {
             return Collections.emptyList();
         }
 
@@ -196,7 +258,7 @@ public class SubscriptionsManager extends BaseManager {
         }
 
         String[] whereArgs = new String[parameterCount];
-        for (int index = 0; index < parameterCount; index++){
+        for (int index = 0; index < parameterCount; index++) {
             whereArgs[index] = String.valueOf(podcastIds[index]);
         }
 

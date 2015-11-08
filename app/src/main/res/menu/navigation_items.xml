@@ -10,20 +10,12 @@
             android:checkable="true"
             android:title="@string/navigation_my_podcasts" />
         <item
-            android:id="@+id/navigation_episodes"
-            android:checkable="true"
-            android:title="@string/navigation_episodes" />
-        <item
             android:id="@+id/navigation_player"
             android:checkable="true"
             android:title="@string/navigation_player" />
         <item
-            android:id="@+id/navigation_playlist"
-            android:checkable="true"
-            android:title="@string/navigation_playlist" />
-        <item
-            android:id="@+id/navigation_about"
-            android:checkable="true"
-            android:title="@string/navigation_about" />
+            android:id="@+id/navigation_settings"
+            android:checkable="false"
+            android:title="@string/navigation_settings"/>
     </group>
 </menu>

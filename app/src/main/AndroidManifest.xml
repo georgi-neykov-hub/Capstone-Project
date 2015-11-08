@@ -3,13 +3,15 @@
     package="com.neykov.podcastportal">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="19" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"  android:maxSdkVersion="22" />
 
     <application
         android:name=".PodcastPortal"
@@ -18,19 +20,15 @@
         android:label="@string/app_name"
         android:largeHeap="true"
         android:theme="@style/AppTheme">
-
         <activity android:name=".view.subscriptions.MyPodcastsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
         <activity android:name=".view.explore.ExploreActivity" />
-        <activity android:name=".view.player.PlayerActivity">
-
-        </activity>
+        <activity android:name=".view.player.PlayerActivity"></activity>
 
         <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
             <intent-filter>
@@ -46,7 +44,6 @@
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </service>
-
         <service
             android:name=".account.AuthenticatorService"
             android:enabled="true"
@@ -54,24 +51,24 @@
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
-
         <service
-            android:name="com.neykov.podcastportal.model.subscriptions.PodcastSyncService"
+            android:name=".model.subscriptions.PodcastSyncService"
             android:enabled="true"
             android:exported="true"
             android:process=":sync">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
+
             <meta-data
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/sync_properties" />
         </service>
-
         <service
             android:name=".model.downloads.DownloadIntentService"
             android:exported="false" />
@@ -83,12 +80,29 @@
         </receiver>
 
         <provider
-            android:name="com.neykov.podcastportal.model.persistence.PodcastContentProvider"
+            android:name=".model.persistence.PodcastContentProvider"
             android:authorities="com.neykov.podcastportal"
             android:enabled="true"
             android:exported="false"
             android:syncable="true" />
 
+        <activity
+            android:name=".view.settings.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/AppTheme.Settings"
+            android:parentActivityName=".view.subscriptions.MyPodcastsActivity">
+            <intent-filter>
+                <action android:name="@string/settingsAction" />
+                <intent-filter>
+                    <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+                    <category android:name="android.intent.category.DEFAULT" />
+                </intent-filter>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.neykov.podcastportal.view.subscriptions.MyPodcastsActivity" />
+        </activity>
     </application>
 
 </manifest>

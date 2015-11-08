@@ -1,7 +1,10 @@
 package com.neykov.podcastportal;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Application;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 

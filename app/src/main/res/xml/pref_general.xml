@@ -1,0 +1,52 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/pref_header_playback" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/pref_key_playback_over_metered"
+        android:summary="@string/pref_subtitle_playback_over_metered"
+        android:title="@string/pref_title_playback_over_metered" />
+
+    <PreferenceCategory
+        android:title="@string/pref_header_data_sync" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/pref_key_download_over_metered"
+        android:summary="@string/pref_subtitle_download_mobile_data"
+        android:title="@string/pref_title_download_mobile_data" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/pref_key_sync_enabled"
+        android:summary="@string/pref_subtitle_sync_episodes"
+        android:title="@string/pref_title_sync_episodes" />
+
+    <ListPreference
+        android:defaultValue="180"
+        android:entries="@array/pref_sync_frequency_titles"
+        android:entryValues="@array/pref_sync_frequency_values"
+        android:dependency="@string/pref_key_sync_enabled"
+        android:key="@string/pref_key_sync_frequency"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_sync_frequency" />
+
+    <!-- This preference simply launches an intent when selected. Use this UI sparingly, per
+         design guidelines. -->
+    <Preference android:title="@string/pref_title_system_sync_settings">
+        <intent android:action="android.settings.SYNC_SETTINGS" />
+    </Preference>
+
+    <PreferenceCategory
+        android:title="@string/pref_header_notifications" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/pref_key_notifications_enabled"
+        android:summary="@string/pref_subtitle_notifications_for_episodes"
+        android:title="@string/pref_title_notifications_for_episodes" />
+
+</PreferenceScreen>

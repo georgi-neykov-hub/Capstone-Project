@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Strings related to Settings -->
+    <string name="action_settings">Settings</string>
+
+    <!-- Preferences keys -->
+    <string name="pref_filename">PodcastPortalPreferences</string>
+    <string name="pref_key_playback_over_metered">playback_over_metered</string>
+    <string name="pref_key_sync_enabled">sync_enabled</string>
+    <string name="pref_key_download_over_metered">download_over_metered</string>
+    <string name="pref_key_sync_frequency">sync_frequency</string>
+    <string name="pref_key_notifications_enabled">notifications_enabled</string>
+
+    <!-- General settings -->
+    <string name="pref_header_playback">Playback</string>
+
+    <string name="pref_title_playback_over_metered">Stream over Metered Networks</string>
+    <string name="pref_subtitle_playback_over_metered">Stream non-downloaded episodes over metered networks</string>
+
+
+    <string name="pref_header_data_sync">Data &amp; sync</string>
+
+    <string name="pref_title_sync_episodes">Sync Episodes</string>
+    <string name="pref_subtitle_sync_episodes">Automatically fetch new episodes</string>
+
+    <string name="pref_title_download_mobile_data">Download over Metered Networks</string>
+    <string name="pref_subtitle_download_mobile_data">Run episode downloads over metered networks</string>
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>12 Hours</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>720</item>
+    </string-array>
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+    <string name="pref_title_sync_settings">Manage sync settings</string>
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+
+
+
+
+    <string name="pref_title_notifications_for_episodes">Show notifications</string>
+    <string name="pref_subtitle_notifications_for_episodes">Display notifications for new episodes</string>
+
+
+    <string name="pref_title_notification_sound">Notification Sound</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
+</resources>
