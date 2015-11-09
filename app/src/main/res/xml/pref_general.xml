@@ -38,14 +38,6 @@
         <intent android:action="android.settings.SYNC_SETTINGS" />
     </Preference>
 
-    <PreferenceCategory android:title="@string/pref_header_notifications" />
-
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="@string/pref_key_notifications_enabled"
-        android:summary="@string/pref_subtitle_notifications_for_episodes"
-        android:title="@string/pref_title_notifications_for_episodes" />
-
     <PreferenceCategory android:title="@string/pref_header_other" />
     <Preference
         android:title="@string/pref_title_about"
