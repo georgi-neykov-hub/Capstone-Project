@@ -11,7 +11,10 @@
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"  android:maxSdkVersion="22" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS"
+        android:maxSdkVersion="22" />
 
     <application
         android:name=".PodcastPortal"
@@ -37,7 +40,7 @@
         </receiver>
 
         <service
-            android:name=".playback.PlaybackService"
+            android:name=".model.playback.PlaybackService"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -89,15 +92,15 @@
         <activity
             android:name=".view.settings.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:theme="@style/AppTheme.Settings"
-            android:parentActivityName=".view.subscriptions.MyPodcastsActivity">
+            android:parentActivityName=".view.subscriptions.MyPodcastsActivity"
+            android:theme="@style/AppTheme.Settings">
+            <intent-filter>
+                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
             <intent-filter>
                 <action android:name="@string/settingsAction" />
-                <intent-filter>
-                    <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
-                    <category android:name="android.intent.category.DEFAULT" />
                 </intent-filter>
-            </intent-filter>
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

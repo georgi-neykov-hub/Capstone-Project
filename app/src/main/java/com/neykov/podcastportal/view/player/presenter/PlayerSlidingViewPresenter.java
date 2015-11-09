@@ -3,10 +3,8 @@ package com.neykov.podcastportal.view.player.presenter;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.neykov.podcastportal.playback.PlaybackSession;
-import com.neykov.podcastportal.playback.PlaybackSessionConnectionListener;
-import com.neykov.podcastportal.playback.PlaybackSessionConnector;
-import com.neykov.podcastportal.playback.PlaybackService;
+import com.neykov.podcastportal.model.playback.PlaybackSession;
+import com.neykov.podcastportal.model.playback.PlaybackSessionConnector;
 import com.neykov.podcastportal.model.utils.Global;
 import com.neykov.podcastportal.view.base.BasePresenter;
 import com.neykov.podcastportal.view.player.view.PlayerSlidingView;

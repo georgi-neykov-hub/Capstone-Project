@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.playback;
+package com.neykov.podcastportal.model.playback;
 
 import android.support.v4.media.session.MediaSessionCompat;
 import android.view.Surface;
@@ -8,7 +8,8 @@ import android.view.Surface;
  */
 public interface PlaybackSession {
 
-    String EXTRA_MIME_TYPE = "com.neykov.podcastportal.playback.PlaybackSession.MIME_TYPE";
+    String EXTRA_EPISODE_DATA = "com.neykov.podcastportal.model.playback.PlaybackSession.EPISODE_DATA";
+    String EXTRA_PODCAST_DATA = "com.neykov.podcastportal.model.playback.PlaybackSession.PODCAST_DATA";
 
     MediaSessionCompat.Token getMediaSessionToken();
 

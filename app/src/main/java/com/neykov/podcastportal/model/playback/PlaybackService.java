@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.playback;
+package com.neykov.podcastportal.model.playback;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -23,8 +23,10 @@ import android.view.Surface;
 import com.neykov.podcastportal.model.LogHelper;
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.PlaylistEntry;
+import com.neykov.podcastportal.model.networking.connectivity.ConnectivityMonitor;
 import com.neykov.podcastportal.model.playlist.PlaylistManager;
 import com.neykov.podcastportal.model.utils.ComponentService;
+import com.neykov.podcastportal.model.utils.PreferencesHelper;
 import com.neykov.podcastportal.view.player.PlayerActivity;
 
 import java.lang.ref.WeakReference;
@@ -48,6 +50,8 @@ public class PlaybackService extends ComponentService implements Player.Callback
 
     // Music catalog manager
     private PlaylistManager mPlaylistManager;
+    private PreferencesHelper mPreferencesHelper;
+    private ConnectivityMonitor mConnectivityMonitor;
     // "Now playing" queue:
     private PlaylistEntry mCurrentPlayingItem;
     private MediaNotificationManager mMediaNotificationManager;
@@ -79,6 +83,8 @@ public class PlaybackService extends ComponentService implements Player.Callback
         mSessionToken = mSession.getSessionToken();
 
         mPlaylistManager = getModelComponent().getPlaylistManager();
+        mPreferencesHelper = getModelComponent().getPreferencesHelper();
+        mConnectivityMonitor = getModelComponent().getConnectivityMonitor();
 
         mPlayback = new PlayerImpl(this);
         mPlayback.setCallback(this);
@@ -187,7 +193,13 @@ public class PlaybackService extends ComponentService implements Player.Callback
 
         mCurrentPlayingItem = entry;
         updateSessionMetadata(entry);
-        mPlayback.play(entry.getEpisode());
+        if (!entry.getEpisode().canBePlayedLocally() &&
+                !mPreferencesHelper.isPlaybackOverMeteredEnabled() &&
+                mConnectivityMonitor.isNetworkMetered()) {
+            mPlayback.stop(true);
+        } else {
+            mPlayback.play(entry.getEpisode());
+        }
     }
 
     /**
@@ -358,7 +370,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
 
     }
 
-    private static class PlaybackSessionBinder extends Binder implements com.neykov.podcastportal.playback.PlaybackSession {
+    private static class PlaybackSessionBinder extends Binder implements com.neykov.podcastportal.model.playback.PlaybackSession {
 
         private WeakReference<PlaybackService> mServiceRef;
 
@@ -460,8 +472,10 @@ public class PlaybackService extends ComponentService implements Player.Callback
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
             LogHelper.d(TAG, "playFromMediaId mediaId:", mediaId, "  extras=", extras);
 
-            long playlistId = Long.parseLong(mediaId);
+            Long playlistId = Long.parseLong(mediaId);
+
             PlaylistEntry playlistEntry = mPlaylistManager.getItem(playlistId);
+
             if (playlistEntry != null) {
                 handlePlayRequest(playlistEntry);
             }

@@ -4,10 +4,9 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.neykov.podcastportal.model.utils.Global;
-import com.neykov.podcastportal.playback.PlaybackSession;
-import com.neykov.podcastportal.playback.PlaybackSessionConnector;
+import com.neykov.podcastportal.model.playback.PlaybackSession;
+import com.neykov.podcastportal.model.playback.PlaybackSessionConnector;
 import com.neykov.podcastportal.view.base.BasePresenter;
-import com.neykov.podcastportal.view.player.view.PlayerSlidingView;
 import com.neykov.podcastportal.view.player.view.PlayerView;
 
 import javax.inject.Inject;

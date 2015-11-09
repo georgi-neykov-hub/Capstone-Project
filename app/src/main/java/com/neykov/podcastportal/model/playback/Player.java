@@ -1,11 +1,9 @@
-package com.neykov.podcastportal.playback;
+package com.neykov.podcastportal.model.playback;
 
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.Surface;
-import android.view.SurfaceHolder;
 
 import com.neykov.podcastportal.model.entity.Episode;
-import com.neykov.podcastportal.model.entity.PlaylistEntry;
 
 /**
  * Created by Georgi on 31.10.2015 г..

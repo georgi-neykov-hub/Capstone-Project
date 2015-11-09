@@ -4,7 +4,7 @@
     <string name="action_settings">Settings</string>
 
     <!-- Preferences keys -->
-    <string name="pref_filename">PodcastPortalPreferences</string>
+    <string name="pref_filename">com.neykov.podcastportal_preferences</string>
     <string name="pref_key_playback_over_metered">playback_over_metered</string>
     <string name="pref_key_sync_enabled">sync_enabled</string>
     <string name="pref_key_download_over_metered">download_over_metered</string>

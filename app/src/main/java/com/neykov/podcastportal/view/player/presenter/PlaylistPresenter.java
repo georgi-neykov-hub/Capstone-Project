@@ -3,11 +3,10 @@ package com.neykov.podcastportal.view.player.presenter;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v7.widget.RecyclerView;
 
 import com.neykov.podcastportal.model.entity.PlaylistEntry;
 import com.neykov.podcastportal.model.playlist.PlaylistManager;
-import com.neykov.podcastportal.playback.PlaybackSessionConnector;
+import com.neykov.podcastportal.model.playback.PlaybackSessionConnector;
 import com.neykov.podcastportal.view.base.BasePresenter;
 import com.neykov.podcastportal.view.player.view.PlaylistItemTouchCallback;
 import com.neykov.podcastportal.view.player.view.PlaylistView;

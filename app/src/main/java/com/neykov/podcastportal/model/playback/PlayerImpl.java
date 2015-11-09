@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.playback;
+package com.neykov.podcastportal.model.playback;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

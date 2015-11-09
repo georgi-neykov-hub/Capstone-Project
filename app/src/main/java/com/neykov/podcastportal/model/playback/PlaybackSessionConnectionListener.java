@@ -1,4 +1,4 @@
-package com.neykov.podcastportal.playback;
+package com.neykov.podcastportal.model.playback;
 
 public interface PlaybackSessionConnectionListener {
     void onConnected(PlaybackSession playbackSession);

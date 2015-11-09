@@ -72,14 +72,16 @@ public class MyPodcastsFragment extends ToolbarViewFragment<MyPodcastsPresenter>
 
             case RUNNING:
                 mRefreshItem.setVisible(false);
+                mRefreshItem.setEnabled(false);
                 break;
             case PENDING:
                 mRefreshItem.setVisible(true);
-                mRefreshItem.setIcon(R.drawable.ic_file_cloud);
+                mRefreshItem.setIcon(R.drawable.ic_action_download);
                 break;
             case IDLE:
                 mRefreshItem.setIcon(R.drawable.ic_sync);
                 mRefreshItem.setVisible(true);
+                mRefreshItem.setEnabled(true);
                 break;
         }
         mRefreshActiveItem.setVisible(!mRefreshItem.isVisible());

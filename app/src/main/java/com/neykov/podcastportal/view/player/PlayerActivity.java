@@ -5,10 +5,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
-import com.neykov.podcastportal.playback.PlaybackSession;
-import com.neykov.podcastportal.playback.PlaybackSessionConnectionListener;
-import com.neykov.podcastportal.playback.PlaybackSessionConnector;
-import com.neykov.podcastportal.playback.PlaybackSessionProvider;
+import com.neykov.podcastportal.model.playback.PlaybackSession;
+import com.neykov.podcastportal.model.playback.PlaybackSessionConnectionListener;
+import com.neykov.podcastportal.model.playback.PlaybackSessionProvider;
 import com.neykov.podcastportal.view.base.NavigationDrawerActivity;
 import com.neykov.podcastportal.view.player.view.PlayerFragment;
 

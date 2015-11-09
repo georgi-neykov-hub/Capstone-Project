@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.neykov.podcastportal.R;
-import com.neykov.podcastportal.playback.PlaybackSession;
+import com.neykov.podcastportal.model.playback.PlaybackSession;
 import com.neykov.podcastportal.view.base.fragment.ToolbarViewFragment;
 import com.neykov.podcastportal.view.player.presenter.PlayerPresenter;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;

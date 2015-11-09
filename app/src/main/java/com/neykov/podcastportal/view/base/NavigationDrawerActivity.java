@@ -76,8 +76,10 @@ public abstract class NavigationDrawerActivity extends BaseActivity implements D
                 break;
             case R.id.navigation_player:
                 openSection(PlayerActivity.class);
+                break;
             case R.id.navigation_settings:
                 openSection(SettingsActivity.class);
+                break;
         }
         return false;
     }
