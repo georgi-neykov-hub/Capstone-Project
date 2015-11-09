@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.view.base.NavigationDrawerActivity;
 import com.neykov.podcastportal.view.explore.view.ExploreFragment;
-import com.neykov.podcastportal.view.subscriptions.view.MyPodcastsFragment;
 
 public class ExploreActivity extends NavigationDrawerActivity {
 

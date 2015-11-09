@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.neykov.podcastportal">
+    package="com.neykov.podcastportal" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_SYNC_STATS" />
@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission
         android:name="android.permission.GET_ACCOUNTS"
         android:maxSdkVersion="22" />
@@ -22,8 +22,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".view.subscriptions.MyPodcastsActivity">
+        android:theme="@style/AppTheme" >
+        <activity android:name=".view.subscriptions.MyPodcastsActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,9 +31,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".view.explore.ExploreActivity" />
-        <activity android:name=".view.player.PlayerActivity"></activity>
+        <activity android:name=".view.player.PlayerActivity" />
 
-        <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
+        <receiver android:name="android.support.v4.media.session.MediaButtonReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
@@ -42,7 +42,7 @@
         <service
             android:name=".model.playback.PlaybackService"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false" >
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
@@ -50,7 +50,7 @@
         <service
             android:name=".account.AuthenticatorService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -63,7 +63,7 @@
             android:name=".model.subscriptions.PodcastSyncService"
             android:enabled="true"
             android:exported="true"
-            android:process=":sync">
+            android:process=":sync" >
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
@@ -76,7 +76,7 @@
             android:name=".model.downloads.DownloadIntentService"
             android:exported="false" />
 
-        <receiver android:name=".model.downloads.DownloadChangeReceiver">
+        <receiver android:name=".model.downloads.DownloadChangeReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
             </intent-filter>
@@ -93,18 +93,24 @@
             android:name=".view.settings.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".view.subscriptions.MyPodcastsActivity"
-            android:theme="@style/AppTheme.Settings">
+            android:theme="@style/AppTheme.Settings" >
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="@string/settingsAction" />
-                </intent-filter>
+            </intent-filter>
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.neykov.podcastportal.view.subscriptions.MyPodcastsActivity" />
+        </activity>
+        <activity
+            android:name=".view.settings.AboutActivity"
+            android:label="@string/title_activity_about"
+            android:theme="@style/AppTheme" >
         </activity>
     </application>
 

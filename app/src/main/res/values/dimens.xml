@@ -15,4 +15,5 @@
     <dimen name="list_item_text_offset">72dp</dimen>
     <dimen name="episode_card_height">220dp</dimen>
     <dimen name="notification_image_size">256dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>

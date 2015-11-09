@@ -1,10 +1,13 @@
 package com.neykov.podcastportal.view.settings;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceManager;
+import android.view.View;
 
 import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.subscriptions.SubscriptionsManager;
@@ -47,6 +50,18 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             mSubscriptionsManager.setSyncAutomatically((Boolean) newValue);
             return true;
         });
+
+        Preference aboutPreference = getPreferenceManager().findPreference(getString(R.string.pref_key_about));
+        aboutPreference.setOnPreferenceClickListener(preference -> {
+            //noinspection ConstantConditions
+            View aboutIconView = getView().findViewById(R.id.about);
+            Intent intent = new Intent(getActivity(), AboutActivity.class);
+            ActivityOptionsCompat options = ActivityOptionsCompat.
+                    makeSceneTransitionAnimation(getActivity(), aboutIconView, getString(R.string.pref_title_about_transition_name));
+            getActivity().startActivity(intent, options.toBundle());
+            return true;
+        });
+
     }
 
     private void setDefaultPreferenceValue(Preference preference) {
