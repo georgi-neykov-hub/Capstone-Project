@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+    <!-- Google Analytics Tracker configuration file used for debug builds.
+        For more information on the parameters see:
+    https://developers.google.com/analytics/devguides/collection/android/v4/parameters-->
+
+    <string name="ga_trackingId">UA-69853082-1</string>
+    <string name="ga_sampleFrequency">100.0</string>
+    <string name="ga_logLevel">error</string>
+    <integer name="ga_sessionTimeout">30</integer>
+    <boolean name="ga_autoActivityTracking">true</boolean>
+    <boolean name="ga_anonymizeIp">true</boolean>
+    <boolean name="ga_reportUncaughtExceptions">true</boolean>
+    <boolean name="ga_dryRun">false</boolean>
+</resources>

@@ -1,5 +1,7 @@
 package com.neykov.podcastportal;
 
+import com.google.android.gms.analytics.Tracker;
+import com.neykov.podcastportal.analytics.AnalyticsModule;
 import com.neykov.podcastportal.model.ModelComponent;
 import com.neykov.podcastportal.model.networking.NetworkingModule;
 import com.neykov.podcastportal.model.persistence.PersistanceModule;
@@ -17,11 +19,23 @@ import dagger.Component;
         modules = {
                 ApplicationModule.class,
                 NetworkingModule.class,
-                PersistanceModule.class
+                PersistanceModule.class,
+                AnalyticsModule.class
         })
 public interface DependencyResolver {
-    @Singleton PlayerComponent getPlayerComponent();
-    @Singleton DiscoverComponent getDiscoverComponent();
-    @Singleton SubscriptionsComponent getSubscriptionsComponent();
-    @Singleton ModelComponent getModelComponent();
+    @Singleton
+    PlayerComponent getPlayerComponent();
+
+    @Singleton
+    DiscoverComponent getDiscoverComponent();
+
+    @Singleton
+    SubscriptionsComponent getSubscriptionsComponent();
+
+    @Singleton
+    ModelComponent getModelComponent();
+
+    @Singleton
+    Tracker getTracker();
+
 }
