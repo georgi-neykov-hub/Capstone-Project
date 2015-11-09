@@ -70,7 +70,6 @@ public class PopularPodcastsFragment extends BaseListViewFragment<PodcastsAdapte
 
     @Override
     protected void onConfigureRecycleView(@NonNull RecyclerView view) {
-        view.setItemAnimator(new DefaultItemAnimator());
         int spanCount = getResources().getInteger(R.integer.grid_column_count);
         int horizontalPadding = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
         int verticalPadding = getResources().getDimensionPixelSize(R.dimen.activity_vertical_margin);

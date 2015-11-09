@@ -47,7 +47,7 @@ public class PodcastSearchPresenter extends BaseDiscoverPodcastsPresenter{
         if(mQuery != null) {
             return mService.searchPodcasts(mQuery);
         } else {
-            return Observable.defer(() -> Observable.just(new ArrayList<>(0)));
+            return Observable.just(new ArrayList<>(0));
         }
     }
 

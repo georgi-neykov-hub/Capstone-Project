@@ -40,7 +40,9 @@
                 android:layout_gravity="center"
                 android:transitionName="@string/pref_title_about_transition_name"
                 android:layout_marginTop="@dimen/rhythm_space_double"
-                android:src="@mipmap/ic_launcher"/>
+                android:src="@mipmap/ic_launcher"
+                android:contentDescription="@string/content_description_app_icon"
+                tools:ignore="UnusedAttribute" />
 
             <TextView
                 android:layout_width="wrap_content"

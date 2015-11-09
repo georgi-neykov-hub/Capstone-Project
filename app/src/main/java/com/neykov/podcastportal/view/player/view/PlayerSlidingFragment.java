@@ -311,6 +311,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
                 mPlayPauseButton.setEnabled(true);
                 mPlayPauseButton.setImageDrawable(mPauseDrawable);
                 mPlaybackControlsView.setVisibility(View.VISIBLE);
+                mPlayPauseButton.setContentDescription(getString(R.string.content_description_pause));
                 mSeekBar.setEnabled(true);
                 scheduleSeekbarUpdate();
                 break;
@@ -320,6 +321,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
                 mPlayPauseButton.setEnabled(true);
                 mSeekBar.setEnabled(true);
                 mPlayPauseButton.setImageDrawable(mPlayDrawable);
+                mPlayPauseButton.setContentDescription(getString(R.string.content_description_play));
                 stopSeekbarUpdate();
                 break;
             case PlaybackStateCompat.STATE_ERROR:

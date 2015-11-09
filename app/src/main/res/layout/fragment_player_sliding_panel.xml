@@ -9,13 +9,15 @@
         android:id="@+id/artwork"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/photo_placeholder"/>
+        android:background="@color/photo_placeholder"
+        android:contentDescription="@null" />
 
     <TextureView
         android:id="@+id/videoContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
+        android:contentDescription="@string/content_description_playback_video"
         android:visibility="visible"/>
 
     <ProgressBar
@@ -62,6 +64,7 @@
 
         <ImageView
             android:id="@+id/thumbnail"
+            android:contentDescription="@string/content_description_episode_artwork"
             android:layout_width="@dimen/rhythm_control_normal"
             android:layout_height="@dimen/rhythm_control_normal"
             android:layout_marginBottom="@dimen/rhythm_space_single"
@@ -98,6 +101,7 @@
 
             <ImageButton
                 android:id="@+id/rewindStart"
+                android:contentDescription="@string/content_description_rewind"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -109,12 +113,14 @@
 
             <ImageButton
                 android:id="@+id/rewind"
+                android:contentDescription="@string/content_description_rewind"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:scaleType="center"
                 android:src="@drawable/ic_rewind"
+                android:visibility="gone"
                 android:tint="?android:textColorPrimary" />
 
             <FrameLayout
@@ -123,6 +129,7 @@
                 android:layout_weight="1">
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/play"
+                    android:contentDescription="@string/content_description_play"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -136,15 +143,18 @@
             <ImageButton
                 android:id="@+id/fastForward"
                 style="@style/Widget.AppCompat.Button.Borderless"
+                android:contentDescription="@string/content_description_fast_forward"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:scaleType="center"
+                android:visibility="gone"
                 android:src="@drawable/ic_fast_forward"
                 android:tint="?android:textColorPrimary" />
 
             <ImageButton
                 android:id="@+id/fastForwardEnd"
+                android:contentDescription="@string/content_descriptionfast_forward"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -175,6 +185,7 @@
 
         <SeekBar
             android:id="@+id/seekBar"
+            android:contentDescription="@string/content_description_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="32dp"

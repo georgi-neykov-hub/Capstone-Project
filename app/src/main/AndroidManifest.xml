@@ -109,7 +109,7 @@
         </activity>
         <activity
             android:name=".view.settings.AboutActivity"
-            android:label="@string/title_activity_about"
+            android:label="@string/pref_title_about"
             android:theme="@style/AppTheme" >
         </activity>
     </application>

@@ -20,6 +20,7 @@ import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
 import com.neykov.podcastportal.view.base.fragment.ToolbarFragment;
 import com.neykov.podcastportal.view.explore.presenter.PodcastsForTagPresenter;
+import com.neykov.podcastportal.view.widget.GridSpaceItemDecoration;
 
 public class PodcastsForTagFragment extends ToolbarFragment {
 
@@ -115,8 +116,14 @@ public class PodcastsForTagFragment extends ToolbarFragment {
 
         @Override
         protected void onConfigureRecycleView(@NonNull RecyclerView view) {
+            int spanCount = getResources().getInteger(R.integer.grid_column_count);
+            int horizontalPadding = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
+            int verticalPadding = getResources().getDimensionPixelSize(R.dimen.activity_vertical_margin);
+            view.setPaddingRelative(horizontalPadding, 0, horizontalPadding, 0);
+            GridSpaceItemDecoration spaceDecoration = new GridSpaceItemDecoration(spanCount, GridSpaceItemDecoration.VERTICAL);
+            spaceDecoration.setVerticalEndSpacing(verticalPadding);
+            view.addItemDecoration(spaceDecoration);
             view.setItemAnimator(new DefaultItemAnimator());
-            view.setVerticalScrollBarEnabled(true);
         }
 
         @NonNull

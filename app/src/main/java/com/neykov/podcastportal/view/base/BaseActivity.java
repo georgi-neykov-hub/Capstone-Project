@@ -15,7 +15,7 @@ public class BaseActivity extends AppCompatActivity {
     private DependencyResolver mDependencyResolver;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mDependencyResolver = ((DependencyResolverProvider)getApplicationContext()).getDependencyResolver();
         mFragmentStack = new FragmentStack(

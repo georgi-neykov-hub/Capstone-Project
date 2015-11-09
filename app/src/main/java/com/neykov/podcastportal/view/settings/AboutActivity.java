@@ -10,9 +10,12 @@ import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.neykov.podcastportal.R;
+import com.neykov.podcastportal.view.base.BaseActivity;
 
-public class AboutActivity extends AppCompatActivity {
+public class AboutActivity extends BaseActivity {
 
     private static final int QUERY_LOADER_ID = 1;
 
@@ -34,6 +37,11 @@ public class AboutActivity extends AppCompatActivity {
         mBuildDataTextView = (TextView) findViewById(R.id.version);
         // Do the time consuming, potentially UI thread-blocking operation.
         getSupportLoaderManager().restartLoader(QUERY_LOADER_ID, null, mQueryCallbacks).forceLoad();
+
+        //Fire a simple Analytics screen event.
+        Tracker tracker = getDependencyResolver().getTracker();
+        tracker.setScreenName(this.getClass().getSimpleName());
+        tracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override

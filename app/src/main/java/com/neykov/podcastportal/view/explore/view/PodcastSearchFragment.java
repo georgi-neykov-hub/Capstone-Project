@@ -21,10 +21,13 @@ import com.neykov.podcastportal.view.ViewUtils;
 import com.neykov.podcastportal.view.base.fragment.BaseListViewFragment;
 import com.neykov.podcastportal.view.base.fragment.ToolbarFragment;
 import com.neykov.podcastportal.view.explore.presenter.PodcastSearchPresenter;
+import com.neykov.podcastportal.view.widget.GridSpaceItemDecoration;
 
 import java.util.concurrent.TimeUnit;
 
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import rx.subjects.Subject;
 
@@ -57,7 +60,8 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
         super.onViewCreated(view, savedInstanceState);
         mContentFragment = (ContentFragment) getChildFragmentManager().findFragmentById(R.id.podcastSearchContentFragment);
         mQuerySubject
-                .debounce(1300, TimeUnit.MILLISECONDS)
+                .debounce(1300, TimeUnit.MILLISECONDS, Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mQuerySubscriber);
     }
 
@@ -85,6 +89,7 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
     public boolean onQueryTextSubmit(String query) {
         if (mContentFragment != null) {
             mContentFragment.setSearchQuery(query);
+            ViewUtils.hideSoftwareKeyboard(getActivity());
         }
         return true;
     }
@@ -149,8 +154,14 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
 
         @Override
         protected void onConfigureRecycleView(@NonNull RecyclerView view) {
+            int spanCount = getResources().getInteger(R.integer.grid_column_count);
+            int horizontalPadding = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
+            int verticalPadding = getResources().getDimensionPixelSize(R.dimen.activity_vertical_margin);
+            view.setPaddingRelative(horizontalPadding, 0, horizontalPadding, 0);
+            GridSpaceItemDecoration spaceDecoration = new GridSpaceItemDecoration(spanCount, GridSpaceItemDecoration.VERTICAL);
+            spaceDecoration.setVerticalEndSpacing(verticalPadding);
+            view.addItemDecoration(spaceDecoration);
             view.setItemAnimator(new DefaultItemAnimator());
-            view.setVerticalScrollBarEnabled(true);
         }
 
         @NonNull
@@ -167,6 +178,18 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
         }
 
         @Override
+        public void onPause() {
+            getAdapter().setListener(null);
+            super.onPause();
+        }
+
+        @Override
+        public void onResume() {
+            getAdapter().setListener(mItemListener);
+            super.onResume();
+        }
+
+        @Override
         public void onPodcastSubcribed(PodcastSubscription podcast) {
 
         }
@@ -175,5 +198,27 @@ public class PodcastSearchFragment extends ToolbarFragment implements SearchView
         public void onPodcastUnsubscribed(RemotePodcastData podcast) {
 
         }
+
+        private final PodcastsAdapter.PodcastItemListener mItemListener = new PodcastsAdapter.PodcastItemListener() {
+            @Override
+            public void onItemClick(int position) {
+
+            }
+
+            @Override
+            public void onItemSubscribeClick(int position) {
+                RemotePodcastData podcast = getAdapter().getItem(position);
+                if (podcast instanceof PodcastSubscription) {
+                    getPresenter().unsubscribeFromPodcast(position, (PodcastSubscription) podcast);
+                } else {
+                    getPresenter().subscribeForPodcast(position, podcast);
+                }
+            }
+
+            @Override
+            public void onItemShareClick(int position) {
+
+            }
+        };
     }
 }

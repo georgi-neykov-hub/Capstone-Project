@@ -84,6 +84,7 @@
 
             <ImageView
                 android:id="@+id/mediaType"
+                android:contentDescription="@null"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_alignParentStart="true"
@@ -94,6 +95,7 @@
 
             <ImageView
                 android:id="@+id/downloadState"
+                android:contentDescription="@null"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_alignParentStart="true"
@@ -104,6 +106,7 @@
 
             <ImageView
                 android:id="@+id/addedInPlaylist"
+                android:contentDescription="@null"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_marginEnd="@dimen/rhythm_space_half"
@@ -112,6 +115,7 @@
 
             <ImageView
                 android:id="@+id/watched"
+                android:contentDescription="@null"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:tint="?colorAccent"

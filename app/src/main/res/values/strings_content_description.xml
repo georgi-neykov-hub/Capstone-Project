@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="content_description">Go to About screen</string>
+    <string name="content_description_app_icon">Application Icon</string>
+    <string name="content_description_playback_video">Playback Video</string>
+    <string name="content_description_episode_title">Episode Title</string>
+    <string name="content_description_episode_artwork">Episode Artwork</string>
+    <string name="content_description_rewind">Rewind</string>
+    <string name="content_description_play">Play</string>
+    <string name="content_description_pause">Pause</string>
+    <string name="content_description_fast_forward">Fast Forward</string>
+    <string name="content_descriptionfast_forward">Fast Forward To End</string>
+    <string name="content_description_seekbar">Episode position seekbar</string>
 </resources>
