@@ -1,6 +1,7 @@
 package com.neykov.podcastportal.model.playback;
 
 import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +20,9 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 import android.view.Surface;
+import android.widget.RemoteViews;
 
+import com.neykov.podcastportal.R;
 import com.neykov.podcastportal.model.LogHelper;
 import com.neykov.podcastportal.model.entity.Episode;
 import com.neykov.podcastportal.model.entity.PlaylistEntry;
@@ -45,6 +48,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
     // A value of a CMD_NAME key in the extras of the incoming Intent that
     // indicates that the music playback should be paused (see {@link #onStartCommand})
     public static final String CMD_PAUSE = "CMD_PAUSE";
+    public static final String CMD_PLAY = "CMD_PLAY";
 
     private static final String TAG = LogHelper.makeLogTag(PlaybackService.class);
 
@@ -65,6 +69,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
     private PlaybackSessionBinder mServiceBinder;
 
     private OnVideoSizeChangedListener mVideoSizeListener;
+    private AppWidgetManager mAppWidgetManager;
 
     @Override
     public void onCreate() {
@@ -97,6 +102,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mSession.setSessionActivity(pi);
         mMediaNotificationManager = new MediaNotificationManager(this, playerComponentName);
+        mAppWidgetManager = AppWidgetManager.getInstance(this);
         updatePlaybackState(null);
     }
 
@@ -110,10 +116,17 @@ public class PlaybackService extends ComponentService implements Player.Callback
         if (startIntent != null) {
             String action = startIntent.getAction();
             String command = startIntent.getStringExtra(CMD_NAME);
-            if (ACTION_CMD.equals(action)) {
-                if (CMD_PAUSE.equals(command)) {
-                    if (mPlayback != null && mPlayback.isPlaying()) {
-                        handlePauseRequest();
+            if (ACTION_CMD.equals(action) && mPlayback != null) {
+                if (CMD_PAUSE.equals(command) && mPlayback.isPlaying()) {
+                    handlePauseRequest();
+                } else if (CMD_PLAY.equals(command)) {
+                    if (mCurrentPlayingItem != null) {
+                        handlePlayRequest(mCurrentPlayingItem);
+                    } else {
+                        PlaylistEntry firstPLaylistEntry = mPlaylistManager.getFirstItem();
+                        if (firstPLaylistEntry != null) {
+                            handlePlayRequest(firstPLaylistEntry);
+                        }
                     }
                 }
             } else if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
@@ -275,6 +288,36 @@ public class PlaybackService extends ComponentService implements Player.Callback
         if (state == PlaybackStateCompat.STATE_PLAYING || state == PlaybackStateCompat.STATE_PAUSED) {
             mMediaNotificationManager.startNotification();
         }
+
+        updateWidgetState();
+    }
+
+    private void updateWidgetState() {
+        String title, subtitle;
+        MediaMetadataCompat metadata = mSession.getController().getMetadata();
+        if (metadata != null) {
+            title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
+            subtitle = metadata.getString(MediaMetadataCompat.METADATA_KEY_AUTHOR);
+        } else {
+            title = getString(R.string.label_widget_default);
+            subtitle = null;
+        }
+
+        boolean playbackActive = mPlayback.isPlaying();
+        Intent buttonIntent = new Intent(this, PlaybackService.class)
+                .setAction(ACTION_CMD)
+                .putExtra(CMD_NAME, playbackActive ? CMD_PAUSE : CMD_PLAY);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 25/*request code*/, buttonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        int iconRes = playbackActive ? R.drawable.ic_pause : R.drawable.ic_play;
+        int[] widgetIds = mAppWidgetManager.getAppWidgetIds(new ComponentName(this, PlaybackWidgetProvider.class));
+        RemoteViews views = new RemoteViews(this.getPackageName(), R.layout.layout_widget);
+        views.setTextViewText(R.id.title, title);
+        views.setTextViewText(R.id.podcastName, subtitle);
+        views.setImageViewResource(R.id.play, iconRes);
+        views.setOnClickPendingIntent(R.id.play, pendingIntent);
+
+        mAppWidgetManager.updateAppWidget(widgetIds, views);
     }
 
     private
@@ -392,6 +435,7 @@ public class PlaybackService extends ComponentService implements Player.Callback
         public void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener) {
             mServiceRef.get().setOnVideoSizeChangedListener(listener);
         }
+
     }
 
     private final MediaSessionCompat.Callback mSessionCallback = new MediaSessionCompat.Callback() {

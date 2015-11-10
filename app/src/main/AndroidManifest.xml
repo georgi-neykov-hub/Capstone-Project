@@ -112,6 +112,15 @@
             android:label="@string/pref_title_about"
             android:theme="@style/AppTheme" >
         </activity>
+
+        <receiver android:name=".model.playback.PlaybackWidgetProvider" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_provider" />
+        </receiver>
+
     </application>
 
 </manifest>

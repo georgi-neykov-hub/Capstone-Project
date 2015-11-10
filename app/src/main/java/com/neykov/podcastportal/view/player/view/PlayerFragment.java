@@ -51,6 +51,8 @@ public class PlayerFragment extends ToolbarViewFragment<PlayerPresenter> impleme
         super.onDestroyView();
     }
 
+
+
     @Nullable
     @Override
     protected Toolbar onSetToolbar(View view) {
@@ -98,7 +100,7 @@ public class PlayerFragment extends ToolbarViewFragment<PlayerPresenter> impleme
     }
 
     private void handlePlaybackStateChange(@PlaybackStateCompat.State int playbackStatus){
-        if(playbackStatus == PlaybackStateCompat.STATE_NONE || playbackStatus == PlaybackStateCompat.STATE_STOPPED){
+        if(playbackStatus == PlaybackStateCompat.STATE_NONE){
             if(mSlidingLayoutView.getPanelState()== SlidingUpPanelLayout.PanelState.COLLAPSED) {
                 hideSlidingFragment();
             }
