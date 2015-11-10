@@ -68,6 +68,7 @@ public class PlaylistManager extends BaseManager {
     public
     @Nullable
     PlaylistEntry getFirstItem() {
+        if (mDataSubject.hasValue()){
         return mDataSubject.map(longMapPair -> {
             PlaylistEntry firstEntry = null;
             Long firstItemId = longMapPair.first;
@@ -77,6 +78,9 @@ public class PlaylistManager extends BaseManager {
             return firstEntry;
         }).toBlocking()
                 .first();
+        } else {
+            return null;
+        }
     }
 
 
