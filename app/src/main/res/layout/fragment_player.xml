@@ -9,6 +9,7 @@
     android:gravity="bottom"
     sothree:umanoInitialState="hidden"
     sothree:umanoPanelHeight="?listPreferredItemHeight"
+    sothree:umanoParallaxOffset="256dp"
     sothree:umanoShadowHeight="4dp">
 
     <android.support.design.widget.CoordinatorLayout

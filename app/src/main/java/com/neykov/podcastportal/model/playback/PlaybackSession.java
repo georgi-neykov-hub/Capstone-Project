@@ -10,6 +10,7 @@ public interface PlaybackSession {
 
     String EXTRA_EPISODE_DATA = "com.neykov.podcastportal.model.playback.PlaybackSession.EPISODE_DATA";
     String EXTRA_PODCAST_DATA = "com.neykov.podcastportal.model.playback.PlaybackSession.PODCAST_DATA";
+    String EXTRA_SHARE_INTENT = "com.neykov.podcastportal.model.SHARE_INTENT";
 
     MediaSessionCompat.Token getMediaSessionToken();
 

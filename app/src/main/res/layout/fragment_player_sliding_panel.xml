@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:layout_toEndOf="@+id/thumbnail"
-            android:layout_toStartOf="@+id/playerMenu"
+            android:layout_toStartOf="@+id/playerMenuContainer"
             android:ellipsize="marquee"
             android:focusable="true"
             android:focusableInTouchMode="true"
@@ -57,7 +57,7 @@
             android:layout_below="@+id/title"
             android:layout_marginTop="@dimen/rhythm_space_half"
             android:layout_toEndOf="@+id/thumbnail"
-            android:layout_toStartOf="@+id/playerMenu"
+            android:layout_toStartOf="@+id/playerMenuContainer"
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"
             tools:text="The Podcast Title" />
@@ -73,13 +73,22 @@
             android:layout_marginTop="@dimen/rhythm_space_single"
             android:src="@color/photo_placeholder" />
 
-        <android.support.v7.widget.ActionMenuView
-            android:id="@+id/playerMenu"
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:id="@+id/playerMenuContainer"
+            android:layout_width="@dimen/rhythm_control_half"
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true">
+            <android.support.v7.widget.ActionMenuView
+                android:id="@+id/playerMenu"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
 
-        </android.support.v7.widget.ActionMenuView>
+                android:theme="@style/AppTheme.ActionMenu">
+
+            </android.support.v7.widget.ActionMenuView>
+        </FrameLayout>
+
 
     </RelativeLayout>
 

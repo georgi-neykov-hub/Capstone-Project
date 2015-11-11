@@ -1,9 +1,11 @@
 package com.neykov.podcastportal.view.player.view;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadata;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,8 +18,14 @@ import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.internal.view.SupportMenuInflater;
+import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.ShareActionProvider;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -59,6 +67,8 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     private TextView mPodcastNameTextView;
     private ImageView mFullArtImageView;
     private ImageView mThumbnailArtImageView;
+    private ShareActionProvider mShareActionProvider;
+    private MenuItem mShareMenuItem;
 
     private Drawable mPauseDrawable;
     private Drawable mPlayDrawable;
@@ -96,6 +106,7 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_player_sliding_panel, container, false);
         initializeViewReferences(rootView);
+        initializeMenu(rootView);
         setEventListeners();
         return rootView;
     }
@@ -118,6 +129,8 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
         mPauseDrawable = null;
         mPlayDrawable = null;
         mVideoBackgroundDrawable = null;
+        mShareActionProvider = null;
+        mShareMenuItem = null;
     }
 
     private void initializeViewReferences(View rootView) {
@@ -140,6 +153,16 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
         mPauseDrawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_pause);
         mPlayDrawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_play);
         mVideoBackgroundDrawable = new ColorDrawable(Color.BLACK);
+
+    }
+
+    private void initializeMenu(View rootView){
+        ActionMenuView menuView = (ActionMenuView) rootView.findViewById(R.id.playerMenu);
+        Menu menu = menuView.getMenu();
+        SupportMenuInflater inflater = new SupportMenuInflater(menuView.getContext());
+        inflater.inflate(R.menu.menu_sliding_player, menu);
+        mShareMenuItem = menu.findItem(R.id.action_share_track);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(mShareMenuItem);
     }
 
     @NonNull
@@ -168,6 +191,10 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
         if (metadata != null) {
             updateDuration(metadata);
             updateMediaDescription(metadata);
+        }
+        if(mMediaController.getExtras() != null){
+            Intent shareIntent = mMediaController.getExtras().getParcelable(PlaybackSession.EXTRA_SHARE_INTENT);
+            updateShareActions(shareIntent);
         }
     }
 
@@ -361,6 +388,10 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
         mSeekBar.setProgress((int) currentPosition);
     }
 
+    private void updateShareActions(@Nullable Intent shareIntent){
+        mShareActionProvider.setShareIntent(shareIntent);
+    }
+
     private MediaControllerCompat.Callback mMediaControllerCallback = new MediaControllerCompat.Callback() {
 
         @Override
@@ -373,6 +404,13 @@ public class PlayerSlidingFragment extends BaseViewFragment<PlayerSlidingViewPre
             if (metadata != null) {
                 updateMediaDescription(metadata);
                 updateDuration(metadata);
+
+
+            }
+
+            if(mMediaController != null && mMediaController.getExtras() != null){
+                Intent shareIntent = mMediaController.getExtras().getParcelable(PlaybackSession.EXTRA_SHARE_INTENT);
+                updateShareActions(shareIntent);
             }
         }
     };

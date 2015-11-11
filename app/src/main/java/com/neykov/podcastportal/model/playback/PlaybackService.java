@@ -18,6 +18,7 @@ import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Surface;
 import android.widget.RemoteViews;
@@ -243,6 +244,15 @@ public class PlaybackService extends ComponentService implements Player.Callback
 
     private void updateSessionMetadata(PlaylistEntry entry) {
         Episode episode = entry.getEpisode();
+        Intent shareIntent = new Intent()
+                .setAction(Intent.ACTION_SEND)
+                .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
+                .putExtra(Intent.EXTRA_TEXT, episode.getContentUrl())
+                .setType("text/plain");
+        Bundle sessionExtras = new Bundle(1);
+        sessionExtras.putParcelable(PlaybackSession.EXTRA_SHARE_INTENT, shareIntent);
+        mSession.setExtras(sessionExtras);
+
         MediaMetadataCompat mediaData = new MediaMetadataCompat.Builder()
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, episode.getTitle())
                 .putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, entry.getPodcastTitle())
