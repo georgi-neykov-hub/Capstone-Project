@@ -52,7 +52,7 @@ public abstract class NavigationDrawerActivity extends BaseActivity implements D
         super.onRestoreInstanceState(savedInstanceState);
         mKeepDrawerClosed = savedInstanceState.getBoolean(KEY_KEEP_DRAWER_CLOSED);
         if(mKeepDrawerClosed){
-            mNavigationDrawer.closeDrawer(Gravity.LEFT);
+            mNavigationDrawer.closeDrawer(GravityCompat.START);
             mKeepDrawerClosed = false;
         }
     }
@@ -65,7 +65,7 @@ public abstract class NavigationDrawerActivity extends BaseActivity implements D
 
     @Override
     public boolean onNavigationItemSelected(MenuItem menuItem) {
-        mNavigationDrawer.closeDrawer(Gravity.LEFT);
+        mNavigationDrawer.closeDrawer(GravityCompat.START);
         mKeepDrawerClosed = true;
         switch (menuItem.getItemId()) {
             case R.id.navigation_explore:
