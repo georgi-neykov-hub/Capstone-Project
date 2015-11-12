@@ -29,7 +29,7 @@ alt="Sample video" height="256" style="object-fit: cover; object-position: cente
 * Extensive use of [Dagger 2](http://google.github.io/dagger/) for injecting code dependencies.
 * The Model and Presenter layers are implemented in a reactive, push-based style by [RxJava](https://github.com/ReactiveX/RxJava) streams.
 * Data is backed by a a SQLite-backed ContentProvider
-* Database quries are executed and observed with [SQLBrite](https://github.com/square/sqlbrite).
+* Database queries are executed and observed with [SQLBrite](https://github.com/square/sqlbrite).
 * The networking layer is based on OkHTTP/Retrofit/Picasso stack.
 * The player uses the support version of the MediaSession API.
 * Support for devices running Android API17+ (Jelly Bean).
