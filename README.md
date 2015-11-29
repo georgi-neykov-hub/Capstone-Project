@@ -13,11 +13,11 @@ Podcast Portal is simple Material-styled podcast player for Android.
 
 ###Tech Details
 * The app architecture is based on the wonderful [Nucleus](https://github.com/konmik/nucleus) MVP library
-* Extensive use of [Dagger 2](http://google.github.io/dagger/) for injecting code dependencies.
-* The Model and Presenter layers are implemented in a reactive, push-based style by [RxJava](https://github.com/ReactiveX/RxJava) streams.
+* Extensive use of [Dagger 2](http://google.github.io/dagger/) for resolving and injecting code dependencies.
+* The Model and Presenter layers are implemented in a reactive, push-based style with [RxJava](https://github.com/ReactiveX/RxJava) streams.
 * Data is backed by a a SQLite-backed ContentProvider
 * Database queries are executed and observed with [SQLBrite](https://github.com/square/sqlbrite).
-* The networking layer is based on OkHTTP/Retrofit/Picasso stack.
+* The networking layer is based on the OkHTTP/Retrofit/Picasso stack.
 * The player uses the support version of the MediaSession API.
 * Support for devices running Android API17+ (Jelly Bean).
 
